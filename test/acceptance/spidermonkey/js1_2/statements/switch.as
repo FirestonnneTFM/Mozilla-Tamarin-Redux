@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'switch.js';
 
@@ -15,14 +16,11 @@ gTestfile = 'switch.js';
    Date:         March 19, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-var TITLE   = 'statements: switch';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE   = 'statements: switch';
 var BUGNUMBER="323696";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog("Executing script: switch.js");
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var var1 = "match string";
@@ -41,13 +39,13 @@ case "bad string 2":
   match3 = true;
 }
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            true, match1);
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            true, match2);
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            false, match3);
 
 var var2 = 3;
@@ -79,19 +77,18 @@ case 3:
   match5 = true;
   break;
 }
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            false, match1);
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            false, match2);
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            false, match3);
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            false, match4);
 
-testcases[index++] = new TestCase ( SECTION, 'switch statement',
+Assert.expectEq (  'switch statement',
            true, match5);
 
-test();

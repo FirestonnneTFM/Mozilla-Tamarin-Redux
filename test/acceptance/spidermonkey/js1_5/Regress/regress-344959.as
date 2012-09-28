@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-344959.js';
 //-----------------------------------------------------------------------------
@@ -20,22 +20,21 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   var x = "global"
 
     with ({x:"with"})
     actual = (function() { try {} catch(exc) {}; return x }());
 
-  AddTestCase(summary + ': 1', expect, actual);
+  Assert.expectEq(summary + ': 1', expect, actual);
 
   with ({x:"with"})
     actual = (function() { try { throw 1} catch(exc) {}; return x }());
 
-  AddTestCase(summary + ': 2', expect, actual);
+  Assert.expectEq(summary + ': 2', expect, actual);
 
 
 }
 
-test();

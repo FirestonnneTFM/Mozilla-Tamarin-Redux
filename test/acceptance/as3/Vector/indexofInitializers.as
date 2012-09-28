@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /**
    File Name:    indexof.es
    Description:  indexOf(object,value,from=...)
@@ -11,40 +12,37 @@
    *
    */
 
-var SECTION = ""
-var VERSION = "ECMA_1";
+// var SECTION = ""
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( SECTION + " Vector.indexOf()");
 
-AddTestCase(    "indexOf empty vector",
+Assert.expectEq(    "indexOf empty vector",
         -1,
         new <int>[].indexOf(0));
 
-AddTestCase(    "indexOf object not found",
+Assert.expectEq(    "indexOf object not found",
         -1,
         new <int>[0,1,2,3,4,5,6,7,8,9].indexOf(10));
 
-AddTestCase(    "indexOf single match found",
+Assert.expectEq(    "indexOf single match found",
         4,
         new <int>[0,1,2,3,4,5,6,7,8,9].indexOf(4));
 
-AddTestCase(    "indexOf first match found",
+Assert.expectEq(    "indexOf first match found",
         4,
         new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4));
 
-AddTestCase(    "indexOf first match found setting start parameter",
+Assert.expectEq(    "indexOf first match found setting start parameter",
         4,
         new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,2));
 
-AddTestCase(    "indexOf start parameter greater than vector length",
+Assert.expectEq(    "indexOf start parameter greater than vector length",
         -1,
         new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,100));
 
-AddTestCase(    "indexOf start parameter negative",
+Assert.expectEq(    "indexOf start parameter negative",
         -1,
         new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,-1));
 
-test();
 

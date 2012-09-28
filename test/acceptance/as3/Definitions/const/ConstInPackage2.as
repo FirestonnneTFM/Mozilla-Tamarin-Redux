@@ -8,18 +8,17 @@ package TestPackage
     public const num2 = 2;
 }
 
-var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "ambinuous reference to const in package";       // Provide ECMA section title or a description
+// var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "ambinuous reference to const in package";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();
 
 var num1 = 3;
 var num2 = 4;
 
 import TestPackage.*;
 
-AddTestCase("const in package with fully qualified name", 3, TestPackage.num1 + TestPackage.num2);
+import com.adobe.test.Assert;
+Assert.expectEq("const in package with fully qualified name", 3, TestPackage.num1 + TestPackage.num2);
 
-test();

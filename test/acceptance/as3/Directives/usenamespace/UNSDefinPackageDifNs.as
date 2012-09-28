@@ -18,12 +18,11 @@ package P {
  }
 
  
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "use namespace";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "use namespace";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -31,12 +30,12 @@ startTest();                // leave this alone
 
 import P.*;
 
+import com.adobe.test.Assert;
 var game = new Game();
 
-AddTestCase( "Who is going to play = 'Joe'", "Joe", game.Football::whoplay());
-AddTestCase( "Who is going to play = 'Steve'", "Steve", game.Baseball::whoplay());
+Assert.expectEq( "Who is going to play = 'Joe'", "Joe", game.Football::whoplay());
+Assert.expectEq( "Who is going to play = 'Steve'", "Steve", game.Baseball::whoplay());
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

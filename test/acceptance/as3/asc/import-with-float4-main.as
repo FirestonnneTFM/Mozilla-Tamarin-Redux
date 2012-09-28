@@ -11,21 +11,19 @@
 // with -ea, the bug was partly that there was an assertion to flag
 // the problem, but with assertions disabled we won't see that.
 
-var SECTION = "ASC";
-var VERSION = "AS3";
-var TITLE   = "Allow an ABC import to contain a float4 default argument";
+// var SECTION = "ASC";
+// var VERSION = "AS3";
+// var TITLE   = "Allow an ABC import to contain a float4 default argument";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // -- begin test
 
 import fnord.*;
 var xyzzy = function() { return f() };  // Do nothing interesting, it is the parsing of the imported file that is the problem.
 print(xyzzy());
+import com.adobe.test.Assert;
 
 // -- end test
 
-AddTestCase("Trivially true", true, true);
+Assert.expectEq("Trivially true", true, true);
 
-test();

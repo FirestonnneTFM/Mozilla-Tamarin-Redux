@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_10.js';
 
@@ -22,12 +23,10 @@ gTestfile = 'proto_10.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_10";
-var VERSION = "JS1_3";
-var TITLE   = "Determining Instance Relationships";
+// var SECTION = "proto_10";
+// var VERSION = "JS1_3";
+// var TITLE   = "Determining Instance Relationships";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function InstanceOf( object, constructor ) {
   return object instanceof constructor;
@@ -64,28 +63,27 @@ Engineer.prototype = new WorkerBee();
 
 var pat = new Engineer();
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
               "InstanceOf( pat, Engineer )",
               true,
               InstanceOf( pat, Engineer ) );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
               "InstanceOf( pat, WorkerBee )",
               true,
               InstanceOf( pat, WorkerBee ) );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
               "InstanceOf( pat, Employee )",
               true,
               InstanceOf( pat, Employee ) );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
               "InstanceOf( pat, Object )",
               true,
               InstanceOf( pat, Object ) );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
               "InstanceOf( pat, SalesPerson )",
               false,
               InstanceOf ( pat, SalesPerson ) );
-test();

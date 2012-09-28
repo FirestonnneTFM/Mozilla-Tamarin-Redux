@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
     import flash.utils.Dictionary
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = "DictionarySubclass";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test non-dynamic subclass of Dictionary class";
+//     var SECTION = "DictionarySubclass";
+//     var VERSION = "as3";
+//     var TITLE   = "test non-dynamic subclass of Dictionary class";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
     // test constructors
 
@@ -22,21 +22,21 @@
     };
 
     var dict:SealedDictionary=new SealedDictionary();
-    AddTestCase(
+    Assert.expectEq(
       "SealedDictionary constructor no args",
       true,
       dict!=null
       );
 
     var dict_notweak:SealedDictionary=new SealedDictionary(false);
-    AddTestCase(
+    Assert.expectEq(
       "SealedDictionary constructor weakKeys=false",
       true,
       dict_notweak!=null
       );
 
     var dict_weak:SealedDictionary=new SealedDictionary(true);
-    AddTestCase(
+    Assert.expectEq(
       "SealedDictionary constructor weakKeys=true",
       true,
       dict_weak!=null
@@ -44,7 +44,7 @@
 
     // test get/set keys and values
 
-    AddTestCase(
+    Assert.expectEq(
       "empty SealedDictionary toString",
       "[object SealedDictionary]",
       dict.toString()
@@ -54,9 +54,9 @@
     
     tmp = void 0;
     try { tmp = dict_notweak['notfound']; }
-    catch(e) { tmp = grabError(e, e.toString()); }
+    catch(e) { tmp = Utils.grabError(e, e.toString()); }
 
-    AddTestCase(
+    Assert.expectEq(
       "SealedDictionary key lookup fails",
       "Error #1069",
       tmp
@@ -64,9 +64,9 @@
 
     tmp = void 0;
     try { tmp = dict_weak['notfound']; }
-    catch(e) { tmp = grabError(e, e.toString()); }
+    catch(e) { tmp = Utils.grabError(e, e.toString()); }
 
-    AddTestCase(
+    Assert.expectEq(
       "weak SealedDictionary key lookup fails",
       "Error #1069",
       tmp
@@ -74,9 +74,9 @@
 
     tmp = void 0;
     try { dict_notweak["one"]="one_value"; tmp = dict_notweak["one"]; }
-    catch(e) { tmp = grabError(e, e.toString()); }
+    catch(e) { tmp = Utils.grabError(e, e.toString()); }
     
-    AddTestCase(
+    Assert.expectEq(
       "SealedDictionary key is literal",
       "Error #1056",
       tmp
@@ -84,9 +84,9 @@
 
     tmp = void 0;
     try { dict_weak["one"]="one_value"; tmp = dict_weak["one"]; }
-    catch(e) { tmp = grabError(e, e.toString()); }
+    catch(e) { tmp = Utils.grabError(e, e.toString()); }
     
-    AddTestCase(
+    Assert.expectEq(
       "weak SealedDictionary key is literal",
       "Error #1056",
       tmp
@@ -102,9 +102,9 @@
     // versioning
     tmp = void 0;
     try { dict_notweak[obj1]="obj1_value"; tmp = dict_notweak[obj1]; }
-    catch(e) { tmp = grabError(e, e.toString()); }
+    catch(e) { tmp = Utils.grabError(e, e.toString()); }
     
-    AddTestCase(
+    Assert.expectEq(
       "SealedDictionary key is object",
       "obj1_value",
       tmp
@@ -112,9 +112,9 @@
 
     tmp = void 0;
     try { dict_weak[obj1]="obj1_value"; tmp = dict_weak[obj1]; }
-    catch(e) { tmp = grabError(e, e.toString()); }
+    catch(e) { tmp = Utils.grabError(e, e.toString()); }
     
-    AddTestCase(
+    Assert.expectEq(
       "weak SealedDictionary key is object",
       "obj1_value",
       tmp
@@ -122,23 +122,23 @@
 
     // test in (hasAtomProperty)
     
-    AddTestCase(
+    Assert.expectEq(
       "literal in SealedDictionary key",
       false,
       ("one" in dict_notweak)
     );
     // see above: Object keys ignore sealed-ness
-    AddTestCase(
+    Assert.expectEq(
       "object in SealedDictionary key",
       true,
       obj1 in dict_notweak
     );
-    AddTestCase(
+    Assert.expectEq(
       "literal in weak SealedDictionary key",
       false,
       "one" in dict_weak
     );
-    AddTestCase(
+    Assert.expectEq(
       "object in weak SealedDictionary key",
       true,
       obj1 in dict_weak
@@ -150,7 +150,7 @@
         out1.push(a.toString());
     }
     out1.sort();
-    AddTestCase(
+    Assert.expectEq(
      "for in SealedDictionary",
      "obj1",
      out1.toString());
@@ -160,7 +160,7 @@
         out2.push(a.toString());
     }
     out2.sort();
-    AddTestCase(
+    Assert.expectEq(
      "for in weak SealedDictionary",
      "obj1",
      out2.toString());
@@ -170,7 +170,7 @@
         out3.push(a.toString());
     }
     out3.sort();
-    AddTestCase(
+    Assert.expectEq(
      "for each in SealedDictionary",
      "obj1_value",
      out3.toString());
@@ -180,7 +180,7 @@
         out4.push(a.toString());
     }
     out4.sort();
-    AddTestCase(
+    Assert.expectEq(
      "for each in weak SealedDictionary",
      "obj1_value",
      out4.toString());
@@ -189,29 +189,28 @@
 
     // see above: Object keys ignore sealed-ness
     tmp = delete dict_notweak['one'];
-    AddTestCase(
+    Assert.expectEq(
      "delete literal key from SealedDictionary",
      false,
      tmp);
 
     tmp = delete dict_notweak[obj1];
-    AddTestCase(
+    Assert.expectEq(
      "delete object key from SealedDictionary",
      true,
      tmp);
 
     // see above: Object keys ignore sealed-ness
     tmp = delete dict_weak['one'];
-    AddTestCase(
+    Assert.expectEq(
      "delete literal key from weak SealedDictionary",
      false,
      tmp);
 
     tmp = delete dict_weak[obj1];
-    AddTestCase(
+    Assert.expectEq(
      "delete object key from weak SealedDictionary",
      true,
      tmp);
 
-    test();
 

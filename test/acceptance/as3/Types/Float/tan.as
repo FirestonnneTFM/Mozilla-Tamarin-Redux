@@ -9,12 +9,10 @@ Returns an implementation-dependent approximation to the tangent of x. The
 argument is expressed in radians.
 */
 
-var SECTION = "4.5.32";
-var VERSION = "AS3";
-var TITLE   = "public function tan(x:float):float";
+// var SECTION = "4.5.32";
+// var VERSION = "AS3";
+// var TITLE   = "public function tan(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.tan(param); }
 
@@ -54,5 +52,4 @@ AddStrictTestCase("float.tan(3f*float.PI/4f)", float(-1), float.tan(3f*float.PI/
 AddStrictTestCase("float.tan(float.PI)", -float.sin(float.PI), float.tan(float.PI));
 AddStrictTestCase("float.tan(5f*float.PI/4f)", float(1.0000003576278687), float.tan(5f*float.PI/4f));
 
-test();
 

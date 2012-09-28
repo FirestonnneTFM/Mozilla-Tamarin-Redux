@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "11.2.1-4-n";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Property Accessors";
-    writeHeaderToLog( SECTION + " "+TITLE );
+import com.adobe.test.Assert;
+//     var SECTION = "11.2.1-4-n";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Property Accessors";
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -28,13 +26,13 @@ function getTestCases() {
     for ( var i = 0, RESULT; i < PROPERTY.length; i++ ) {
 
        
-     array[item++] = new TestCase( SECTION,
+     array[item++] = Assert.expectEq( 
                                         PROPERTY[i].object + ".valueOf()",
                                         PROPERTY[i].value+"",
                                         ( PROPERTY[i].object.valueOf()+"" ) );
 
         
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                                         PROPERTY[i].object + ".toString()",
                                         PROPERTY[i].string,
                                         ( PROPERTY[i].object.toString() ) );

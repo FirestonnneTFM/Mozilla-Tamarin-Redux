@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  12.6.4 of ECMA-262 which defines the for-in Statement states that "If a
@@ -9,7 +10,6 @@ property that has not yet been visited during enumeration is deleted, then it
 will not be visited"
 */
 
-startTest();
 
 var gTestfile = 'regress-261887.js';
 //-----------------------------------------------------------------------------
@@ -19,8 +19,8 @@ var summary = 'deleted properties should not be visited by for in';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 var count = 0;
 var result = [];
@@ -58,7 +58,6 @@ if (deletedFive == true) {
     expectedResult = ['five', 'one', 'three', 'two'].toString();
 }
 
-AddTestCase(summary + ' : value', expectedValue, value.sort().toString());
-AddTestCase(summary + ' : prop', expectedResult, result.sort().toString());
+Assert.expectEq(summary + ' : value', expectedValue, value.sort().toString());
+Assert.expectEq(summary + ' : prop', expectedResult, result.sort().toString());
 
-test();

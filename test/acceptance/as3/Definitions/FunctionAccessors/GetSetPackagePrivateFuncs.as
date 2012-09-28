@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import GetSetPackagePrivateFuncs.*;
+import com.adobe.test.Assert;
 
-var SECTION = "FunctionAccessors";
-var VERSION = "AS3";
-var TITLE   = "Function Accessors";
+// var SECTION = "FunctionAccessors";
+// var VERSION = "AS3";
+// var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
-startTest();
 
 var OBJ = new GetSetPackagePrivateFuncs();
 
@@ -22,7 +22,7 @@ try{
 } catch (e1) {
     res = "exception";
 } finally {
-    AddTestCase("Get package private var:int", "exception", res);
+    Assert.expectEq("Get package private var:int", "exception", res);
 }
 
 try{
@@ -33,7 +33,7 @@ try{
 } catch (e2) {
     res = "exception";
 } finally {
-    AddTestCase("Set package private var:int", "exception", res);
+    Assert.expectEq("Set package private var:int", "exception", res);
 }
 
 try{
@@ -43,7 +43,7 @@ try{
 } catch (e3) {
     res = "exception";
 } finally {
-    AddTestCase("Get package private var:Array", "exception", res);
+    Assert.expectEq("Get package private var:Array", "exception", res);
 }
 
 try{
@@ -54,7 +54,7 @@ try{
 } catch (e3) {
     res = "exception";
 } finally {
-    AddTestCase("Set package private var:Array", "exception", res);
+    Assert.expectEq("Set package private var:Array", "exception", res);
 }
 
 try{
@@ -64,7 +64,7 @@ try{
 } catch (e4) {
     res = "exception";
 } finally {
-    AddTestCase("Get package private var:Boolean", "exception", res);
+    Assert.expectEq("Get package private var:Boolean", "exception", res);
 }
 
 try{
@@ -75,7 +75,7 @@ try{
 } catch (e5) {
     res = "exception";
 } finally {
-    AddTestCase("Set package private var:Boolean", "exception", res);
+    Assert.expectEq("Set package private var:Boolean", "exception", res);
 }
 
 
@@ -86,7 +86,7 @@ try{
 } catch (e2) {
     res = "exception";
 } finally {
-    AddTestCase("Get package private var:uint", "exception", res);
+    Assert.expectEq("Get package private var:uint", "exception", res);
 }
 
 try{
@@ -97,7 +97,7 @@ try{
 } catch (e3) {
     res = "exception";
 } finally {
-    AddTestCase("Set package private var:uint", "exception", res);
+    Assert.expectEq("Set package private var:uint", "exception", res);
 }
 
 try{
@@ -107,7 +107,7 @@ try{
 } catch (e3) {
     res = "exception";
 } finally {
-    AddTestCase("Get package private var:String", "exception", res);
+    Assert.expectEq("Get package private var:String", "exception", res);
 }
 
 try{
@@ -118,7 +118,7 @@ try{
 } catch (e4) {
     res = "exception";
 } finally {
-    AddTestCase("Set package private var:String", "exception", res);
+    Assert.expectEq("Set package private var:String", "exception", res);
 }
 
 try{
@@ -128,7 +128,7 @@ try{
 } catch (e3) {
     res = "exception";
 } finally {
-    AddTestCase("Get package private untyped var", "exception", res);
+    Assert.expectEq("Get package private untyped var", "exception", res);
 }
 
 try{
@@ -139,8 +139,7 @@ try{
 } catch (e4) {
     res = "exception";
 } finally {
-    AddTestCase("Set package private untyped var", "exception", res);
+    Assert.expectEq("Set package private untyped var", "exception", res);
 }
 
-test();
 

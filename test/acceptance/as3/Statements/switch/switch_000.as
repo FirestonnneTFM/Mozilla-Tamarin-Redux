@@ -1,17 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+//     var SECTION = "switch";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The switch statement";
 
-    var SECTION = "switch";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The switch statement";
-
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -29,8 +26,9 @@ function getTestCases() {
                 result += 1;
         }
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            //SECTION,
+            // TODO: REVIEW AS4 CONVERSION ISSUE
             "switch with only default case: input is " + input,
             expect,
             result );

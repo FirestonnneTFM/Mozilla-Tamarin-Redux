@@ -15,7 +15,7 @@
 # %MOZ_SRC/mozilla/js/tamarin/platform/,
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil,zipfile
+import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil
 import subprocess, random
 from os.path import abspath, basename, dirname, exists, isdir, isfile, split, splitext, getmtime
 from os import getcwd,environ
@@ -110,6 +110,7 @@ class RuntestBase(object):
     sourceExt = '.as'
     supportFolderExt = '_support'
     testconfig = 'testconfig.txt'
+    test_harness_dir = '.'
     vmargs = ''
     vmtype = ''
     aotsdk = None
@@ -132,6 +133,7 @@ class RuntestBase(object):
     currentPids = []
     exclude = []
     executableExtensions = ()    # file extentions for tests that do not get compiled
+    harness_abcs = []
     otherTestExtensions = ()     # other file extensions that are valid tests
     longOptions = []
     support_dirs = []   # list of support directories used when running --rebuildtests
@@ -580,14 +582,27 @@ class RuntestBase(object):
             self.vmargs = environ['VMARGS'].strip()
 
     ### File and Directory functions ###
+    
+    def check_harness_files(self):
+        # determine required test harness files
+        harness_as_files = glob(join(self.test_harness_dir, '*.as'))
+        for as_file in harness_as_files:
+            abc = as_file[:-2] + 'abc'
+            if not exists(abc) or (getmtime(as_file) > getmtime(abc)):
+                # compile the abc
+                cmd = ''
+                if self.asc.endswith('.jar'):
+                    cmd = self.java
+                    cmd += ' -jar %s' %  self.asc
+                else:
+                    cmd = self.asc
+                cmd += ' -import %s' %self.builtinabc
+                self.run_pipe('%s %s' % (cmd,as_file))
+            self.harness_abcs.append(abc)
 
     def build_incfiles(self, as_file):
         files=[]
         (dir, file) = split(as_file)
-        for p in self.parents(dir):
-            shell = join(p,'shell'+self.sourceExt)
-            if isfile(shell):
-                files.append(shell)
         (testdir, ext) = splitext(as_file)
         for util in glob(join(testdir,'*'+self.sourceExt)):
             files.append(util.replace("$", "\$"))
@@ -704,7 +719,8 @@ class RuntestBase(object):
                     dirs.remove(x)
                     if x.endswith(self.supportFolderExt):
                         self.support_dirs.append(join(d, x))
-        
+        tests=[a for a in tests if os.path.dirname(a)!='' and os.path.dirname(a)!='.']
+
         def filter_test_list(directive):
             # pare down the testlist to only tests that match directive
             test_list = []
@@ -777,8 +793,7 @@ class RuntestBase(object):
         return settings
 
     def istest(self,f, fileExtentions):
-        return f.endswith(fileExtentions) and basename(f) != ('shell'+self.sourceExt) \
-               and not f.endswith('Util'+self.sourceExt)
+        return f.endswith(fileExtentions) and not f.endswith('Util'+self.sourceExt)
 
     def parents(self, d):
         '''return a generator of the current dir and all parent directories up
@@ -1112,15 +1127,11 @@ class RuntestBase(object):
             if self.ascOutputOnly:
                 # asc output is only the args passed to asc
                 cmd = ''
+                
+            
 
             ascargs += ' ' + ' '.join(extraArgs)
             ascArgList = parseArgStringToList(ascargs)
-        
-            for p in self.parents(dir):
-                shell = join(p,'shell'+self.sourceExt)
-                if isfile(shell):
-                    ascArgList.append(' -in ' + shell)
-                    break
             
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
             ascArgList = self.loadArgsFile(ascArgList, dir, as_file, 'asc_args')
@@ -1132,16 +1143,16 @@ class RuntestBase(object):
                 cmd += ' %s' % arg
             
             # look for a subdirectory of the same name as the .as file
-            # if it exists, include all of the files within that dir when
+            # if it exists, import all of the files within that dir when
             # compiling the test
-            deps = glob(join(testdir,'*'+self.sourceExt))
+            deps = glob(join(testdir,'*.abc'))
             deps.sort()
             for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
                 if self.osName == 'win' and not self.cygwin:
                     # don't escape $ when running windows python
-                    cmd += ' -in %s' % util 
+                    cmd += ' -import %s' % util 
                 else:
-                    cmd += ' -in %s' % util.replace('$', '\$')
+                    cmd += ' -import %s' % util.replace('$', '\$')
                 
         elif as_file.endswith(self.abcasmExt):
             javaArgList = parseArgStringToList(self.javaargs)
@@ -1156,6 +1167,11 @@ class RuntestBase(object):
         if self.ascOutputOnly:
             self.ascOutputFile.write('%s %s\n' % (cmd, as_file))
             return ''
+        
+        
+        if '$' in as_file:
+            if self.osName != 'win' or self.cygwin:
+                as_file = as_file.replace('$', '\$')
         
         try:
             (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file),
@@ -1213,22 +1229,10 @@ class RuntestBase(object):
                     self.compile_aot(testdir+".abc")
 
         else:  #pexpect available
-            # check asc.jar to look for an entry point into ash, we support either of the following classes:
-            entry1='macromedia.asc.embedding.Shell'
-            entry2='com.adobe.flash.compiler.clients.ASCShell'
-            f=zipfile.ZipFile(self.asc,"r")
-            if any(eachfile.startswith(entry1.replace('.','/')) for eachfile in f.namelist()):
-                entrypoint=entry1
-            elif any(eachfile.startswith(entry2.replace('.','/')) for eachfile in f.namelist()):
-                entrypoint=entry2
-            else:
-                print("ERROR: could not find ash class in %s" % self.asc)
-                self.ashErrors.append("error could not find ash entry point in %s" % self.asc)
-                return
-                
-
-            child = pexpect.spawn('"%s" %s -classpath %s %s' % (self.java, self.javaargs, self.asc,entrypoint))
+            child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
             child.logfile = None
+            if self.verbose:
+                child.logfile = sys.stdout
             child.expect("\(ash\)")
             child.expect("\(ash\)")
 
@@ -1238,6 +1242,8 @@ class RuntestBase(object):
                 (testdir, ext) = splitext(test)
                 settings = self.get_test_settings(testdir)
                 if self.excludeTest(file, settings):
+                    continue
+                if self.skipTest(file, settings):
                     continue
 
                 if test.endswith(self.abcasmExt):
@@ -1268,6 +1274,17 @@ class RuntestBase(object):
                             self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc_", '\n'.join(str(x) for x in err)))
                     continue
                 else:
+                    extraVmArgs=_extraVmArgs=''
+                    outputCalls=[]
+                    if os.path.exists(testdir):
+                        self.compile_support_files(testdir, outputCalls)
+                        for testfile in glob(join(testdir,'*.abc')):
+                            _extraVmArgs += ' %s' % testfile
+                        if 'Interface' in extraVmArgs:
+                            _extraVmArgs = self.sortInterfaces(extraVmArgs)
+                    for abcfile in _extraVmArgs.split():
+                        extraVmArgs+=' -import %s' % abcfile
+
                     arglist = parseArgStringToList(self.ascargs)
 
                     # Check for a local .java_args file (either dir or file specific)
@@ -1278,11 +1295,6 @@ class RuntestBase(object):
                     if javaArgList:
                         self.compile_test(test)
                     else:
-                        for p in self.parents(dir):
-                            shell = join(p,"shell.as")
-                            if isfile(shell):
-                                arglist.append(' -in ' + shell)
-                                break
 
                         # look for .asc_args files to specify dir / file level compile args
                         arglist = self.loadArgsFile(arglist, dir, test, 'asc_args')
@@ -1295,13 +1307,9 @@ class RuntestBase(object):
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
 
                         cmd = "asc -import %s " % (self.builtinabc)
+                        cmd += extraVmArgs
                         for arg in arglist:
                             cmd += ' %s' % arg
-
-                        deps = glob(join(testdir,"*.as"))
-                        deps.sort()
-                        for util in deps + glob(join(dir,"*Util.as")):
-                            cmd += " -in %s" % util #no need to prepend \ to $ when using ash
 
                         if exists(testdir+".abc"):
                             os.unlink(testdir+".abc")
@@ -1334,7 +1342,6 @@ class RuntestBase(object):
                                 moveAtsSwf(dir,file, self.atsDir)
                         else:
                             cmd += " %s" % test
-                            self.debug_print(cmd)
                             child.sendline(cmd)
                             child.expect("\(ash\)")
 
@@ -1364,8 +1371,36 @@ class RuntestBase(object):
 
         end_time = datetime.today()
 
+    def compile_support_files_extra_pass(self, support_dir, abc_files, outputCalls = []):
+        # One of the support files may have required another file to be imported.
+        # Attempt to compile again with all the .abcs that did compile imported.
+        if self.compile_support_attempts > 10:
+            return
+        extra_args = ['-import %s' % abcfile for abcfile in abc_files]
+        compile_error = False
+        for p, dirs, files in walk(support_dir):
+            for f in files:
+                if f.endswith(self.sourceExt):
+                    f = join(p,f)
+                    binFile = splitext(f)[0]+'.abc'
+                    if not isfile(binFile):
+                        compileOutput = self.compile_test(f, outputCalls=outputCalls, extraArgs=extra_args)
+                        if not isfile(binFile) and not self.ascOutputOnly:
+                            compile_error = True
+                            outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
+                            outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
+                        else:
+                            if binFile not in abc_files:
+                                abc_files.append(binFile)
+        if compile_error:
+            self.compile_support_attempts += 1
+            self.compile_support_files_extra_pass(support_dir, abc_files, outputCalls=outputCalls)
+    
 
     def compile_support_files(self, support_dir, outputCalls = []):
+        compile_error = False
+        abc_files = []
+        self.compile_support_attempts = 1
         for p, dirs, files in walk(support_dir):
             for f in files:
                 if f.endswith(self.sourceExt):
@@ -1376,8 +1411,11 @@ class RuntestBase(object):
                     if not isfile(binFile):
                         compileOutput = self.compile_test(f, outputCalls=outputCalls)
                         if not isfile(binFile) and not self.ascOutputOnly:
-                            outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
-                            outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
+                            compile_error = True
+                        else:
+                            abc_files.append(binFile)
+        if compile_error:
+            self.compile_support_files_extra_pass(support_dir, abc_files, outputCalls=outputCalls)
 
     def skipAtsTest(self, file, settings):
         '''Check testconfig if we should skip the given file.  Returns a boolean'''
@@ -1392,6 +1430,15 @@ class RuntestBase(object):
         '''Check testconfig if we should exclude the given file.  Returns a boolean'''
         if '.*' in settings:
             for key in ['exclude']:
+                if key in settings['.*']:
+                    self.js_print('Excluding %s ... reason: %s' % (file,settings['.*'][key]))
+                    return True
+        return False
+
+    def skipTest(self, file, settings):
+        '''Check testconfig if we should skip the given file.  Returns a boolean'''
+        if '.*' in settings:
+            for key in ['skip']:
                 if key in settings['.*']:
                     self.js_print('Excluding %s ... reason: %s' % (file,settings['.*'][key]))
                     return True
@@ -1697,9 +1744,6 @@ class RuntestBase(object):
               testsTuples.append([t,testsLen-i])
             # generate threadpool
             requests = threadpool.makeRequests(self.runTestPrep, testsTuples, self.printOutput, self.handle_exception)
-            
-            
-            
             main = threadpool.ThreadPool(self.threads)
             # que requests
             [main.putRequest(req) for req in requests]

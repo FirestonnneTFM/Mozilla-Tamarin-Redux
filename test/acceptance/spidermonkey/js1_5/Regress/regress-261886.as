@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-261886.js';
 //-----------------------------------------------------------------------------
@@ -11,8 +11,8 @@ var BUGNUMBER = 261886;
 var summary = 'Always evaluate delete operand expression';
 var actual = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var o = {a:1};
 
@@ -29,6 +29,5 @@ catch(e)
 }
 
 expect = 2;
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

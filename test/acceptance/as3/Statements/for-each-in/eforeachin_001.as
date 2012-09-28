@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "forin-001";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The for each in  statement";
+import com.adobe.test.Assert;
+// TODO: REVIEW AS4 CONVERSION ISSUE
+//     var SECTION = "forin-001";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The for each in  statement";
     var BUGNUMBER="";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var tc = 0;
     var testcases = new Array();
@@ -19,7 +19,6 @@
 //    ForIn_6({ length:4, company:"netscape", year:2000, 0:"zero" });
     ForIn_8({ length:4, company:"netscape", year:2000, 0:"zero" });
 
-    test();
 
     function ForIn_1( object ) {
         PropertyArray = new Array();
@@ -41,8 +40,8 @@
         for ( var i = 0; i < PropertyArray.length; i++ ) {
             switch( PropertyArray[i] ) {
                 case "company":
-                    testcases[tcCompany] = new TestCase(
-                        SECTION,
+                    testcases[tcCompany] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -51,8 +50,8 @@
                     break;
 
                 case "length":
-                    testcases[tcLength] = new TestCase(
-                        SECTION,
+                    testcases[tcLength] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -61,8 +60,8 @@
                     break;
 
                 case "year":
-                    testcases[tcYear] = new TestCase(
-                        SECTION,
+                    testcases[tcYear] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -71,8 +70,8 @@
                     break;
 
                 case "0":
-                    testcases[tcZero] = new TestCase(
-                        SECTION,
+                    testcases[tcZero] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -83,8 +82,8 @@
             }
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "object.length",
             PropertyArray.length,
             object.length );
@@ -111,8 +110,8 @@
         for ( var i = 0; i < PropertyArray.length; i++ ) {
             switch( PropertyArray[i] ) {
                 case "company":
-                    testcases[tcCompany] = new TestCase(
-                        SECTION,
+                    testcases[tcCompany] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -121,8 +120,8 @@
                     break;
 
                 case "length":
-                    testcases[tcLength] = new TestCase(
-                        SECTION,
+                    testcases[tcLength] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -131,8 +130,8 @@
                     break;
 
                 case "year":
-                    testcases[tcYear] = new TestCase(
-                        SECTION,
+                    testcases[tcYear] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -141,8 +140,8 @@
                     break;
 
                 case "0":
-                    testcases[tcZero] = new TestCase(
-                        SECTION,
+                    testcases[tcZero] = Assert.expectEq(
+                        //SECTION,
                         "object[" + PropertyArray[i] +"]",
                         object[PropertyArray[i]],
                         ValueArray[i]
@@ -153,8 +152,8 @@
             }
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "object.length",
             PropertyArray.length,
             object.length );
@@ -171,14 +170,14 @@
             checkBreak = "fail";
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "check break out of for...in",
             "pass",
             checkBreak );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "properties.length",
             1,
             properties.length );
@@ -189,8 +188,8 @@
         if( values[0] != object[properties[0]] )
             myTest = "FAILED";
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "object[properties[0]] == values[0]",
             "PASSED",
             myTest );
@@ -215,26 +214,26 @@
             result3++;
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify labeled statement is only executed once",
             true,
             result1 == 1 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify statements in for loop are evaluated",
             true,
             result2 == i );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify break out of labeled for each in loop",
             true,
             result4 == 0 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify break out of labeled block",
             true,
             result3 == 0 );
@@ -258,26 +257,26 @@
             result3++;
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify labeled statement is only executed once",
             true,
             result1 == 1 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify statements in for loop are evaluated",
             true,
             result2 == i );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify break out of labeled for each in loop",
             true,
             result4 == 0 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "verify break out of labeled block",
             true,
             result3 == 0 );
@@ -294,14 +293,14 @@
             checkBreak = "fail";
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "check break out of for each in",
             "pass",
             checkBreak );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "properties.length",
             1,
             properties.length );
@@ -313,8 +312,8 @@
             myTest = "FAILED";
 
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            //SECTION,
             "object[properties[0]] == object[properties[0]]",
             "PASSED",
             myTest );

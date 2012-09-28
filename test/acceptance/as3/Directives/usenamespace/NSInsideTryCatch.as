@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "namespace inside try catch block";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "namespace inside try catch block";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -37,11 +37,10 @@ class A{
 
        var obj:A = new A();
 
-       AddTestCase( "Calling N2::func1()", "Called N2::func1", obj.accfunc1());
-       AddTestCase( "Calling N3::func1()", "Called N3::func1", obj.accfunc2());
+       Assert.expectEq( "Calling N2::func1()", "Called N2::func1", obj.accfunc1());
+       Assert.expectEq( "Calling N3::func1()", "Called N3::func1", obj.accfunc2());
        
-       test();
   
 } catch (e) {
-      AddTestCase( "Make sure there is no error", false, true);
+      Assert.expectEq( "Make sure there is no error", false, true);
 }

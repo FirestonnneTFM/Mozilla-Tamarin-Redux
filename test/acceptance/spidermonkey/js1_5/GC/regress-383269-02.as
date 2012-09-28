@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-383269-02.js';
 //-----------------------------------------------------------------------------
@@ -20,8 +20,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   function generate_big_object_graph()
   {
@@ -62,9 +62,8 @@ function addtestcases()
   if (time > (base_time + 10) * 3)
     actual = "generate_big_object_graph() leaked, base_gc_time="+base_time+", last_gc_time="+time;
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          e15_4_4_8.as
  *  ECMA Section:       15.4.4.8 Array.prototype.reverse()
@@ -49,19 +50,16 @@
  *
  */
 
-var SECTION = "15.4.4.8";
-var TITLE   = "Array.reverse";
+// var SECTION = "15.4.4.8";
+// var TITLE   = "Array.reverse";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -77,7 +75,7 @@ function getTestCases() {
 
     for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.reverse();", EXPARR[MYVAR], MYARR[MYVAR] );
+        array[item++] = Assert.expectEq(  "MYARR = [2,1,8,6]; MYARR.reverse();", EXPARR[MYVAR], MYARR[MYVAR] );
     }
 
 

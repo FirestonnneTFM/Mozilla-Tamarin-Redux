@@ -1,7 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+/*
 *
 * Date:    10 Apr 2002
 * Revised: 14 July 2002
@@ -21,17 +22,17 @@
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=136893
 */
 //-----------------------------------------------------------------------------
-    var SECTION = "eregress_131348";
-    var VERSION = "";
-    var TITLE   = "JS should not error on |for(i in undefined)|, |for(i in null)|";
-var bug = 131348;
+//     var SECTION = "eregress_131348";
+//     var VERSION = "";
+//     var TITLE   = "JS should not error on |for(i in undefined)|, |for(i in null)|";
+// var bug = 131348;
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
+
+//TO-DO: adding mission import
+import com.adobe.test.Assert;
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -39,7 +40,7 @@ function getTestCases() {
         
 
 var UBound = 0;
-var bug = 131348;
+// var bug = 131348;
 var summary = 'JS should not error on |for(i in undefined)|, |for(i in null)|';
 var TEST_PASSED = 'No error';
 var TEST_FAILED = 'An error was generated!!!';
@@ -51,8 +52,9 @@ var expect= '';
 var expectedvalues = [];
 
 
-
-status = inSection(1);
+//TO-DO: replacing inSection
+//status = inSection(1);
+status = "statements string1";
 expect = TEST_PASSED;
 actual = TEST_PASSED;
 try
@@ -67,11 +69,13 @@ catch(e)
   actual = TEST_FAILED;
 }
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 
 
-status = inSection(2);
+//TO-DO: replacing inSection
+//status = inSection(1);
+status = "statements string2";
 expect = TEST_PASSED;
 actual = TEST_PASSED;
 try
@@ -86,11 +90,13 @@ catch(e)
   actual = TEST_FAILED;
 }
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 
 
-status = inSection(3);
+//TO-DO: replacing inSection
+//status = inSection(1);
+status = "statements string3";
 expect = TEST_PASSED;
 actual = TEST_PASSED;
 /*
@@ -111,11 +117,13 @@ catch(e)
   actual = TEST_FAILED;
 }
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 
 
-status = inSection(4);
+//TO-DO: replacing inSection
+//status = inSection(1);
+status = "statements string4";
 expect = TEST_PASSED;
 actual = TEST_PASSED;
 /*
@@ -134,7 +142,7 @@ catch(e)
   actual = TEST_FAILED;
 }
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 
     return array;

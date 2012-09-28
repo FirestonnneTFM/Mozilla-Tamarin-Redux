@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    foreach.es
    Description:  foreach(object,eacher,thisobj)
@@ -11,12 +13,10 @@
      returns a new vector object containing the elements that were collected in the order they were
      collected.
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " Vector.forEach()");
 
 function eacher(value,index,obj) {
   result+="("+value+":"+index+")";
@@ -30,9 +30,9 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(    "forEach eacher is undefined",
+Assert.expectEq(    "forEach eacher is undefined",
         "ArgumentError: Error #1063",
-    parseError(errormsg,"ArgumentError: Error #1063".length));
+    Utils.parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1=new Vector.<int>();
 for (var i=0;i<3;i++) v1[i]=i;
@@ -42,15 +42,15 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase("forEach eacher is not a function",
+Assert.expectEq("forEach eacher is not a function",
                 "TypeError: Error #1034",
-            parseError(errormsg,"TypeError: Error #1034".length));
+            Utils.parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1=new Vector.<String>();
 for (var i=0;i<3;i++) v1[i]="s"+i;
 var result="";
 v1.forEach(eacher);
-AddTestCase(    "forEach simple vector",
+Assert.expectEq(    "forEach simple vector",
         "(s0:0)(s1:1)(s2:2)",
         result);
 
@@ -61,22 +61,21 @@ function double(value,index,obj) {
 var v1=Vector.<uint>([4560,9120,13680]);
 var result="";
 v1.forEach(eacher);
-AddTestCase(    "forEach simple uint vector",
+Assert.expectEq(    "forEach simple uint vector",
         "(4560:0)(9120:1)(13680:2)",
         result);
 
 var v1=Vector.<Number>([4560,9120,13680]);
 var result="";
 v1.forEach(eacher);
-AddTestCase(    "forEach simple Number vector",
+Assert.expectEq(    "forEach simple Number vector",
         "(4560:0)(9120:1)(13680:2)",
         result);
 
 var v1=Vector.<int>([4560,9120,13680]);
 var result="";
 v1.forEach(eacher);
-AddTestCase(    "forEach simple uint vector",
+Assert.expectEq(    "forEach simple uint vector",
         "(4560:0)(9120:1)(13680:2)",
         result);
 
-test();

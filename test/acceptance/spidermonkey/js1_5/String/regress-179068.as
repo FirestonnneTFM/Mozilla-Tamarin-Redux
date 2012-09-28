@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -80,7 +80,7 @@ var str = "";
 var long_str = duplicate(LONG_STR_SEED, N);
 eval("str='".concat(long_str, "';"));
 
-status = inSection(1);
+//status = inSection(1);
 actual = str.length == LONG_STR_SEED.length * N
   expect = true;
 addThis();
@@ -116,15 +116,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

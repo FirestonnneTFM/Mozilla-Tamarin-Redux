@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.4.12-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.prototype.toUpperCase()";
+//     var SECTION = "15.5.4.12-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.prototype.toUpperCase()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -31,7 +29,7 @@ function getTestCases() {
     // characters that break the driver
     var isEqual = EXPECT_STRING == (new String( TEST_STRING )).toUpperCase();
                   
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                       "isEqual",
                                       true,
                                       isEqual);

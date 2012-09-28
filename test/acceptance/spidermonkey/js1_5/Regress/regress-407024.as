@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-407024.js';
 //-----------------------------------------------------------------------------
@@ -12,14 +12,13 @@ var summary = 'Do not assert JSVAL_IS_NUMBER(pn3->pn_val) || JSVAL_IS_STRING(pn3
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function f(x) { switch (x) { case Array: return 1; }};
 var result = f(Array);
 if (result !== 1)
   throw "Unexpected result: "+(result);
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

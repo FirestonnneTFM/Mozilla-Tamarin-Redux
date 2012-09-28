@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import avmplus.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-313479.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ var summary = 'Root access in jsnum.c';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var prepared_string = String(1);
 String(2); // To remove prepared_string from newborn
@@ -36,8 +36,7 @@ var likeNumber = {
 
   var expect = 1;
 var actual = parseInt(likeString, likeNumber);
-printStatus("expect="+expect+" actual="+actual);
+//printStatus("expect="+expect+" actual="+actual);
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION="";
-var VERSION = "AS3";
+// var SECTION="";
+// var VERSION = "AS3";
 
-startTest();
 
-writeHeaderToLog("Bug 420755: Expand Array Test Coverage");
 
 // check for subclassing of Array, both with and without "dynamic"
 
@@ -52,17 +52,17 @@ function testArray(a:Array)
     return tot;
 }
 
-AddTestCase("Validate behaviour of holes in Array",
+Assert.expectEq("Validate behaviour of holes in Array",
             4930,
             testArray(new Array())
             );
 
-AddTestCase("Validate behaviour of holes in subclassed dynamic Array",
+Assert.expectEq("Validate behaviour of holes in subclassed dynamic Array",
             4930,
             testArray(new MyDynamicArray())
             );
 
-AddTestCase("Validate behaviour of holes in subclassed grandchild of dynamic Array",
+Assert.expectEq("Validate behaviour of holes in subclassed grandchild of dynamic Array",
             4930,
             testArray(new MyDynamicArray2())
             );
@@ -71,9 +71,9 @@ var err = "no error";
 try {
     testArray(new MyNonDynamicArray()); // expect ReferenceError: Error #1056
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Validate behaviour of holes in subclassed non-dynamic Array",
+    Assert.expectEq("Validate behaviour of holes in subclassed non-dynamic Array",
                 "Error #1056",
                 err );
 }
@@ -82,9 +82,9 @@ err = "no error";
 try {
     testArray(new MyNonDynamicArray2());    // expect ReferenceError: Error #1056
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Validate behaviour of holes in subclassed grandchild of non-dynamic Array",
+    Assert.expectEq("Validate behaviour of holes in subclassed grandchild of non-dynamic Array",
                 "Error #1056",
                 err );
 }
@@ -92,7 +92,7 @@ try {
 // test "construct"
 
 var a = new Array(1,2,3);
-AddTestCase("test array construct",
+Assert.expectEq("test array construct",
             3,
             a.length);
 
@@ -101,9 +101,9 @@ try {
     var a = new MyDynamicArray(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test construct of subclassed dynamic Array",
+    Assert.expectEq("Test construct of subclassed dynamic Array",
                 "Error #1063",
                 err );
 }
@@ -113,9 +113,9 @@ try {
     var a = new MyDynamicArray2(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test construct of grandchild of subclassed dynamic Array",
+    Assert.expectEq("Test construct of grandchild of subclassed dynamic Array",
                 "Error #1063",
                 err );
 }
@@ -125,9 +125,9 @@ try {
     var a = new MyNonDynamicArray(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test construct in subclassed non-dynamic Array",
+    Assert.expectEq("Test construct in subclassed non-dynamic Array",
                 "Error #1063",
                 err );
 }
@@ -137,25 +137,25 @@ try {
     var a = new MyNonDynamicArray2(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test construct in grandchild of subclassed non-dynamic Array",
+    Assert.expectEq("Test construct in grandchild of subclassed non-dynamic Array",
                 "Error #1063",
                 err );
 }
 
 // test "call"
 var a = Array(1,2,3);
-AddTestCase("Test array call", 3, a.length);
+Assert.expectEq("Test array call", 3, a.length);
 
 err = "no error";
 try {
     var a = MyDynamicArray(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test call in subclassed dynamic Array",
+    Assert.expectEq("Test call in subclassed dynamic Array",
                 "Error #1112",
                 err );
 }
@@ -165,9 +165,9 @@ try {
     var a = MyDynamicArray2(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test call in grandchild of subclassed dynamic Array",
+    Assert.expectEq("Test call in grandchild of subclassed dynamic Array",
                 "Error #1112",
                 err );
 }
@@ -177,9 +177,9 @@ try {
     var a = MyNonDynamicArray(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test call in subclassed non-dynamic Array",
+    Assert.expectEq("Test call in subclassed non-dynamic Array",
                 "Error #1112",
                 err );
 }
@@ -189,9 +189,9 @@ try {
     var a = MyNonDynamicArray2(1,2,3);
     var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-    err = grabError(e, e.toString());
+    err = Utils.grabError(e, e.toString());
 } finally {
-    AddTestCase("Test call in grandchild of subclassed non-dynamic Array",
+    Assert.expectEq("Test call in grandchild of subclassed non-dynamic Array",
                 "Error #1112",
                 err );
 }
@@ -200,12 +200,12 @@ try {
 // test holes vs elements-with-value-of-undefined
 var a = [undefined];
 for (var e in a) {
-    AddTestCase("test holes vs elements-with-value-of-undefined: for-var-in",
+    Assert.expectEq("test holes vs elements-with-value-of-undefined: for-var-in",
                 0,
                 e);
 }
 for each (var e in a) {
-    AddTestCase("test holes vs elements-with-value-of-undefined: for-each-var-in",
+    Assert.expectEq("test holes vs elements-with-value-of-undefined: for-each-var-in",
                 undefined,
                 e);
 }
@@ -218,7 +218,7 @@ var x=0;
 for (var e in a) {
     x++;
 }
-AddTestCase("test holes vs elements-with-value-of-undefined - deleted element: for-var-in",
+Assert.expectEq("test holes vs elements-with-value-of-undefined - deleted element: for-var-in",
             0,
             x);
 
@@ -226,9 +226,8 @@ x=0;
 for each (var e in a) {
     x++
 }
-AddTestCase("test holes vs elements-with-value-of-undefined - deleted element: for-each-var-in",
+Assert.expectEq("test holes vs elements-with-value-of-undefined - deleted element: for-each-var-in",
             0,
             x);
 
-test();
 

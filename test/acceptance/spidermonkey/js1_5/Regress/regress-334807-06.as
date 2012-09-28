@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-334807-06.js';
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@ var summary = '12.14 - exception prototype is the original Object prototype.';
 var actual = 'No Error';
 var expect = 'ReferenceError';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-printStatus('set Error = Number');
+//printStatus('set Error = Number');
 
 Error = Number;
 
@@ -28,15 +28,14 @@ catch(ex)
   try
   {
     actual = ex.name;
-    printStatus(ex + ': x.y');
+//printStatus(ex + ': x.y');
     ex.valueOf();
   }
   catch(ex2)
   {
-    printStatus(ex2 + ': ex.valueOf()');
+//printStatus(ex2 + ': ex.valueOf()');
     actual = ex2.name;
   }
 }
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

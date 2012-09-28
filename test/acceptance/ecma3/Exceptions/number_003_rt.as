@@ -1,14 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "number-003";
-    var VERSION = "ECMA_4";
-    var TITLE   = "Exceptions for Number.valueOf()";
+ // TODO: REVIEW AS4 CONVERSION ISSUE 
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "number-003";
+//     var VERSION = "ECMA_4";
+//     var TITLE   = "Exceptions for Number.valueOf()";
 
-    startTest();
-    writeHeaderToLog( SECTION + " Number.prototype.valueOf()");
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -29,10 +29,10 @@ function getTestCases() {
         exception = e.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        // SECTION,
         "Assigning Number.prototype.valueOf as the valueOf of a String object " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 
@@ -47,10 +47,10 @@ function getTestCases() {
         exception = e1.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+       // SECTION,
         "Assigning Number.prototype.valueOf as the valueOf of new Number() " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 
@@ -65,10 +65,10 @@ function getTestCases() {
         exception = e2.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+       // SECTION,
         "Assigning Number.prototype.valueOf as the valueOf of new Number(4) " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 
@@ -83,10 +83,10 @@ function getTestCases() {
         exception = e3.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+       // SECTION,
         "Assigning Number.prototype.valueOf as the valueOf of '4' " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-301738-02.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Date parse compatibilty with MSIE';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /*
     Case 2. The input string is of the form "f/m/l" where f, m and l are
@@ -57,7 +57,7 @@ l = 0;
 
 expect = (new Date(l, f-1, m)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 f = 0;
 m = 0;
@@ -65,7 +65,7 @@ l = 100;
 
 expect = (new Date(l, f-1, m)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 // 2.a.ii
 f = 0;
@@ -74,7 +74,7 @@ l = 100;
 
 expect = (new Date(l, f-1, m)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 f = 0;
 m = 24;
@@ -82,7 +82,7 @@ l = 2100;
 
 expect = (new Date(l, f-1, m)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 
 // 2.b.i
@@ -92,7 +92,7 @@ l = 100;
 
 expect = (new Date(f, m-1, l)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 */
 
@@ -102,7 +102,7 @@ l = 1;
 
 expect = (new Date(f, m-1, l)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 // 2.b.ii.
 
@@ -112,7 +112,7 @@ l = 1;
 
 expect = true;
 actual = isNaN(newDate(f, m, l));
-AddTestCase(newDesc(f, m, l) + ' is an invalid date', expect, actual);
+Assert.expectEq(newDesc(f, m, l) + ' is an invalid date', expect, actual);
 
 // 2.c.i
 
@@ -122,7 +122,7 @@ l = 1;
 
 expect = (new Date(f, m-1, l)).toDateString();
 actual = newDate(f, m, l).toDateString();
-AddTestCase(newDesc(f, m, l), expect, actual);
+Assert.expectEq(newDesc(f, m, l), expect, actual);
 
 // 2.c.ii
 
@@ -132,8 +132,7 @@ l = 1;
 
 expect = true;
 actual = isNaN(newDate(f, m, l));
-AddTestCase(newDesc(f, m, l) + ' is an invalid date', expect, actual);
+Assert.expectEq(newDesc(f, m, l) + ' is an invalid date', expect, actual);
 
 
 
-test();

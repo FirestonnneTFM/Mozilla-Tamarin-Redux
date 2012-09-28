@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "try-008";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The try statement: try in a constructor";
+import com.adobe.test.Assert;
+//     var SECTION = "try-008";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The try statement: try in a constructor";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -23,8 +21,8 @@ function getTestCases() {
             this.value = e.toString();
         }
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "Integer( " + value +" )",
             (exception ? INVALID_INTEGER_VALUE +": " + value : this.value),
             this.value );

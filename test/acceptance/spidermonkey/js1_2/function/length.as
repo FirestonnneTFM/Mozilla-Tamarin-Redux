@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'length.js';
 
@@ -25,25 +26,22 @@ gTestfile = 'length.js';
    Date:               12 november 1997
 */
 
-var SECTION = "function/length.js";
-var VERSION = "ECMA_1";
-var TITLE   = "Function.length";
+// var SECTION = "function/length.js";
+// var VERSION = "ECMA_1";
+// var TITLE   = "Function.length";
 var BUGNUMBER="104204";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var f = function(a,b,c) {return f.length};
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
       'var f = new Function( "a","b", "c", "return f.length"); f()',
       3,
       f() );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
       'var f = new Function( "a","b", "c", "return f.length"); f(1,2,3,4,5)',
       3,
       f(1,2,3,4,5) );
 
-test();

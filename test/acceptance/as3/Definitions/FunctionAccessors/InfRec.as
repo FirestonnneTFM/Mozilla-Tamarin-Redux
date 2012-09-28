@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "FunctionAccessors";
-var VERSION = "AS3";
-var TITLE   = "Function Accessors";
+// var SECTION = "FunctionAccessors";
+// var VERSION = "AS3";
+// var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
-startTest();
 
 class foo{
     // infinite recursion calling setter from setter and back again
@@ -26,8 +26,7 @@ try{
 } catch (e) {
     res = "exception";
 } finally {
-    AddTestCase("Infinite recursion getter calling getter", "exception", res);
+    Assert.expectEq("Infinite recursion getter calling getter", "exception", res);
 }
 
-test();
 

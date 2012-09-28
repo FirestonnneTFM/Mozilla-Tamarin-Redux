@@ -11,27 +11,27 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION:String = "mops";
-    var VERSION:String = "AS3";
-    var TITLE:String   = "lix16";
+//     var SECTION:String = "mops";
+//     var VERSION:String = "AS3";
+//     var TITLE:String   = "lix16";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("lix16(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("lix16(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ LIX16(Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
     // Get a handle to the domainMemory after it is initialized
     var mem:ByteArray = Domain.currentDomain.domainMemory;
 
-    AddErrorTest("lix16(-1)", RANGEERROR+1506, function(){ LIX16(-1); });
-    AddErrorTest("lix16(mem.length)", RANGEERROR+1506, function(){ LIX16(mem.length); });
-    AddErrorTest("lix16(mem.length-1)", RANGEERROR+1506, function(){ LIX16(mem.length-1); });
-    AddTestCase("lix16(mem.length-2)", 0, LIX16(mem.length-2));
+    Assert.expectError("lix16(-1)", Utils.RANGEERROR+1506, function(){ LIX16(-1); });
+    Assert.expectError("lix16(mem.length)", Utils.RANGEERROR+1506, function(){ LIX16(mem.length); });
+    Assert.expectError("lix16(mem.length-1)", Utils.RANGEERROR+1506, function(){ LIX16(mem.length-1); });
+    Assert.expectEq("lix16(mem.length-2)", 0, LIX16(mem.length-2));
 
     testsi8();
     testsi16();
@@ -39,7 +39,6 @@ package {
     testwriteByte();
     testwriteInt();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -71,9 +70,9 @@ package {
         SI8(0xFF, 3);
         SI8(0xFF, 4);
         SI8(0x7F, 5);
-        AddTestCase("lix16 load byte written by si8()", -32768, LIX16(0));
-        AddTestCase("lix16 load byte written by si8()", -1, LIX16(2));
-        AddTestCase("lix16 load byte written by si8()", 32767, LIX16(4));
+        Assert.expectEq("lix16 load byte written by si8()", -32768, LIX16(0));
+        Assert.expectEq("lix16 load byte written by si8()", -1, LIX16(2));
+        Assert.expectEq("lix16 load byte written by si8()", 32767, LIX16(4));
     }
 
     function testsi16():void
@@ -85,17 +84,17 @@ package {
         SI16(0x8000, 0);
         SI16(0xFFFF, 2);
         SI16(0x7FFF, 4);
-        AddTestCase("lix16 load bytes written by si16(0x8000)", -32768, LIX16(0));
-        AddTestCase("lix16 load bytes written by si16(0xFFFF)", -1, LIX16(2));
-        AddTestCase("lix16 load bytes written by si16(0x7FFF)", 32767, LIX16(4));
+        Assert.expectEq("lix16 load bytes written by si16(0x8000)", -32768, LIX16(0));
+        Assert.expectEq("lix16 load bytes written by si16(0xFFFF)", -1, LIX16(2));
+        Assert.expectEq("lix16 load bytes written by si16(0x7FFF)", 32767, LIX16(4));
     }
 
     function testsi32():void
     {
         clearMemory();
         SI32(0x7FFF8000, 0);
-        AddTestCase("lix16 load 1st short written by si32(0x7FFF8000)", -32768, LIX16(0));
-        AddTestCase("lix16 load 2nd short written by si32(0x7FFF8000)", 32767, LIX16(2));
+        Assert.expectEq("lix16 load 1st short written by si32(0x7FFF8000)", -32768, LIX16(0));
+        Assert.expectEq("lix16 load 2nd short written by si32(0x7FFF8000)", 32767, LIX16(2));
     }
 
     function testwriteByte():void
@@ -107,8 +106,8 @@ package {
         mem.writeByte(0xFF);
         mem.writeByte(0x7F);
 
-        AddTestCase("lix16 load bytes written by writeByte()", -32768, LIX16(0));
-        AddTestCase("lix16 load bytes written by writeByte()", 32767, LIX16(2));
+        Assert.expectEq("lix16 load bytes written by writeByte()", -32768, LIX16(0));
+        Assert.expectEq("lix16 load bytes written by writeByte()", 32767, LIX16(2));
     }
 
     function testwriteInt():void
@@ -117,8 +116,8 @@ package {
         mem.position = 0;
         mem.writeInt(2147450880);
 
-        AddTestCase("lix16 load 1st short written by writeInt(2147450880)", -32768, LIX16(0));
-        AddTestCase("lix16 load 2nd short written by writeInt(2147450880)", 32767, LIX16(2));
+        Assert.expectEq("lix16 load 1st short written by writeInt(2147450880)", -32768, LIX16(0));
+        Assert.expectEq("lix16 load 2nd short written by writeInt(2147450880)", 32767, LIX16(2));
     }
 
 }

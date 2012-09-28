@@ -1,7 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+import com.adobe.test.Assert;
+/*
 *
 * Date:    18 Feb 2002
 * SUMMARY: Testing re.exec(str) when re.lastIndex is < 0 or > str.length
@@ -62,15 +64,12 @@
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "e15_10_6_2_2";
-var VERSION = "";
-var TITLE   = "Testing re.exec(str) when re.lastIndex is < 0 or > str.length";
-var bug = "76717";
+// var SECTION = "e15_10_6_2_2";
+// var VERSION = "";
+// var TITLE   = "Testing re.exec(str) when re.lastIndex is < 0 or > str.length";
+// var bug = "76717";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -91,37 +90,37 @@ function getTestCases() {
     pattern = /abc/gi;
     string = 'AbcaBcabC';
 
-    status = inSection(1);
+ //    status = inSection(1);
     actualmatch = pattern.exec(string);
     expectedmatch = Array('Abc');
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-    status = inSection(2);
+ //    status = inSection(2);
     actualmatch = pattern.exec(string);
     expectedmatch = Array('aBc');
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-    status = inSection(3);
+ //    status = inSection(3);
     actualmatch = pattern.exec(string);
     expectedmatch = Array('abC');
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     /*
     * At this point |lastIndex| is > string.length, so the match should be null -
     */
-    status = inSection(4);
+ //    status = inSection(4);
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
     /*
     * Now let's set |lastIndex| to -1, so the match should again be null -
     */
-    status = inSection(5);
+ //    status = inSection(5);
     pattern.lastIndex = -1;
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
     /*
     * Now try some edge-case values. Thanks to the work done in
@@ -135,65 +134,65 @@ function getTestCases() {
     /*
     ***** leave commmented out until we decide the size of lastIndex ******
 
-    status = inSection(6);
+ //    status = inSection(6);
     pattern.lastIndex = Math.pow(2,32);
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(7);
+ //    status = inSection(7);
     pattern.lastIndex = -Math.pow(2,32);
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(8);
+ //    status = inSection(8);
     pattern.lastIndex = Math.pow(2,32) + 1;
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(9);
+ //    status = inSection(9);
     pattern.lastIndex = -(Math.pow(2,32) + 1);
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(10);
+ //    status = inSection(10);
     pattern.lastIndex = Math.pow(2,32) * 2;
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(11);
+ //    status = inSection(11);
     pattern.lastIndex = -Math.pow(2,32) * 2;
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(12);
+ //    status = inSection(12);
     pattern.lastIndex = Math.pow(2,40);
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(13);
+ //    status = inSection(13);
     pattern.lastIndex = -Math.pow(2,40);
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(14);
+ //    status = inSection(14);
     pattern.lastIndex = Number.MAX_VALUE;
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
-    status = inSection(15);
+ //    status = inSection(15);
     pattern.lastIndex = -Number.MAX_VALUE;
     actualmatch = pattern.exec(string);
     expectedmatch = null;
-    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
     */
 
 
@@ -213,17 +212,17 @@ function getTestCases() {
     /*  status = inSection(16);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(17);
+   //    status = inSection(17);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc'); // NOT Array('aBc') as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(18);
+   //    status = inSection(18);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc'); // NOT Array('abC') as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
     */
       /*
        * At this point above, |lastIndex| WAS > string.length, but not here -
@@ -231,7 +230,7 @@ function getTestCases() {
     /*  status = inSection(19);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
     */
       /*
        * Now let's set |lastIndex| to -1
@@ -240,7 +239,7 @@ function getTestCases() {
       pattern.lastIndex = -1;
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
     */
       /*
        * Now try some edge-case values. Thanks to the work done in
@@ -255,69 +254,69 @@ function getTestCases() {
       pattern.lastIndex = Math.pow(2,32);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(22);
+   //    status = inSection(22);
       pattern.lastIndex = -Math.pow(2,32);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(23);
+   //    status = inSection(23);
       pattern.lastIndex = Math.pow(2,32) + 1;
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(24);
+   //    status = inSection(24);
       pattern.lastIndex = -(Math.pow(2,32) + 1);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(25);
+   //    status = inSection(25);
       pattern.lastIndex = Math.pow(2,32) * 2;
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(26);
+   //    status = inSection(26);
       pattern.lastIndex = -Math.pow(2,32) * 2;
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(27);
+   //    status = inSection(27);
       pattern.lastIndex = Math.pow(2,40);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -;
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(28);
+   //    status = inSection(28);
       pattern.lastIndex = -Math.pow(2,40);
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(29);
+   //    status = inSection(29);
       pattern.lastIndex = Number.MAX_VALUE;
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(30);
+   //    status = inSection(30);
       pattern.lastIndex = -Number.MAX_VALUE;
       actualmatch = pattern.exec(string);
       expectedmatch = Array('Abc') // NOT null as before -
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
     */
 
     // added from regress_24712
-    status = inSection(31);
+ //    status = inSection(31);
     pattern = /([\S]+([ \t]+[\S]+)*)[ \t]*=[ \t]*[\S]+/;
     actualmatch = pattern.exec("Course_Creator = Test");
     expectedmatch = ["Course_Creator = Test", "Course_Creator", undefined];
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

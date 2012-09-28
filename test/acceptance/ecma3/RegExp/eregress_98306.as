@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 04 September 2001
  *
@@ -11,15 +12,12 @@
  */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_98306";
-var VERSION = "";
-var TITLE   = "Testing that we don't crash on this code -";
-var bug = "98306";
+// var SECTION = "eregress_98306";
+// var VERSION = "";
+// var TITLE   = "Testing that we don't crash on this code -";
+// var bug = "98306";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -61,7 +59,7 @@ function getTestCases() {
         }
       }
 
-      array[item++] = new TestCase(SECTION, sCode, "no error", thisError);
+      array[item++] = Assert.expectEq( sCode, "no error", thisError);
     }
 
     return array;

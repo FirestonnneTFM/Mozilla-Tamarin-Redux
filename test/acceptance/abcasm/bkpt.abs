@@ -8,7 +8,7 @@ function hello()
         
         bkpt
 	pushstring "Hello, world"
-	.print
+
 
 	findpropstrict START
 	pushstring ".print demo"
@@ -23,3 +23,5 @@ function hello()
 
 	returnvoid
 }
+
+script_info{init: hello}

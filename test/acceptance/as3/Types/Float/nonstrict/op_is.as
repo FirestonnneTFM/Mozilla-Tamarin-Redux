@@ -3,16 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
-var SECTION = "6.7.1";
-var VERSION = "AS3";
-var TITLE   = "The is operator augmented by float values";
+// var SECTION = "6.7.1";
+// var VERSION = "AS3";
+// var TITLE   = "The is operator augmented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var pi_float:Object = new float(3.14);
-AddErrorTest("TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float is "float"; });
+Assert.expectError("TypeError if datatype is not Class", Utils.TYPEERROR, function(){ return pi_float is "float"; });
 
-test();
 

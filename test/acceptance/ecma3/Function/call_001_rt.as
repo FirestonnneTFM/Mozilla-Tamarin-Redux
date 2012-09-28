@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /*
  * Date: 2001-07-13
  *
@@ -25,17 +27,14 @@
  *
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "call_001_rt";
-    var VERSION = "";
-    startTest();
+//     var SECTION = "call_001_rt";
+//     var VERSION = "";
 
-    var TITLE   = "Applying Function.prototype.call to the Function object itself";
-    var bug = '(none)';
+//     var TITLE   = "Applying Function.prototype.call to the Function object itself";
+//     var bug = '(none)';
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
 
@@ -65,10 +64,10 @@ function getTestCases() {
        }finally{
            //print(thisError);
            status = 'Function.call';
-           actual = typeError(thisError);
+           actual = Utils.typeError(thisError);
            expect = 'TypeError: Error #1006';
            //captureThis();
-           array[item++] = new TestCase(SECTION, status, expect, actual);
+           array[item++] = Assert.expectEq( status, expect, actual);
     } 
  
 
@@ -80,13 +79,13 @@ function getTestCases() {
     actual = f();
     expect = cnHello;
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     status = 'Section B of test';
     actual = g();
     expect = cnHello;
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);    
+    array[item++] = Assert.expectEq( status, expect, actual);    
     
     f = Function.call(self, 'return this.toString()');
     g = Function.call(objTEST, 'return this.toString()');
@@ -95,13 +94,13 @@ function getTestCases() {
     actual = f();
     expect = cnOBJECT_GLOBAL;
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);    
+    array[item++] = Assert.expectEq( status, expect, actual);    
     
     status = 'Section D of test';
     actual = g();
     expect = cnOBJECT_GLOBAL;
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);    
+    array[item++] = Assert.expectEq( status, expect, actual);    
     
     
     f = Function.call(self, 'return this.color');
@@ -111,13 +110,13 @@ function getTestCases() {
     actual = f();
     expect = undefined;
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);    
+    array[item++] = Assert.expectEq( status, expect, actual);    
     
     status = 'Section F of test';
     actual = g();
     expect = undefined;
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);    
+    array[item++] = Assert.expectEq( status, expect, actual);    
     */
     
     return array;

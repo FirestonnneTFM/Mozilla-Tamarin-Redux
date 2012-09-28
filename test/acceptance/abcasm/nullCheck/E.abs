@@ -2,30 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Instructions that start with the letter E" 
-    callpropvoid START 1
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
-
-.method_info { 
+//http://watsonexp.corp.adobe.com/#bug=3328170
+method_info { 
     name: runTest 
-    flags: SETS_DXNS
+//    flags: SETS_DXNSk //not implemented
 }
-.method_body_info {
+method_body_info {
 
-    method: .function_id(runTest)
+    method: runTest
 
     traits: {
-        .trait { kind: Trait_Slot name: var1 }
+        trait { kind: Trait_Slot name: var1 }
     }
     code:
     {
@@ -64,6 +51,7 @@ function main() {
         equals
         callpropvoid COMPARE_STRICTEQ 3
         
+        /* UNIMPLEMNTED OPCODES
         findproperty COMPARE_STRICTEQ
         pushstring "esc_xattr null"
         pushstring "null" // expected
@@ -77,7 +65,22 @@ function main() {
         pushnull
         esc_xelem
         callpropvoid COMPARE_STRICTEQ 3
-
+		*/
         returnvoid
     }
 }
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Instructions that start with the letter E" 
+    callpropvoid START 1
+    newfunction runTest
+    getlocal0
+    call 0
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+
+script_info{init: main}

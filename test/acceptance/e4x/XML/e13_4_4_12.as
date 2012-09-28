@@ -1,8 +1,99 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
 
 START("13.4.4.12 - XML descendants");
 
@@ -32,27 +123,27 @@ XML.prettyPrinting = false;
 
 var xmlDoc = "<MLB><foo>bar</foo><Team>Giants<foo>bar</foo></Team><City><foo>bar</foo>San Francisco</City><Team>Padres</Team><City>San Diego</City></MLB>";
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('Team')", "<Team>Giants<foo>bar</foo></Team>" + NL() + "<Team>Padres</Team>",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('Team')", "<Team>Giants<foo>bar</foo></Team>" + NL() + "<Team>Padres</Team>",
              (MYXML = new XML(xmlDoc), MYXML.descendants('Team').toString()) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('Team').length()", 2,
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('Team').length()", 2,
              (MYXML = new XML(xmlDoc), MYXML.descendants('Team').length()) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('Team') instanceof XMLList", true,
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('Team') instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.descendants('Team') instanceof XMLList) );
 
 // find multiple levels of descendants
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('foo')", "<foo>bar</foo>" + NL() + "<foo>bar</foo>" + NL() + "<foo>bar</foo>",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('foo')", "<foo>bar</foo>" + NL() + "<foo>bar</foo>" + NL() + "<foo>bar</foo>",
              (MYXML = new XML(xmlDoc), MYXML.descendants('foo').toString()) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('foo').length()", 3,
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('foo').length()", 3,
              (MYXML = new XML(xmlDoc), MYXML.descendants('foo').length()) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('foo') instanceof XMLList", true,
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('foo') instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.descendants('foo') instanceof XMLList) );
 
 // no matching descendants
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('nomatch')", "",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('nomatch')", "",
              (MYXML = new XML(xmlDoc), MYXML.descendants('nomatch').toString()) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('nomatch').length()", 0,
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('nomatch').length()", 0,
              (MYXML = new XML(xmlDoc), MYXML.descendants('nomatch').length()) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.descendants('nomatch') instanceof XMLList", true,
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.descendants('nomatch') instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.descendants('nomatch') instanceof XMLList) );
              
 // descendant with hyphen
@@ -69,6 +160,6 @@ correct =
 
 names = e.descendants("first-name");
 
-AddTestCase("Descendant with hyphen", correct, names);
+Assert.expectEq("Descendant with hyphen", correct.toString(), names.toString());
 
 END();

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'regress-7703.js';
 
@@ -12,15 +13,14 @@ gTestfile = 'regress-7703.js';
  *  Description:        See the text of the bugnumber above
  */
 
-var SECTION = "js1_2";       // provide a document reference (ie, ECMA section)
-var VERSION = "JS1_2"; // Version of JavaScript or ECMA
-var TITLE   = "Regression test for bugzilla # 7703";       // Provide ECMA section title or a description
+// var SECTION = "js1_2";       // provide a document reference (ie, ECMA section)
+// var VERSION = "JS1_2"; // Version of JavaScript or ECMA
+// var TITLE   = "Regression test for bugzilla # 7703";       // Provide ECMA section title or a description
 var BUGNUMBER = "http://bugzilla.mozilla.org/show_bug.cgi?id=7703";     // Provide URL to bugsplat or bugzilla report
 
-startTest();  var testscases=[]; var index=0;               // leave this alone
 
 /*
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -30,7 +30,7 @@ startTest();  var testscases=[]; var index=0;               // leave this alone
  *
  * var zip = /[\d]{5}$/;
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "zip = /[\d]{5}$/; \"PO Box 12345 Boston, MA 02134\".match(zip)",   // description of the test
  *  "02134",                                                           // expected result
  *  "PO Box 12345 Boston, MA 02134".match(zip) );                      // actual result
@@ -48,9 +48,9 @@ function inspect(object) {
 var o = {a: 1, b: 2};
 inspect(o);
 
-AddTestCase( "inspect(o),length",   2,       types.length );
-AddTestCase( "inspect(o)[0]",      "number", types[0] );
-AddTestCase( "inspect(o)[1]",      "number", types[1] );
+Assert.expectEq( "inspect(o),length",   2,       types.length );
+Assert.expectEq( "inspect(o)[0]",      "number", types[0] );
+Assert.expectEq( "inspect(o)[1]",      "number", types[1] );
 
 types_2 = [];
 
@@ -61,10 +61,9 @@ function inspect_again(object) {
 }
 
 inspect_again(o);
-AddTestCase( "inspect_again(o),length",   2,       types.length );
-AddTestCase( "inspect_again(o)[0]",      "number", types[0] );
-AddTestCase( "inspect_again(o)[1]",      "number", types[1] );
+Assert.expectEq( "inspect_again(o),length",   2,       types.length );
+Assert.expectEq( "inspect_again(o)[0]",      "number", types[0] );
+Assert.expectEq( "inspect_again(o)[1]",      "number", types[1] );
 
 
-test();       // leave this alone.  this executes the test cases and
 // displays results.

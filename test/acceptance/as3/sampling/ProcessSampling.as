@@ -6,15 +6,14 @@ package {
 
 import flash.sampler.*;
 import avmplus.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Sampling";
-var VERSION = "AS3";
-var TITLE   = "Iterate and investigate the sample data";
+// var SECTION = "Sampling";
+// var VERSION = "AS3";
+// var TITLE   = "Iterate and investigate the sample data";
 
 var isdebugger=System.isDebugger();
 
-startTest();
-writeHeaderToLog("Sampling api");
 
 var objs:Array=new Array();
 class simpleobject {
@@ -58,7 +57,7 @@ for each (var sample in getSamples()) {
 print("nallocs  ="+nallocs+" allocs  ="+allocs);
 print("ndeallocs="+ndeallocs+" deallocs="+deallocs);
 
-AddTestCase(
+Assert.expectEq(
     "ProcessSamples: deallocs match allocs",
     "",
     badalloc
@@ -77,13 +76,13 @@ print("sizeAllocs="+sizeAllocs);
 print("sizeDeAllocs="+sizeDeallocs);
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
         "GetSizeSamples: test getSize on NewObjectSamples returns a positive value",
         true,
         sizeAllocs>0
     );
 } else {
-    AddTestCase(
+    Assert.expectEq(
         "GetSizeSamples: test getSize on NewObjectSamples returns a positive value",
         false,
         sizeAllocs>0
@@ -103,7 +102,7 @@ for (var item in objs1) {
    print(item+" "+objs1[item]);
 }
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
         "InternalsInStack: assert the [verify] internal is shown in the samples and has > 0 size",
         true,
         objs1['[verify]']>0
@@ -114,6 +113,5 @@ for (var sample3 in getSamples()) {
     print("getsample:"+sample3);
 }
 
-test();
 
 }

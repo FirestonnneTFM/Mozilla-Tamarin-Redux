@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 class A
 {
@@ -80,11 +81,9 @@ function test_one(c)
     results.push({expected: "ReferenceError: Error #1074", actual: test_one(C3)});
     results.push({expected: "ReferenceError: Error #1074", actual: test_one(C4)});
 
-startTest();
 for (var i in results)
 {
     var o = results[i]
-    AddTestCase("test_"+i, o.expected, o.actual);
+    Assert.expectEq("test_"+i, o.expected, o.actual);
 }
-test();
 

@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
-var SECTION = "4.5.29";
-var VERSION = "AS3";
-var TITLE   = "public function reciprocal(x:float):float";
+// var SECTION = "4.5.29";
+// var VERSION = "AS3";
+// var TITLE   = "public function reciprocal(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddErrorTest("float.reciprocal() with no args", ARGUMENTERROR+1063,  function(){ float.reciprocal(); });
+Assert.expectError("float.reciprocal() with no args", Utils.ARGUMENTERROR+1063,  function(){ float.reciprocal(); });
 
 // If x is NaN, the result is NaN
 AddStrictTestCase("float.reciprocal(string)", float.NaN, float.reciprocal("string"));
@@ -22,5 +21,4 @@ AddStrictTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reci
 
 AddStrictTestCase("float.reciprocal(true)", float(1), float.reciprocal(true));
 
-test();
 

@@ -2,37 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Instructions that start with the letter D" 
-    callpropvoid START 1
-    
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest1)
-    getlocal0
-    call 0
-    
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
-
-.method_info { 
+method_info { 
     name: runTest 
-    flags: SETS_DXNS
+    //    flags: SETS_DXNSk //not implemented
 }
-.method_body_info {
+method_body_info {
 
-    method: .function_id(runTest)
-
+    method: runTest
+/*
     traits: {
-        .trait { kind: Trait_Slot name: var1 }
+        trait { kind: Trait_Slot name: var1 }
     }
+*/
     code:
     {
         getlocal0
@@ -79,9 +60,11 @@ function main() {
         pushnull
         decrement_i
         callpropvoid COMPARE_STRICTEQ 3
+
+
+/*        
         
-        
-        .try 
+        try 
         {
             pushnull
             deleteproperty NoSuchProperty
@@ -99,7 +82,7 @@ function main() {
             
             jump finished_deleteproperty_on_null_object
         }
-        .catch
+        catch
         {
             getlocal0
             pushscope
@@ -112,20 +95,22 @@ function main() {
         }
         
         finished_deleteproperty_on_null_object:
+        
+*/    
         returnvoid
     }
 }
 
-.method_info { 
+method_info { 
     name: runTest1 
-    flags: SETS_DXNS
+    // flags: SETS_DXNS // not implemented
 }
-.method_body_info {
+method_body_info {
 
-    method: .function_id(runTest1)
+    method: runTest1
 
     traits: {
-        .trait { kind: Trait_Slot name: var1 }
+        trait { kind: Trait_Slot name: var1 }
     }
     code:
     {
@@ -162,6 +147,7 @@ function main() {
         dup
         callpropvoid COMPARE_STRICTEQ 3
 
+/* not implemented
         findproperty COMPARE_STRICTEQ
         pushstring "dxns"
         dxns "foo"
@@ -169,7 +155,7 @@ function main() {
         swap
         callpropvoid PASS 1
         pop // COMPARE_STRICTEQ
-        
+
         
         findproperty COMPARE_STRICTEQ
         pushstring "dxnslate - null"
@@ -180,8 +166,33 @@ function main() {
         callpropvoid PASS 1
         pop // COMPARE_STRICTEQ
 
-
+*/
         returnvoid
     }
 }
 
+
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Instructions that start with the letter D" 
+    callpropvoid START 1
+    
+    newfunction runTest
+    getlocal0
+    call 0
+    
+    newfunction runTest1
+    getlocal0
+    call 0
+    
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+script_info{init: main
+    traits: {
+        trait { kind: Trait_Slot name: var1 }
+    }
+}

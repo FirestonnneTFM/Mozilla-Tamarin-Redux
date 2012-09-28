@@ -1,7 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+import com.adobe.test.Assert;
+/*
 *
 * Date:    31 August 2002
 * SUMMARY: RegExp conformance test
@@ -10,15 +12,12 @@
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_169497";
-var VERSION = "";
-var TITLE   = "RegExp conformance test";
-var bug = "169497";
+// var SECTION = "eregress_169497";
+// var VERSION = "";
+// var TITLE   = "RegExp conformance test";
+// var bug = "169497";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -41,12 +40,12 @@ function getTestCases() {
     sHTML += sBody;
     sHTML += '\n<\/html>';
 
-    status = inSection(1);
+ //    status = inSection(1);
     string = sHTML;
     pattern = /<body.*>((.*\n?)*?)<\/body>/i;
     actualmatch = string.match(pattern);
     expectedmatch = Array(sBody, '\n<p>Kibology for all</p>\n<p>All for Kibology</p>\n', '<p>All for Kibology</p>\n');
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

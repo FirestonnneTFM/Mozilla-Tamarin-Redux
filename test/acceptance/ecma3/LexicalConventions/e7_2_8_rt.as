@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "7.2-8";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Line Terminators";
+import com.adobe.test.Assert;
+//     var SECTION = "7.2-8";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Line Terminators";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -25,7 +23,7 @@ a
 <
 b
 
-    array[item++] = new TestCase( "7.2",    "c<cr>a<cr><<cr>b",     false,     c);
+    array[item++] = Assert.expectEq( "7.2 c<cr>a<cr><<cr>b",     false,     c);
 
     return ( array );
 }

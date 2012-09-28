@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-234389.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Do not Crash when overloaded toString causes infinite recursion';
 var actual = ''
   var expect = 'Internal Error: too much recursion';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var foo = {
   toString: function() {
@@ -39,6 +39,5 @@ catch(ex)
   expect = 'Error #1023: Stack overflow occurred.'.substr(0,11);
   actual = ex.message.substr(0,11);
 }
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

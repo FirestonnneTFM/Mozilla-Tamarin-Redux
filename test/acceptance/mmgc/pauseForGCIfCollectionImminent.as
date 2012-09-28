@@ -1,14 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+try {
+    import avmplus.* ;      // System class in the avmshell
+} catch (e) {
+    import flash.system.* ; // System class in the flash player
+import com.adobe.test.Assert;
+}
 
-import avmplus.* ;      // System class in the avmshell
-import flash.system.* ; // System class in the flash player
-
-var SECTION = "System::pauseForGCIfCollectionImminent";
-var VERSION = "";
-startTest();
-var TITLE = "Test pauseForGCIfCollectionImminent api";
+// var SECTION = "System::pauseForGCIfCollectionImminent";
+// var VERSION = "";
+// var TITLE = "Test pauseForGCIfCollectionImminent api";
 
 
 class Node {
@@ -73,7 +75,7 @@ for each(var f in fractions) {
             trace("Hits: " + hits);
     }
 
-    AddTestCase("pauseForGCIfCollectionImminent test f=" + f + " : hits="+hits,
+    Assert.expectEq("pauseForGCIfCollectionImminent test f=" + f + " : hits="+hits,
                 true,
                 ((hits > 0) == (f < 1.0)));
 }
@@ -92,10 +94,9 @@ for each (var ec in error_cases) {
     } catch (err) {
         error = err.toString();
     }
-    AddTestCase("pauseForGCIfCollectionImminent test @ " + ec,
+    Assert.expectEq("pauseForGCIfCollectionImminent test @ " + ec,
                 "no error", error);
 }
 var loop_time = new Date() - start;
 trace("error tests: "+loop_time);
 
-test();

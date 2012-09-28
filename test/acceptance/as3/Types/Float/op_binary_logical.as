@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.10";
-var VERSION = "AS3";
-var TITLE   = "The binary logical operators augmented by float values";
+// var SECTION = "6.10";
+// var VERSION = "AS3";
+// var TITLE   = "The binary logical operators augmented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var neg_onef:float = -1f;
 var zerof:float = 0f;
@@ -57,11 +56,11 @@ AddStrictTestCase("-1f && true", true, neg_onef && true );
 AddStrictTestCase("-1f FloatLiteral && true", true, -1f && true );
 AddStrictTestCase("true && float.POSITIVE_INFINITY", float.POSITIVE_INFINITY, true && float.POSITIVE_INFINITY );
 AddStrictTestCase("float.NEGATIVE_INFINITY && true", true, float.NEGATIVE_INFINITY && true );
-AddTestCase("float.NaN && float.NaN", float.NaN,  float.NaN && float.NaN );
-AddTestCase("float.NaN && 0f", float.NaN,  float.NaN && 0f );
-AddTestCase("0f && float.NaN", 0f,  0f && float.NaN );
-AddTestCase("flaot.NaN && float.POSITIVE_INFINITY", float.NaN,  float.NaN && float.POSITIVE_INFINITY );
-AddTestCase("float.POSITIVE_INFINITY && float.NaN", float.NaN,  float.POSITIVE_INFINITY && float.NaN );
+Assert.expectEq("float.NaN && float.NaN", float.NaN,  float.NaN && float.NaN );
+Assert.expectEq("float.NaN && 0f", float.NaN,  float.NaN && 0f );
+Assert.expectEq("0f && float.NaN", 0f,  0f && float.NaN );
+Assert.expectEq("flaot.NaN && float.POSITIVE_INFINITY", float.NaN,  float.NaN && float.POSITIVE_INFINITY );
+Assert.expectEq("float.POSITIVE_INFINITY && float.NaN", float.NaN,  float.POSITIVE_INFINITY && float.NaN );
 
 
 
@@ -113,4 +112,3 @@ AddStrictTestCase("0f || float.NaN", float.NaN,  0f || float.NaN );
 AddStrictTestCase("flaot.NaN || float.POSITIVE_INFINITY", float.POSITIVE_INFINITY,  float.NaN || float.POSITIVE_INFINITY );
 AddStrictTestCase("float.POSITIVE_INFINITY || float.NaN", float.POSITIVE_INFINITY,  float.POSITIVE_INFINITY || float.NaN );
 
-test();

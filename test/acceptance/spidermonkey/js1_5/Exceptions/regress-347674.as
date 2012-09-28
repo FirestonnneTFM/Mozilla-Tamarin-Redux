@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-347674.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = "ReferenceError thrown when accessing exception bound in a " +
   "catch block in a try block within that catch block";
 var actual, expect;
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 /**************
  * BEGIN TEST *
@@ -63,6 +63,5 @@ catch (e)
 expect = false;
 actual = failed;
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

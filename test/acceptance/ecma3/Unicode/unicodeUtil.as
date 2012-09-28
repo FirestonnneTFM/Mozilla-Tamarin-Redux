@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
 Description:
 Concatenate the unicode characters in the given range and test against it.
@@ -89,15 +90,15 @@ function testUnicodeRangeHelper(hexFrom, hexTo) {
     } // for loop
 
         // Output test results
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
         "Unicode String.search from " + decimalToHexString(hexFrom) + " to " + decimalToHexString(hexFrom),
         '', stringSearchResult);
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
         "Unicode String.search for 3 chars from " + decimalToHexString(hexFrom) + " to " + decimalToHexString(hexFrom),
                 '', string3SearchResult);
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
         "Unicode String.match", '', stringMatchResult);
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
         "Unicode String.split", '', stringSplitResult);
 
     testReplace(hexFrom, hexTo);
@@ -141,7 +142,7 @@ function testReplace(hexFrom, hexTo)
                         stringReplaceResult += "Replace failed swapping: " + firstLastChars + " ";
     }
 
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
             "Unicode String.replace", '', stringReplaceResult);
 
 }
@@ -188,7 +189,7 @@ function testSplitOnMark(testStr:String, markArray:Array, markArrayName:String) 
         } // else
     } // for
     
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
             "Unicode Split on Mark", '', testSplitResult);
     
 }

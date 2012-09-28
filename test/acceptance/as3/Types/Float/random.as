@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
 Returns a float value with positive sign, greater than or equal to 0 but less
@@ -11,12 +12,10 @@ over that range, using an implementation-dependent algorithm or strategy. This
 function takes no arguments.
 */
 
-var SECTION = "4.5.28";
-var VERSION = "AS3";
-var TITLE   = "public function random():float";
+// var SECTION = "4.5.28";
+// var VERSION = "AS3";
+// var TITLE   = "public function random():float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 AddStrictTestCase("float.random() returns a float", "float", getQualifiedClassName(float.random()));
@@ -27,11 +26,10 @@ for (var x:int = 0; x < 1000; x++)
 {
     myRandom = float.random();
     if ( myRandom < 0f)
-        AddTestCase("float.random() illegal value returned", "<0f", myRandom);
+        Assert.expectEq("float.random() illegal value returned", "<0f", myRandom);
     if ( myRandom > 1f)
-        AddTestCase("float.random() illegal value returned", ">1f", myRandom);
+        Assert.expectEq("float.random() illegal value returned", ">1f", myRandom);
 }
 
 
-test();
 

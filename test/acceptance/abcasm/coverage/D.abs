@@ -2,31 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Instructions that start with the letter D" 
-	callpropvoid START 1
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-	findproperty END
-	callpropvoid END 0
-	returnvoid
-}
 
-.method_info { 
+method_info { 
 	name: runTest 
-	flags: SETS_DXNS
+//	flags: SETS_DXNS
 }
-.method_body_info {
+method_body_info {
 
-	method: .function_id(runTest)
+	method: runTest
 
+/*
 	traits: {
-		.trait { kind: Trait_Slot name: var1 }
+		trait { kind: Trait_Slot name: var1 }
 	}
+	*/
 	code:
 	{
 		pushint 7
@@ -114,7 +103,7 @@ function main() {
 		pushuint 0
 		decrement
 		callpropvoid COMPARE_STRICTEQ 3
-
+/* not implemented
 		findproperty COMPARE_STRICTEQ
 	pushstring "deleteproperty noSuchProperty"
 		pushtrue // expected
@@ -131,7 +120,7 @@ function main() {
 		constructprop Object 0
 		deleteproperty length
 		callpropvoid COMPARE_STRICTEQ 3
-
+*/
 		findproperty COMPARE_STRICTEQ
 	pushstring "divide double by int"
 		pushdouble 4.25 // expected
@@ -158,6 +147,7 @@ function main() {
 		callproperty COMPARE_NUMBEREQ 4
 		
 
+	/*
 		findproperty COMPARE_STRICTEQ
 	pushstring "dxns"
 		dxns "foo"
@@ -183,8 +173,27 @@ function main() {
 	swap
 	callpropvoid PASS 1
 		pop // COMPARE_STRICTEQ
-
+	*/
 
 		returnvoid
 	}
 } //  runTest
+
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Instructions that start with the letter D" 
+	callpropvoid START 1
+	newfunction runTest
+	getlocal0
+	call 0
+	findproperty END
+	callpropvoid END 0
+	returnvoid
+}
+script_info{init: main 	
+	traits: {
+		trait { kind: Trait_Slot name: var1 }
+	}
+}

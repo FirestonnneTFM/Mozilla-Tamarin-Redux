@@ -1,24 +1,25 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "JSON";
-var VERSION = "AS3";
-var TITLE   = "JSON regression tests";
+// var SECTION = "JSON";
+// var VERSION = "AS3";
+// var TITLE   = "JSON regression tests";
 
-startTest();
 
 // Bug 640711, comment 58.  \u#### emission was clobbering both
 // arbitrary memory due to an unitialized variable and forgetting
 // to finish emitting the remainder of the string.
 
-AddTestCase("JSON.stringify('mn\\u0001op\\u0002qr\\u0003st')",
+Assert.expectEq("JSON.stringify('mn\\u0001op\\u0002qr\\u0003st')",
             '"mn\\u0001op\\u0002qr\\u0003st"',
             JSON.stringify('mn\u0001op\u0002qr\u0003st'));
 
 // Bugzilla 672484: The string literal "\u000FF " *is* valid JSON input.
-AddTestCase("JSON.parse('\"\\u000FF \"')", "\u000FF ", JSON.parse('"\\u000FF "'));
-AddTestCase("JSON.parse('\"\\u0061F \"')", "aF ", JSON.parse('"\\u0061F "'));
+Assert.expectEq("JSON.parse('\"\\u000FF \"')", "\u000FF ", JSON.parse('"\\u000FF "'));
+Assert.expectEq("JSON.parse('\"\\u0061F \"')", "aF ", JSON.parse('"\\u0061F "'));
 
 // Another problem: the JSON.parse and JSON.stringify routines
 // are written as recursive procedures.  How do they handle
@@ -40,11 +41,11 @@ var result;
 try {
     result = drop(JSON.stringify(deep));
 } catch (e) {
-    exception1 = removeExceptionDetail(e.toString());
-    if (exception1 == "Error: Error #1023")
+    exception1 = Utils.grabError(e,e.toString());
+    if (exception1 == "Error #1023")
         result = "okay";
 }
-AddTestCase("JSON.stringify(deep)", "okay", result);
+Assert.expectEq("JSON.stringify(deep)", "okay", result);
 
 
 var prefix = '{"next":';
@@ -60,10 +61,9 @@ try {
     result = JSON.parse(deep2);
     result = "okay";
 } catch (e) {
-    exception2 = removeExceptionDetail(e.toString());
-    if (exception2 == "Error: Error #1023")
+    exception2 = Utils.grabError(e,e.toString());
+    if (exception2 == "Error #1023")
     result = "okay";
 }
-AddTestCase("JSON.parse(deep2)", "okay", result);
+Assert.expectEq("JSON.parse(deep2)", "okay", result);
 
-test();

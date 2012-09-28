@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-211590.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Math.random should be random';
 var actual = '';
 var expect = 'between 48% and 52%';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 var r = Math.random;
 var c = Math.pow( 2, 53 );
@@ -45,7 +45,7 @@ else
   actual = ' is ' + odd1.toFixed(3);
 }
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 if (odd2 >= 48 && odd2 <= 52)
 {
@@ -56,6 +56,5 @@ else
   actual = ' is ' + odd2.toFixed(3);
 }
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

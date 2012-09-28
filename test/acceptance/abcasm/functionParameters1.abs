@@ -3,14 +3,30 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 //  Test function parameter passing.
+//function oneParam(String)
+method_info { name:oneParam return_type:void param_type: {String} }
 
-.script_info { 
-	init: .function_id(main)
-	traits: {
-		.trait { kind: Trait_Slot name:oneParam }
-		.trait { kind: Trait_Slot name:intFunc }
+method_body_info {
+	method: oneParam
+	code:
+	{
+		findpropstrict COMPARE_STRICTEQ
+		pushstring "String param"
+		pushstring "Param one"
+		getlocal1
+		callproperty COMPARE_STRICTEQ 3
+		returnvoid
 	}
 }
+
+function intFunc(int):int
+{
+	pushdouble 3.14157
+	getlocal1
+	add
+	returnvalue
+}
+
 
 function main()
 {
@@ -18,12 +34,12 @@ function main()
 	pushscope
 
 	findproperty oneParam
-	newfunction .function_id(oneParam)
-	setslot .slot_id(oneParam)
+	newfunction oneParam
+	setslot 1
 
 	findproperty intFunc
-	newfunction .function_id(intFunc)
-	setslot .slot_id(intFunc)
+	newfunction intFunc
+	setslot 2
 
 	findpropstrict START
 	pushstring "call void function with string"
@@ -65,26 +81,12 @@ function main()
 }
 
 
-//function oneParam(String)
-.method_info { name:oneParam return_type:void param_type: {String} }
 
-.method_body_info {
-	method: .function_id(oneParam)
-	code:
-	{
-		findpropstrict COMPARE_STRICTEQ
-		pushstring "String param"
-		pushstring "Param one"
-		getlocal1
-		callproperty COMPARE_STRICTEQ 3
-		returnvoid
+
+script_info { 
+	init: main
+	traits: {
+		trait { kind: Trait_Slot name:oneParam slot_id:1 }
+		trait { kind: Trait_Slot name:intFunc slot_id:2}
 	}
-}
-
-function intFunc(int):int
-{
-	pushdouble 3.14157
-	getlocal1
-	add
-	returnvalue
 }

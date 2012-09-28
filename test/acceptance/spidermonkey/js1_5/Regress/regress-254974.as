@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-254974.js';
 //-----------------------------------------------------------------------------
@@ -16,8 +16,8 @@ var summary = 'all var and arg properties should be JSPROP_SHARED';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function testfunc(tokens) {
   function eek(y) {} /* remove function eek and the code will change its behavior */
@@ -32,12 +32,11 @@ good=testfunc;
 var goodvalue = good("DIV[@id=\"test\"]");
 var badvalue = bad("DIV[@id=\"test\"]");
 
-printStatus(goodvalue);
-printStatus(badvalue);
+//printStatus(goodvalue);
+//printStatus(badvalue);
 
 expect = goodvalue;
 actual = badvalue;
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

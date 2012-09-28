@@ -1,35 +1,33 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.4.4.4-1";
-    var VERSION = "ECMA_1";
-    startTest();
+//     var SECTION = "15.4.4.4-1";
+//     var VERSION = "ECMA_1";
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " Array.prototype.reverse()");
 
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
     var ARR_PROTOTYPE = Array.prototype;
 
-    array[item++] = new TestCase( SECTION, "Array.prototype.reverse.length",           0,      Array.prototype.reverse.length );
-    array[item++] = new TestCase( SECTION, "delete Array.prototype.reverse.length",    false,  delete Array.prototype.reverse.length );
-    array[item++] = new TestCase( SECTION, "delete Array.prototype.reverse.length; Array.prototype.reverse.length",    0, (delete Array.prototype.reverse.length, Array.prototype.reverse.length) );
+    array[item++] = Assert.expectEq(  "Array.prototype.reverse.length",           0,      Array.prototype.reverse.length );
+    array[item++] = Assert.expectEq(  "delete Array.prototype.reverse.length",    false,  delete Array.prototype.reverse.length );
+    array[item++] = Assert.expectEq(  "delete Array.prototype.reverse.length; Array.prototype.reverse.length",    0, (delete Array.prototype.reverse.length, Array.prototype.reverse.length) );
 
     // length of array is 0
     var A;
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array();   A.reverse(); A.length",
                                     0,
                                     (A = new Array(),   A.reverse(), A.length ) );
 
     function CheckItems( R, A ) {
         for ( var i = 0; i < R.length; i++ ) {
-            array[item++] = new TestCase(
+            array[item++] = Assert.expectEq(
                                                 SECTION,
                                                 "A["+i+ "]",
                                                 R[i],

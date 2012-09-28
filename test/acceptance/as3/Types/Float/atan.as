@@ -9,12 +9,10 @@ Returns an implementation-dependent approximation to the arc tangent of x.
 The result is expressed in radians and ranges from iPI/2 to +PI/2.
 */
 
-var SECTION = "4.5.18";
-var VERSION = "AS3";
-var TITLE   = "public function atan(x:float):float";
+// var SECTION = "4.5.18";
+// var VERSION = "AS3";
+// var TITLE   = "public function atan(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.atan(param); }
 
@@ -64,5 +62,4 @@ AddStrictTestCase("float.atan(-0f) FloatLiteral", -float(0), float.atan(-0f));
 AddStrictTestCase("float.atan(-1f) FloatLiteral", -float(float.PI/4.0f), float.atan(-1f));
 
 
-test();
 

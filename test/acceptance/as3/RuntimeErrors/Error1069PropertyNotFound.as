@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /*
 1069    Property _ not found on _ and there is no default value.
 */
@@ -8,7 +10,6 @@
 var CODE = 1069;
 
 //-----------------------------------------------------------
-startTest();
 //-----------------------------------------------------------
 
 class C {}
@@ -20,9 +21,8 @@ try {
 } catch (err) {
     z = err.toString();
 } finally {
-    AddTestCase("Runtime Error", "ReferenceError: Error #" + CODE, referenceError(z));
+    Assert.expectEq("Runtime Error", "ReferenceError: Error #" + CODE, Utils.referenceError(z));
 }
 
 //-----------------------------------------------------------
-test();
 //-----------------------------------------------------------

@@ -6,12 +6,11 @@
 
 import testdynfinalClassWithStringParamCons.*;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Constructors with parameters of a Dynamic class";  // Provide ECMA section                                                                   //title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Constructors with parameters of a Dynamic class";  // Provide ECMA section                                                                   //title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var x = "test";
@@ -36,6 +35,7 @@ var myArray:Array = new Array(4,6,5);
 }*/
 import testdynfinalClassWithStringParamCons.publicClassCons;
 var pbClCons:publicClassCons = new publicClassCons();
+import com.adobe.test.Assert;
 
 var MyDefaultClass:DefaultClass;
 var dynWithStrParamCons=new dynfinClassWithStrParamCons(x,y,myArray,pbClCons,MyDefaultClass);
@@ -47,14 +47,13 @@ var dynWithStrParamCons=new dynfinClassWithStrParamCons(x,y,myArray,pbClCons,MyD
 //print (myArray);
 //print(dynWithStrParamCons.myAdd());
 
-AddTestCase("calling public Instance method","test",dynWithStrParamCons.myString());
-AddTestCase("calling public Instance method", true,dynWithStrParamCons.myBoolean());
+Assert.expectEq("calling public Instance method","test",dynWithStrParamCons.myString());
+Assert.expectEq("calling public Instance method", true,dynWithStrParamCons.myBoolean());
 
-AddTestCase("Array", myArray,dynWithStrParamCons.myarray());
-AddTestCase("Calling public Instance method Add",9,dynWithStrParamCons.myAdd());
-
-
+Assert.expectEq("Array", myArray,dynWithStrParamCons.myarray());
+Assert.expectEq("Calling public Instance method Add",9,dynWithStrParamCons.myAdd());
 
 
-test();       // leave this alone.  this executes the test cases and
+
+
               // displays results.

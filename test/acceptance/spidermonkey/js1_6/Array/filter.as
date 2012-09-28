@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'filter.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER     = "364603";
@@ -11,8 +11,8 @@ var summary = "The value placed in a filtered array for an element is the " +
   " element's value before the callback is run, not after";
 var actual, expect;
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 /**************
  * BEGIN TEST *
@@ -52,5 +52,5 @@ catch (e)
 expect = false;
 actual = failed;
 
-reportCompare(expect, actual, summary);
-test();
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);

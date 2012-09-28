@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          e15_4_4_12.as
  *  ECMA Section:       15.4.4.10 Array.prototype.splice()
@@ -19,19 +20,16 @@
  *
  */
 
-var SECTION = "15.4.4.12";
-var TITLE   = "Array.splice";
+// var SECTION = "15.4.4.12";
+// var TITLE   = "Array.splice";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -46,7 +44,7 @@ function getTestCases() {
 
     for (var MYVAR = 0; ( MYVAR < RESULTARR.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR = new Array( 0, 2, 3, 4, 5 ); MYARR.splice(1);", EXPCTARR[MYVAR], RESULTARR[MYVAR] );
+        array[item++] = Assert.expectEq(  "MYARR = new Array( 0, 2, 3, 4, 5 ); MYARR.splice(1);", EXPCTARR[MYVAR], RESULTARR[MYVAR] );
     }
 
 

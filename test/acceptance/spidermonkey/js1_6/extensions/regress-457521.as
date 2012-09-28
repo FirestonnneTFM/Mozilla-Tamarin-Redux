@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-457521.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 457521;
@@ -11,8 +11,8 @@ var summary = 'Do not crash @ js_DecompileValueGenerator';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 try
 {
@@ -23,5 +23,5 @@ try
 catch(ex)
 {
 }
-reportCompare(expect, actual, summary);
-test();
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);

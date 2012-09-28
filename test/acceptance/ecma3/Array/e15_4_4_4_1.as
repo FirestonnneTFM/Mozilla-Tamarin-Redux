@@ -1,27 +1,28 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+
     var SECTION = "15.4.4.4-1";
-    var VERSION = "ECMA_1";
-    startTest();
+//     var VERSION = "ECMA_1";
     var BUGNUMBER="123724";
 
-    writeHeaderToLog( SECTION + " Array.prototype.reverse()");
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
     var ARR_PROTOTYPE = Array.prototype;
 
-    array[item++] = new TestCase( SECTION, "Array.prototype.reverse.length",           0,      Array.prototype.reverse.length );
-    array[item++] = new TestCase( SECTION, "delete Array.prototype.reverse.length",    false,  delete Array.prototype.reverse.length );
-    array[item++] = new TestCase( SECTION, "delete Array.prototype.reverse.length; Array.prototype.reverse.length",    0, (delete Array.prototype.reverse.length, Array.prototype.reverse.length) );
+    array[item++] = Assert.expectEq(  "Array.prototype.reverse.length",           0,      Array.prototype.reverse.length );
+    array[item++] = Assert.expectEq(  "delete Array.prototype.reverse.length",    false,  delete Array.prototype.reverse.length );
+    array[item++] = Assert.expectEq(  "delete Array.prototype.reverse.length; Array.prototype.reverse.length",    0, (delete Array.prototype.reverse.length, Array.prototype.reverse.length) );
 
     // length of array is 0
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array();   A.reverse(); A.length",
                                     0,
                                     (A = new Array(),   A.reverse(), A.length ) );
@@ -30,9 +31,8 @@ function getTestCases() {
     var A = new Array(true);
     var R = Reverse(A);
 
-    array[item++] = new TestCase(   SECTION,
-                                    "var A = new Array(true);   A.reverse(); A.length",
-                                    R.length,
+    array[item++] = Assert.expectEq(   
+                                    "var A = new Array(true);   A.reverse(); A.length ", R.length,
                                     (A = new Array(true),   A.reverse(), A.length ) );
     CheckItems( R, A );
 
@@ -41,8 +41,7 @@ function getTestCases() {
     var A = new Array( true,false );
     var R = Reverse(A);
 
-    array[item++] =   new TestCase(
-                                    SECTION,
+    array[item++] =   Assert.expectEq(
                                     S +";  A.reverse(); A.length",
                                     R.length,
                                     (A.reverse(), A.length) );
@@ -54,7 +53,7 @@ function getTestCases() {
     var A = new Array( true,false,null );
     var R = Reverse(A);
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     S +";  A.reverse(); A.length",
                                     R.length,
                                     (A = new Array( true,false,null ), A.reverse(), A.length) );
@@ -65,7 +64,7 @@ function getTestCases() {
     var A = new Array( true,false,null,void 0 );
     var R = Reverse(A);
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     S +";  A.reverse(); A.length",
                                     R.length,
                                     (new Array( true,false,null,void 0 ), A.reverse(), A.length) );
@@ -76,7 +75,7 @@ function getTestCases() {
     (A = new Array(), A[8] = 'hi', A[3] = 'yo');
     var R = Reverse(A);
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     S +";  A.reverse(); A.length",
                                     R.length,
                                     (A = new Array(), A[8] = 'hi', A[3] = 'yo', A.reverse(), A.length) );
@@ -99,7 +98,7 @@ function getTestCases() {
                       ARRAY_OBJECT, NUMBER_OBJECT, Math, true, false, 123, '90210');
     var R = Reverse(A);
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     S +";  A.reverse(); A.length",
                                     R.length,
                                     (A.reverse(), A.length ) );
@@ -159,30 +158,33 @@ function getTestCases() {
 
     var R = Reverse(A);
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     S +";  A.reverse(); A.length",
                                     R.length,
                                     (A.reverse(), A.length) );
     CheckItems( R, A );
 
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+    // COMMENT OUT WHOLE BLOCK SINCE IT SHOULD ONLY RUN IF NOT as3Enabled (i.e. pre AS3)
+    /* 
     
     if (!as3Enabled) {
         var S = "var MYOBJECT = new Object_1( \"void 0, 1, null, 2, \'\'\" )";
         var MYOBJECT = new Object_1( "void 0, 1, null, 2, \'\'" )
         var R = Reverse( MYOBJECT );
     
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         S +";  MYOBJECT.reverse(); MYOBJECT.length",
                                         R.length,
                                         (MYOBJECT = new Object_1( "void 0, 1, null, 2, \'\'" ), MYOBJECT.reverse(), MYOBJECT.length) ); // cn  This actually fixes a Spidermonkey testcase bug.  It was checking A.reverse, A.length instead of NewObject
         CheckItems( R, MYOBJECT );
     }
+    */
 
 
     function CheckItems( R, A ) {
         for ( var i = 0; i < R.length; i++ ) {
-            array[item++] = new TestCase(
-                                                SECTION,
+            array[item++] = Assert.expectEq(
                                                 "A["+i+ "]",
                                                 R[i],
                                                 A[i] );

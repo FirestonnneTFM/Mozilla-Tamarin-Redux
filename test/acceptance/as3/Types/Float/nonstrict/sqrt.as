@@ -3,19 +3,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
 /*
 Returns an implementation-dependent approximation to the square root of x.
 */
 
-var SECTION = "4.5.31";
-var VERSION = "AS3";
-var TITLE   = "public function sqrt(x:float):float";
+// var SECTION = "4.5.31";
+// var VERSION = "AS3";
+// var TITLE   = "public function sqrt(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddErrorTest("float.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float.sqrt(); });
+Assert.expectError("float.sqrt() with no args", Utils.ARGUMENTERROR+1063,  function(){ float.sqrt(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.sqrt(string)", float.NaN, float.sqrt("string"));
@@ -26,5 +25,4 @@ AddStrictTestCase("float.sqrt(false)", 0f, float.sqrt(false));
 
 AddStrictTestCase("float.sqrt(true)", 1f, float.sqrt(true));
 
-test();
 

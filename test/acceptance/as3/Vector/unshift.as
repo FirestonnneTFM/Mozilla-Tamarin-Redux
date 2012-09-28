@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    unshift.as
    Description:  unshift(object,...items)
@@ -10,16 +12,14 @@
      and the length property of object is updated.
    *
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " Vector.unshift()");
 
 var v1=new Vector.<int>();
 v1.unshift();
-AddTestCase(
+Assert.expectEq(
         "unshift empty vector with no items still empty",
         "",
         v1.toString());
@@ -31,14 +31,14 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "unshift object vector with fixed length",
         "RangeError: Error #1126",
-        parseError(errormsg,"RangeError: Error #1126".length));
+        Utils.parseError(errormsg,"RangeError: Error #1126".length));
 
 var v1=new Vector.<int>();
 v1.unshift(10);
-AddTestCase(
+Assert.expectEq(
         "unshift empty vector with single item",
         "10",
         v1.toString());
@@ -46,7 +46,7 @@ AddTestCase(
 var v1=new Vector.<int>();
 v1[0]=10;
 v1.unshift(11);
-AddTestCase(
+Assert.expectEq(
         "unshift single element vector with single item",
         "11,10",
         v1.toString());
@@ -54,7 +54,7 @@ AddTestCase(
 var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 v1.unshift(11);
-AddTestCase(
+Assert.expectEq(
         "unshift small vector with single item",
         "11,0,1,2,3,4,5,6,7,8,9",
         v1.toString());
@@ -67,18 +67,17 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "unshift single element vector with single item",
         "RangeError: Error #1126",
-        parseError(errormsg,"RangeError: Error #1126".length));
+        Utils.parseError(errormsg,"RangeError: Error #1126".length));
 
 // bug: https://bugzilla.mozilla.org/show_bug.cgi?id=469377
 var strVector = new Vector.<String>;
 strVector.push("Carol", "Justine");
 strVector.unshift("Betty");
-AddTestCase(
+Assert.expectEq(
     "Vector.<String>.unshift()",
     "Betty,Carol,Justine",
     strVector.toString());
 
-test();

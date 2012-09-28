@@ -3,16 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.System;
+import com.adobe.test.Assert;
 
-    var SECTION = "regress_524122";
-    var VERSION = "AS3";
-    var TITLE   = "Array.prototype.sort() on integer properties";
-    var bug     = "524122";
+//     var SECTION = "regress_524122";
+//     var VERSION = "AS3";
+//     var TITLE   = "Array.prototype.sort() on integer properties";
+//     var bug     = "524122";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
     var testcases = getTestCases();
-    test();
 
 function getTestCases()
 {
@@ -39,7 +37,7 @@ function getTestCases()
     else
         expected = expected_new;
 
-    array[item++] = new TestCase(SECTION, "numeric sort", expected.join(), actual.join() );
+    array[item++] = Assert.expectEq( "numeric sort", expected.join(), actual.join() );
 
     return ( array );
 }

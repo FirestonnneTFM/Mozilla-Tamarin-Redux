@@ -7,14 +7,14 @@ package
     public interface B{};
 }
 
-var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "access default package interface globally";       // Provide ECMA section title or a description
+// var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "access default package interface globally";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
 import A.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 class D implements B
 {
@@ -22,6 +22,5 @@ class D implements B
 
 var obj = new D();
 
-AddTestCase("Using default package interface globally", true, obj is B);
+Assert.expectEq("Using default package interface globally", true, obj is B);
 
-test();

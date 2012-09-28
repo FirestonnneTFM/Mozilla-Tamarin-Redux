@@ -1,8 +1,99 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
 
 START("11.5.1 - Equality Operators");
 
@@ -72,10 +163,10 @@ var y1 = new XML("<aa><a>A</a><a>B</a><a>C</a></aa>");
 var y2 = new XML("<bb><b>A</b><b>B</b><b>C</b></bb>");
 var y3 = new XML("<aa><a>Dee</a><a>Eee</a><a>Fee</a></aa>");
 
-AddTestCase( "x=XMLList,                y=XML                   :", false, (x1==y0) );
-AddTestCase( "x=XMLList,                y=XMLList               :", true,  (x1==y1) );
-AddTestCase( "x=XMLList,                y=XMLList               :", false, (x1==y2) );
-AddTestCase( "x=XMLList,                y=XMLList               :", false, (x1==y3) );
+Assert.expectEq( "x=XMLList,                y=XML                   :", false, (x1==y0) );
+Assert.expectEq( "x=XMLList,                y=XMLList               :", true,  (x1==y1) );
+Assert.expectEq( "x=XMLList,                y=XMLList               :", false, (x1==y2) );
+Assert.expectEq( "x=XMLList,                y=XMLList               :", false, (x1==y3) );
 
 
 var xt = new XML("<a><b>text</b></a>");
@@ -85,17 +176,17 @@ var yt = new XML("<a><b>text</b></a>");
 var ya = new XML("<a attr='ATTR'><b>attribute</b></a>");
 var yh = new XML("<a>hasSimpleContent</a>");
 
-AddTestCase( "x.[[Class]]='text,        y.[[Class]]='text'      :", true,  (xt==yt) );
-AddTestCase( "x.[[Class]]='text,        y.[[Class]]='attribute' :", false, (xt==ya.@attr) );
-AddTestCase( "x.[[Class]]='text,        y.hasSimpleContent()    :", false, (xt==yh) );
+Assert.expectEq( "x.[[Class]]='text,        y.[[Class]]='text'      :", true,  (xt==yt) );
+Assert.expectEq( "x.[[Class]]='text,        y.[[Class]]='attribute' :", false, (xt==ya.@attr) );
+Assert.expectEq( "x.[[Class]]='text,        y.hasSimpleContent()    :", false, (xt==yh) );
 
-AddTestCase( "x.[[Class]]='attribute,   y.[[Class]]='text'      :", false, (xa.@attr==yt) );
-AddTestCase( "x.[[Class]]='attribute,   y.[[Class]]='attribute' :", true,  (xa.@attr==ya.@attr) );
-AddTestCase( "x.[[Class]]='attribute,   y.hasSimpleContent()    :", false, (xa.@attr==yh) );
+Assert.expectEq( "x.[[Class]]='attribute,   y.[[Class]]='text'      :", false, (xa.@attr==yt) );
+Assert.expectEq( "x.[[Class]]='attribute,   y.[[Class]]='attribute' :", true,  (xa.@attr==ya.@attr) );
+Assert.expectEq( "x.[[Class]]='attribute,   y.hasSimpleContent()    :", false, (xa.@attr==yh) );
 
-AddTestCase( "x.hasSimpleContent(),     y.[[Class]]='text'      :", false, (xh==yt) );
-AddTestCase( "x.hasSimpleContent(),     y.[[Class]]='attribute' :", false, (xh==ya.@attr) );
-AddTestCase( "x.hasSimpleContent(),     y.hasSimpleContent()    :", true,  (xh==yh) );
+Assert.expectEq( "x.hasSimpleContent(),     y.[[Class]]='text'      :", false, (xh==yt) );
+Assert.expectEq( "x.hasSimpleContent(),     y.[[Class]]='attribute' :", false, (xh==ya.@attr) );
+Assert.expectEq( "x.hasSimpleContent(),     y.hasSimpleContent()    :", true,  (xh==yh) );
 
 
 var xqn0  = new QName("n0");
@@ -108,19 +199,19 @@ var yqn11 = new QName("ns1", "nB");
 var yqn12 = new QName("nsB","n1" );
 var yqn13 = new QName("nsB","nB");
 
-AddTestCase( "QName('n0'),              QName('n0')              :", true,  (xqn0==yqn00) );
-AddTestCase( "QName('n0'),              QName('nA')              :", false, (xqn0==yqn01) );
-AddTestCase( "QName('n0'),              QName('ns1','n1')        :", false, (xqn0==yqn10) );
-AddTestCase( "QName('n0'),              QName('ns1','nB')        :", false, (xqn0==yqn11) );
-AddTestCase( "QName('n0'),              QName('nsB','n1')        :", false, (xqn0==yqn12) );
-AddTestCase( "QName('n0'),              QName('naB','nB')        :", false, (xqn0==yqn13) );
+Assert.expectEq( "QName('n0'),              QName('n0')              :", true,  (xqn0==yqn00) );
+Assert.expectEq( "QName('n0'),              QName('nA')              :", false, (xqn0==yqn01) );
+Assert.expectEq( "QName('n0'),              QName('ns1','n1')        :", false, (xqn0==yqn10) );
+Assert.expectEq( "QName('n0'),              QName('ns1','nB')        :", false, (xqn0==yqn11) );
+Assert.expectEq( "QName('n0'),              QName('nsB','n1')        :", false, (xqn0==yqn12) );
+Assert.expectEq( "QName('n0'),              QName('naB','nB')        :", false, (xqn0==yqn13) );
 
-AddTestCase( "QName('ns1','n1'),        QName('n0')              :", false, (xqn1==yqn00) );
-AddTestCase( "QName('ns1','n1'),        QName('nA')              :", false, (xqn1==yqn01) );
-AddTestCase( "QName('ns1','n1'),        QName('ns1','n1')        :", true,  (xqn1==yqn10) );
-AddTestCase( "QName('ns1','n1'),        QName('ns1','nB')        :", false, (xqn1==yqn11) );
-AddTestCase( "QName('ns1','n1'),        QName('nsB','n1')        :", false, (xqn1==yqn12) );
-AddTestCase( "QName('ns1','n1'),        QName('nsB','nB')        :", false, (xqn1==yqn13) );
+Assert.expectEq( "QName('ns1','n1'),        QName('n0')              :", false, (xqn1==yqn00) );
+Assert.expectEq( "QName('ns1','n1'),        QName('nA')              :", false, (xqn1==yqn01) );
+Assert.expectEq( "QName('ns1','n1'),        QName('ns1','n1')        :", true,  (xqn1==yqn10) );
+Assert.expectEq( "QName('ns1','n1'),        QName('ns1','nB')        :", false, (xqn1==yqn11) );
+Assert.expectEq( "QName('ns1','n1'),        QName('nsB','n1')        :", false, (xqn1==yqn12) );
+Assert.expectEq( "QName('ns1','n1'),        QName('nsB','nB')        :", false, (xqn1==yqn13) );
 
 
 var xns0  = new Namespace();
@@ -136,29 +227,29 @@ var yns22 = new Namespace("preC","uri2");
 var yns23 = new Namespace("preC","uriC");
 
 
-AddTestCase( "Namespace(),              Namespace()              :", true,  (xns0==yns00) );
-AddTestCase( "Namespace(),              Namespace('uri1')        :", false, (xns0==yns10) );
-AddTestCase( "Namespace(),              Namespace('uriB')        :", false, (xns0==yns11) );
-AddTestCase( "Namespace(),              Namespace('pre2','uri2') :", false, (xns0==yns20) );
-AddTestCase( "Namespace(),              Namespace('pre2','uriC') :", false, (xns0==yns21) );
-AddTestCase( "Namespace(),              Namespace('preC','uri2') :", false, (xns0==yns22) );
-AddTestCase( "Namespace(),              Namespace('preC','uriC') :", false, (xns0==yns23) );
+Assert.expectEq( "Namespace(),              Namespace()              :", true,  (xns0==yns00) );
+Assert.expectEq( "Namespace(),              Namespace('uri1')        :", false, (xns0==yns10) );
+Assert.expectEq( "Namespace(),              Namespace('uriB')        :", false, (xns0==yns11) );
+Assert.expectEq( "Namespace(),              Namespace('pre2','uri2') :", false, (xns0==yns20) );
+Assert.expectEq( "Namespace(),              Namespace('pre2','uriC') :", false, (xns0==yns21) );
+Assert.expectEq( "Namespace(),              Namespace('preC','uri2') :", false, (xns0==yns22) );
+Assert.expectEq( "Namespace(),              Namespace('preC','uriC') :", false, (xns0==yns23) );
 
-AddTestCase( "Namespace('uri1'),        Namespace()              :", false, (xns1==yns00) );
-AddTestCase( "Namespace('uri1'),        Namespace('uri1')        :", true,  (xns1==yns10) );
-AddTestCase( "Namespace('uri1'),        Namespace('uriB')        :", false, (xns1==yns11) );
-AddTestCase( "Namespace('uri1'),        Namespace('pre2','uri2') :", false, (xns1==yns20) );
-AddTestCase( "Namespace('uri1'),        Namespace('pre2','uriC') :", false, (xns1==yns21) );
-AddTestCase( "Namespace('uri1'),        Namespace('preC','uri2') :", false, (xns1==yns22) );
-AddTestCase( "Namespace('uri1'),        Namespace('preC','uriC') :", false, (xns1==yns23) );
+Assert.expectEq( "Namespace('uri1'),        Namespace()              :", false, (xns1==yns00) );
+Assert.expectEq( "Namespace('uri1'),        Namespace('uri1')        :", true,  (xns1==yns10) );
+Assert.expectEq( "Namespace('uri1'),        Namespace('uriB')        :", false, (xns1==yns11) );
+Assert.expectEq( "Namespace('uri1'),        Namespace('pre2','uri2') :", false, (xns1==yns20) );
+Assert.expectEq( "Namespace('uri1'),        Namespace('pre2','uriC') :", false, (xns1==yns21) );
+Assert.expectEq( "Namespace('uri1'),        Namespace('preC','uri2') :", false, (xns1==yns22) );
+Assert.expectEq( "Namespace('uri1'),        Namespace('preC','uriC') :", false, (xns1==yns23) );
 
-AddTestCase( "Namespace('pre2','uri2'), Namespace()              :", false, (xns2==yns00) );
-AddTestCase( "Namespace('pre2','uri2'), Namespace('uri1')        :", false, (xns2==yns10) );
-AddTestCase( "Namespace('pre2','uri2'), Namespace('uriB')        :", false, (xns2==yns11) );
-AddTestCase( "Namespace('pre2','uri2'), Namespace('pre2','uri2') :", true,  (xns2==yns20) );
-AddTestCase( "Namespace('pre2','uri2'), Namespace('pre2','uriC') :", false, (xns2==yns21) );
-AddTestCase( "Namespace('pre2','uri2'), Namespace('preC','uri2') :", true,  (xns2==yns22) );
-AddTestCase( "Namespace('pre2','uri2'), Namespace('preC','uriC') :", false, (xns2==yns23) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace()              :", false, (xns2==yns00) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace('uri1')        :", false, (xns2==yns10) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace('uriB')        :", false, (xns2==yns11) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace('pre2','uri2') :", true,  (xns2==yns20) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace('pre2','uriC') :", false, (xns2==yns21) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace('preC','uri2') :", true,  (xns2==yns22) );
+Assert.expectEq( "Namespace('pre2','uri2'), Namespace('preC','uriC') :", false, (xns2==yns23) );
 
 
 END();

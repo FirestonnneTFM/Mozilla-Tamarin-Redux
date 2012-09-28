@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "5.2.3";
-var VERSION = "AS3";
-var TITLE   = "The % operation agumented by float4 values";
+// var SECTION = "5.2.3";
+// var VERSION = "AS3";
+// var TITLE   = "The % operation agumented by float4 values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 
@@ -30,5 +28,4 @@ AddStrictTestCase("float4 % float check()", new float4(1f, 0f, 1f, 1f), check(f1
 AddStrictTestCase("float % float4", new float4(2f, 2f, 2f, 2f), float(20f) % f1);
 AddStrictTestCase("float % float4 check()", new float4(2f, 2f, 2f, 2f), check(float(20f), f1));
 
-test();
 

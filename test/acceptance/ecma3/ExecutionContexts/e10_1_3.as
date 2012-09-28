@@ -1,19 +1,18 @@
 /* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 
-    var SECTION = "10.1.3";
-    var VERSION = "";
-    var TITLE   = "Variable Instantiation";
-    var bug     = "17290";
+//     var SECTION = "10.1.3";
+//     var VERSION = "";
+//     var TITLE   = "Variable Instantiation";
+//     var bug     = "17290";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -31,7 +30,7 @@ function getTestCases() {
         }
     }
 
-    array[item++] = new TestCase(SECTION, "Declaration precedence test", "function", f());
+    array[item++] = Assert.expectEq( "Declaration precedence test", "function", f());
 
     return ( array );
 }

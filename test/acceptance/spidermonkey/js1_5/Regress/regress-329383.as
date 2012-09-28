@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-329383.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Math copysign issues';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var inputs = [
   -Infinity,
@@ -57,13 +57,13 @@ var iinput;
 for (iinput = 0; iinput < inputs.length; iinput++)
 {
   var input = inputs[iinput];
-  AddTestCase(summary + ': Math.round(' + input + ')',
+  Assert.expectEq(summary + ': Math.round(' + input + ')',
                 emulateRound(input),
                 Math.round(input)
                 );
 }
 
-AddTestCase(summary + ': Math.round(' + input + ')',
+Assert.expectEq(summary + ': Math.round(' + input + ')',
               isNaN(emulateRound(NaN)),
               isNaN(Math.round(NaN))
               );
@@ -79,12 +79,11 @@ var z;
 
 z = Math.min(-0, 0);
 
-AddTestCase(summary + ': Math.atan2(-0, -0)', -Math.PI, Math.atan2(z, z));
-AddTestCase(summary + ': 1/-0', 1/z, -Infinity);
+Assert.expectEq(summary + ': Math.atan2(-0, -0)', -Math.PI, Math.atan2(z, z));
+Assert.expectEq(summary + ': 1/-0', 1/z, -Infinity);
 
 z = Math.max(-0, 0);
 
-AddTestCase(summary + ': Math.atan2(0, 0)', 0 , Math.atan2(z, z));
-AddTestCase(summary + ': 1/0', Infinity, 1/z );
+Assert.expectEq(summary + ': Math.atan2(0, 0)', 0 , Math.atan2(z, z));
+Assert.expectEq(summary + ': 1/0', Infinity, 1/z );
 
-test();

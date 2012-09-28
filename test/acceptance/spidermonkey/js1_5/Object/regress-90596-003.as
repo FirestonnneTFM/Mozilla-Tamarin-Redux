@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 28 August 2001
@@ -40,25 +40,25 @@ var expectedvalues = [];
 var obj = {};
 
 
-status = inSection(1);
+//status = inSection(1);
 obj = {toString:9};
 actual = enumerateThis(obj);
 expect = '{toString:9}';
 addThis();
 
-status = inSection(2);
+//status = inSection(2);
 obj = {hasOwnProperty:"Hi"};
 actual = enumerateThis(obj);
 expect = '{hasOwnProperty:"Hi"}';
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 obj = {toString:9, hasOwnProperty:"Hi"};
 actual = enumerateThis(obj);
 expect = '{toString:9, hasOwnProperty:"Hi"}';
 addThis();
 
-status = inSection(4);
+//status = inSection(4);
 obj = {prop1:1, toString:9, hasOwnProperty:"Hi"};
 actual = enumerateThis(obj);
 expect = '{prop1:1, toString:9, hasOwnProperty:"Hi"}';
@@ -69,7 +69,7 @@ addThis();
 // TRY THE SAME THING IN FUNCTION CODE
 function A()
 {
-  status = inSection(9);
+  //status = inSection(9);
   obj = {toString:9};
   actual = enumerateThis(obj);
   expect = '{toString:9}';
@@ -79,7 +79,7 @@ A();
 
 function B()
 {
-  status = inSection(10);
+  //status = inSection(10);
   obj = {hasOwnProperty:"Hi"};
   actual = enumerateThis(obj);
   expect = '{hasOwnProperty:"Hi"}';
@@ -89,7 +89,7 @@ B();
 
 function C()
 {
-  status = inSection(11);
+  //status = inSection(11);
   obj = {toString:9, hasOwnProperty:"Hi"};
   actual = enumerateThis(obj);
   expect = '{toString:9, hasOwnProperty:"Hi"}';
@@ -99,7 +99,7 @@ C();
 
 function D()
 {
-  status = inSection(12);
+  //status = inSection(12);
   obj = {prop1:1, toString:9, hasOwnProperty:"Hi"};
   actual = enumerateThis(obj);
   expect = '{prop1:1, toString:9, hasOwnProperty:"Hi"}';
@@ -234,15 +234,14 @@ function stripBraces(text)
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

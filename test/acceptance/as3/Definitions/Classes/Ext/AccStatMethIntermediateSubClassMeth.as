@@ -3,15 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
-var TITLE   = "Access static method of base class from subclass";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
+// var TITLE   = "Access static method of base class from subclass";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -21,7 +20,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -30,6 +29,7 @@ startTest();                // leave this alone
 
 import StaticPropertyPackage.*;
   
+import com.adobe.test.Assert;
 var obj = new AccStatMethIntermediateSubClassMeth();
 
 
@@ -37,17 +37,16 @@ var obj = new AccStatMethIntermediateSubClassMeth();
 // Access the static method via sub class,
 // using unadorned "foo()"
 // ********************************************
-AddTestCase( "*** Access the static method via sub class using unadorned method call ***", 1, 1 );
-AddTestCase( "obj.callEcho('world')", "world", obj.callEcho("world") );
+Assert.expectEq( "*** Access the static method via sub class using unadorned method call ***", 1, 1 );
+Assert.expectEq( "obj.callEcho('world')", "world", obj.callEcho("world") );
 
 // ********************************************
 // Access the static method via sub class,
 // using "BaseClass.foo()"
 // ********************************************
-AddTestCase( "*** Access the static method via sub class using base class method call ***", 1, 1 );
-AddTestCase( "obj.callBaseEcho('here')", "here", obj.callBaseEcho("here") );
+Assert.expectEq( "*** Access the static method via sub class using base class method call ***", 1, 1 );
+Assert.expectEq( "obj.callBaseEcho('here')", "here", obj.callBaseEcho("here") );
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

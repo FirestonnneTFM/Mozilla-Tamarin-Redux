@@ -1,12 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-var SECTION = "bug127913";
-startTest();
+import com.adobe.test.Assert;
+// var SECTION = "bug127913";
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -25,7 +24,7 @@ function getTestCases() {
         foo();
     } catch( e ){
     } finally {
-        array[item++] = new TestCase(SECTION, "throw an exception in a script where there is infinite recursion", "no crash", "no crash" );
+        array[item++] = Assert.expectEq( "throw an exception in a script where there is infinite recursion", "no crash", "no crash" );
     }
     return array;
 }

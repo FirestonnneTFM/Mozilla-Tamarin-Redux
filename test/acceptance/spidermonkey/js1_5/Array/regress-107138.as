@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 29 October 2001
@@ -38,112 +38,112 @@ var arr = ['zero', 'one', 'two', 'three', 'four', 'five',
 // This bug was intermittent. Stress-test it.
 for (var j=0; j<cnSTRESS; j++)
 {
-  status = inSection(j + cnDASH + 1);
+  //status = inSection(j + cnDASH + 1);
   actual = arr[0];
   expect = 'zero';
   addThis();
 
-  status = inSection(j + cnDASH + 2);
+  //status = inSection(j + cnDASH + 2);
   actual = arr['0'];
   expect = 'zero';
   addThis();
 
-  status = inSection(j + cnDASH + 3);
+  //status = inSection(j + cnDASH + 3);
   actual = arr[1];
   expect = 'one';
   addThis();
 
-  status = inSection(j + cnDASH + 4);
+  //status = inSection(j + cnDASH + 4);
   actual = arr['1'];
   expect = 'one';
   addThis();
 
-  status = inSection(j + cnDASH + 5);
+  //status = inSection(j + cnDASH + 5);
   actual = arr[2];
   expect = 'two';
   addThis();
 
-  status = inSection(j + cnDASH + 6);
+  //status = inSection(j + cnDASH + 6);
   actual = arr['2'];
   expect = 'two';
   addThis();
 
-  status = inSection(j + cnDASH + 7);
+  //status = inSection(j + cnDASH + 7);
   actual = arr[3];
   expect = 'three';
   addThis();
 
-  status = inSection(j + cnDASH + 8);
+  //status = inSection(j + cnDASH + 8);
   actual = arr['3'];
   expect = 'three';
   addThis();
 
-  status = inSection(j + cnDASH + 9);
+  //status = inSection(j + cnDASH + 9);
   actual = arr[4];
   expect = 'four';
   addThis();
 
-  status = inSection(j + cnDASH + 10);
+  //status = inSection(j + cnDASH + 10);
   actual = arr['4'];
   expect = 'four';
   addThis();
 
-  status = inSection(j + cnDASH + 11);
+  //status = inSection(j + cnDASH + 11);
   actual = arr[5];
   expect = 'five';
   addThis();
 
-  status = inSection(j + cnDASH + 12);
+  //status = inSection(j + cnDASH + 12);
   actual = arr['5'];
   expect = 'five';
   addThis();
 
-  status = inSection(j + cnDASH + 13);
+  //status = inSection(j + cnDASH + 13);
   actual = arr[6];
   expect = 'six';
   addThis();
 
-  status = inSection(j + cnDASH + 14);
+  //status = inSection(j + cnDASH + 14);
   actual = arr['6'];
   expect = 'six';
   addThis();
 
-  status = inSection(j + cnDASH + 15);
+  //status = inSection(j + cnDASH + 15);
   actual = arr[7];
   expect = 'seven';
   addThis();
 
-  status = inSection(j + cnDASH + 16);
+  //status = inSection(j + cnDASH + 16);
   actual = arr['7'];
   expect = 'seven';
   addThis();
 
-  status = inSection(j + cnDASH + 17);
+  //status = inSection(j + cnDASH + 17);
   actual = arr[8];
   expect = 'eight';
   addThis();
 
-  status = inSection(j + cnDASH + 18);
+  //status = inSection(j + cnDASH + 18);
   actual = arr['8'];
   expect = 'eight';
   addThis();
 
-  status = inSection(j + cnDASH + 19);
+  //status = inSection(j + cnDASH + 19);
   actual = arr[9];
   expect = 'nine';
   addThis();
 
-  status = inSection(j + cnDASH + 20);
+  //status = inSection(j + cnDASH + 20);
   actual = arr['9'];
   expect = 'nine';
   addThis();
 
-  status = inSection(j + cnDASH + 21);
+  //status = inSection(j + cnDASH + 21);
   actual = arr[10];
   expect = 'ten';
   addThis();
 
-  status = inSection(j + cnDASH + 22);
+  //status = inSection(j + cnDASH + 22);
   actual = arr['10'];
   expect = 'ten';
   addThis();
@@ -168,15 +168,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 31 October 2001
@@ -28,34 +28,34 @@ var str = '';
 var k = -9999;
 
 
-status = inSection(1);
+//status = inSection(1);
 str = "AAA//BBB/CCC/";
 k = str.lastIndexOf('/');
 actual = k;
 expect = 12;
 
-status = inSection(2);
+//status = inSection(2);
 str = str.substring(0, k);
 k = str.lastIndexOf('/');
 actual = k;
 expect = 8;
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 str = str.substring(0, k);
 k = str.lastIndexOf('/');
 actual = k;
 expect = 4;
 addThis();
 
-status = inSection(4);
+//status = inSection(4);
 str = str.substring(0, k);
 k = str.lastIndexOf('/');
 actual = k;
 expect = 3;
 addThis();
 
-status = inSection(5);
+//status = inSection(5);
 str = str.substring(0, k);
 k = str.lastIndexOf('/');
 actual = k;
@@ -82,15 +82,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

@@ -1,6 +1,10 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert; 
+
+// TODO: REVIEW AS4 CONVERSION ISSUE 
+
 /*
  * Date: 13 August 2001
  *
@@ -8,20 +12,17 @@
  * See http://bugzilla.mozilla.org/show_bug.cgi?id=95101
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "regress_95101";
-    var VERSION = "";
-    var bug = 95101;
-    var TITLE   = "Invoking an undefined function should produce a ReferenceError";
+//     var SECTION = "regress_95101";
+//     var VERSION = "";
+//     var bug = 95101;
+//     var TITLE   = "Invoking an undefined function should produce a ReferenceError";
     var msgERR_REF_YES = 'ReferenceError';
     var msgERR_REF_NO = 'did NOT generate a ReferenceError';
 
-    printBugNumber (bug);
-    printStatus (TITLE);
+   // printBugNumber (bug);
+   //  printStatus (TITLE);
 
-    startTest();
-    writeHeaderToLog( SECTION + " Number.prototype.valueOf()");
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -44,7 +45,7 @@ function getTestCases() {
       status = 'Section 1 of test';
       actual = e instanceof ReferenceError;
       expect = true;
-      array[item++] = new TestCase(SECTION, status, expect, actual);
+      array[item++] = Assert.expectEq( status, expect, actual);
     
     
       /*
@@ -55,7 +56,7 @@ function getTestCases() {
       var match = e.toString().search(/ReferenceError/);
       actual = (match > -1);
       expect = true;
-      array[item++] = new TestCase(SECTION, status, expect, actual);
+      array[item++] = Assert.expectEq( status, expect, actual);
     }
     return array;
 }

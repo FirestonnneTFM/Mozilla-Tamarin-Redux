@@ -3,14 +3,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "regress_703238";
-var VERSION = "AS3";
-var TITLE   = "overflow the 31-bit signed integer range";
-var bug = "703238";
+// var SECTION = "regress_703238";
+// var VERSION = "AS3";
+// var TITLE   = "overflow the 31-bit signed integer range";
+// var bug = "703238";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 
 function f()
 {
@@ -19,9 +18,8 @@ function f()
     t += d;
     print(t);
     print(t/86400000);
-    AddTestCase("Results should always stay positive", true,   (t/86400000)>-1);
+    Assert.expectEq("Results should always stay positive", true,   (t/86400000)>-1);
   }
 }
 f();
 
-test();

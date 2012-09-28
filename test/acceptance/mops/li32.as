@@ -11,32 +11,32 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION:String = "mops";
-    var VERSION:String = "AS3";
-    var TITLE:String   = "li32";
+//     var SECTION:String = "mops";
+//     var VERSION:String = "AS3";
+//     var TITLE:String   = "li32";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("li32(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("li32(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ LI32(Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
     // Get a handle to the domainMemory after it is initialized
     var mem:ByteArray = Domain.currentDomain.domainMemory;
 
-    AddErrorTest("li32(-1)", RANGEERROR+1506, function(){ LI32(-1); });
-    AddErrorTest("li32(mem.length)", RANGEERROR+1506, function(){ LI32(mem.length); });
-    AddErrorTest("li32(mem.length-1)", RANGEERROR+1506, function(){ LI32(mem.length-1); });
-    AddErrorTest("li32(mem.length-2)", RANGEERROR+1506, function(){ LI32(mem.length-2); });
-    AddErrorTest("li32(mem.length-3)", RANGEERROR+1506, function(){ LI32(mem.length-3); });
-    AddTestCase("li32(mem.length-4)", 0, LI32(mem.length-4));
+    Assert.expectError("li32(-1)", Utils.RANGEERROR+1506, function(){ LI32(-1); });
+    Assert.expectError("li32(mem.length)", Utils.RANGEERROR+1506, function(){ LI32(mem.length); });
+    Assert.expectError("li32(mem.length-1)", Utils.RANGEERROR+1506, function(){ LI32(mem.length-1); });
+    Assert.expectError("li32(mem.length-2)", Utils.RANGEERROR+1506, function(){ LI32(mem.length-2); });
+    Assert.expectError("li32(mem.length-3)", Utils.RANGEERROR+1506, function(){ LI32(mem.length-3); });
+    Assert.expectEq("li32(mem.length-4)", 0, LI32(mem.length-4));
 
     SI32(0x7FDE8001, 1);
-    AddTestCase("li32(1) loads do not need to be aligned", 0x7FDE8001, LI32(1));
+    Assert.expectEq("li32(1) loads do not need to be aligned", 0x7FDE8001, LI32(1));
 
 
     testsi8();
@@ -50,7 +50,6 @@ package {
     testwriteFloat();
     testwriteDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -77,7 +76,7 @@ package {
         SI8(0x80, 1);
         SI8(0x80, 2);
         SI8(0x01, 3);
-        AddTestCase("li32 load int32 written by si8()", 0x0180807F, LI32(0));
+        Assert.expectEq("li32 load int32 written by si8()", 0x0180807F, LI32(0));
     }
 
     function testsi16():void
@@ -85,14 +84,14 @@ package {
         clearMemory();
         SI16(0x80DE, 0);
         SI16(0x07A5, 2);
-        AddTestCase("li32 load int32 written by si16()", 0x07A580DE, LI32(0));
+        Assert.expectEq("li32 load int32 written by si16()", 0x07A580DE, LI32(0));
     }
 
     function testsi32():void
     {
         clearMemory();
         SI32(0x07DE32F1, 0);
-        AddTestCase("li32 load int32 written by si32(0x07DE32F1)", 0x07DE32F1, LI32(0));
+        Assert.expectEq("li32 load int32 written by si32(0x07DE32F1)", 0x07DE32F1, LI32(0));
     }
 
     function testsf32():void
@@ -112,7 +111,7 @@ package {
          *****************************************/
         clearMemory();
         SF32(12.375, 0);
-        AddTestCase("li32 load int32 written by sf32(12.375)", 0x41460000, LI32(0));
+        Assert.expectEq("li32 load int32 written by sf32(12.375)", 0x41460000, LI32(0));
     }
 
     function testsf64():void
@@ -129,8 +128,8 @@ package {
          *****************************************/
         clearMemory();
         SF64(1.0241024102410242048E19, 0);
-        AddTestCase("li32 load 1st int32 written by si64(10241024102410241024)", 0x43E1C3ED, LI32(4));
-        AddTestCase("li32 load 2nd int32 written by si64(10241024102410241024)", int(0xA52E0C09), LI32(0));
+        Assert.expectEq("li32 load 1st int32 written by si64(10241024102410241024)", 0x43E1C3ED, LI32(4));
+        Assert.expectEq("li32 load 2nd int32 written by si64(10241024102410241024)", int(0xA52E0C09), LI32(0));
     }
 
     function testwriteByte():void
@@ -142,7 +141,7 @@ package {
         mem.writeByte(0x77);
         mem.writeByte(0x5A);
 
-        AddTestCase("li32 load int32 written by writeByte()", 0x5A77807F, LI32(0));
+        Assert.expectEq("li32 load int32 written by writeByte()", 0x5A77807F, LI32(0));
     }
 
     function testwriteBoolean():void
@@ -154,7 +153,7 @@ package {
         mem.writeBoolean(false);
         mem.writeBoolean(true);
 
-        AddTestCase("li32 load int32 written by writeBoolean()", 0x01000101, LI32(0));
+        Assert.expectEq("li32 load int32 written by writeBoolean()", 0x01000101, LI32(0));
     }
 
     function testwriteInt():void
@@ -170,7 +169,7 @@ package {
         mem.position = 0;
         mem.writeInt(2147473647);
 
-        AddTestCase("li32 load int32 written by writeInt(2147473647)", 0x7FFFD8EF, LI32(0));
+        Assert.expectEq("li32 load int32 written by writeInt(2147473647)", 0x7FFFD8EF, LI32(0));
     }
 
     function testwriteFloat():void
@@ -191,7 +190,7 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeFloat(12.375);
-        AddTestCase("li32 load int32 written by writeFloat(12.375)", 0x41460000, LI32(0));
+        Assert.expectEq("li32 load int32 written by writeFloat(12.375)", 0x41460000, LI32(0));
     }
 
 
@@ -210,8 +209,8 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeDouble(1.0241024102410242048E19);
-        AddTestCase("li32 load 1st int32 written by writeDouble(1.0241024102410242048E19)", 0x43E1C3ED, LI32(4));
-        AddTestCase("li32 load 2nd int32 written by writeDouble(1.0241024102410242048E19)", int(0xA52E0C09), LI32(0));
+        Assert.expectEq("li32 load 1st int32 written by writeDouble(1.0241024102410242048E19)", 0x43E1C3ED, LI32(4));
+        Assert.expectEq("li32 load 2nd int32 written by writeDouble(1.0241024102410242048E19)", int(0xA52E0C09), LI32(0));
 
     }
 

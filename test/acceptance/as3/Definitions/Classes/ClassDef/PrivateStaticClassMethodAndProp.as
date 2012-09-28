@@ -4,13 +4,13 @@
  
  
 import PrivateStaticClassMethodAndProp.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Access Class Properties & Methods";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Access Class Properties & Methods";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -32,8 +32,8 @@ var ob = new Object();
 //
 // ********************************************
 
-AddTestCase( "*** Access default method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setArray(arr), Obj.getArray()", arr, Obj.testGetSetArray(arr) );
+Assert.expectEq( "*** Access default method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setArray(arr), Obj.getArray()", arr, Obj.testGetSetArray(arr) );
 
 
 // ********************************************
@@ -42,8 +42,8 @@ AddTestCase( "Obj.setArray(arr), Obj.getArray()", arr, Obj.testGetSetArray(arr) 
 // ********************************************
 
 // TODO: Need to modify the test to only create the date as Date(0) and just check the year
-// AddTestCase( "*** Access private method of a static class ***", 1, 1 );
-// AddTestCase( "Obj.setPrivDate(date), Obj.getPrivDate()", d, Obj.testGetSetPrivDate(d) );
+// Assert.expectEq( "*** Access private method of a static class ***", 1, 1 );
+// Assert.expectEq( "Obj.setPrivDate(date), Obj.getPrivDate()", d, Obj.testGetSetPrivDate(d) );
 
 
 // ********************************************
@@ -51,8 +51,8 @@ AddTestCase( "Obj.setArray(arr), Obj.getArray()", arr, Obj.testGetSetArray(arr) 
 //
 // ********************************************
 
-AddTestCase( "*** Access public method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setPubBoolean(b), Obj.getPubBoolean()", true, Obj.testGetSetPubBoolean(true) );
+Assert.expectEq( "*** Access public method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setPubBoolean(b), Obj.getPubBoolean()", true, Obj.testGetSetPubBoolean(true) );
 
 
 // ********************************************
@@ -60,40 +60,39 @@ AddTestCase( "Obj.setPubBoolean(b), Obj.getPubBoolean()", true, Obj.testGetSetPu
 //
 // ********************************************
 
-AddTestCase( "*** Access static method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setStatFunction(f), Obj.getStatFunction()", f, Obj.testGetSetStatFunction(f) );
+Assert.expectEq( "*** Access static method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setStatFunction(f), Obj.getStatFunction()", f, Obj.testGetSetStatFunction(f) );
 
 // ********************************************
 // access private static method
 // ********************************************
 
-AddTestCase( "*** Access private static method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setPrivStatString(s), Obj.getPrivStatString", str, Obj.testGetSetPrivStatString(str) );
+Assert.expectEq( "*** Access private static method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setPrivStatString(s), Obj.getPrivStatString", str, Obj.testGetSetPrivStatString(str) );
 
 
 // ********************************************
 // access public static method
 // ********************************************
 
-AddTestCase( "*** Access public static method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setPubStatObject(ob), Obj.getPubStatObject()", ob, Obj.testGetSetPubStatObject(ob) );
+Assert.expectEq( "*** Access public static method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setPubStatObject(ob), Obj.getPubStatObject()", ob, Obj.testGetSetPubStatObject(ob) );
 
 
 // ********************************************
 // access final method
 // ********************************************
 
-AddTestCase( "*** Access final method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setFinNumber(10), Obj.getFinNumber()", 10, Obj.testGetSetFinNumber(10) );
+Assert.expectEq( "*** Access final method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setFinNumber(10), Obj.getFinNumber()", 10, Obj.testGetSetFinNumber(10) );
 
 
 // ********************************************
 // access public final method
 // ********************************************
 
-AddTestCase( "*** Access public final method of a static class ***", 1, 1 );
-AddTestCase( "Obj.setPubFinArray(arr), Obj.getPubFinArray()", arr, Obj.testGetSetPubArray(arr) );
+Assert.expectEq( "*** Access public final method of a static class ***", 1, 1 );
+Assert.expectEq( "Obj.setPubFinArray(arr), Obj.getPubFinArray()", arr, Obj.testGetSetPubArray(arr) );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

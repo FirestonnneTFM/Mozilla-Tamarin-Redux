@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    every.es
    Description:  every(object,checker,thisObj=)
@@ -11,12 +13,10 @@
      returns true if all the calls to checker returned true values, otherwise it returns false.
    *
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " Vector.every()");
 
 function checker1(value,index,obj):Boolean {
   msg+="checker1("+value+","+index+",["+obj+"])";
@@ -31,45 +31,45 @@ function checker3(value,index,obj):Boolean {
 
 var msg="";
 var v1=new Vector.<int>();
-AddTestCase(    "every empty array",
+Assert.expectEq(    "every empty array",
         true,
         v1.every(checker1));
 
 var msg="";
 var v1=new Vector.<int>();
 for (var i=0;i<3;i++) v1.push(i+1);
-AddTestCase(    "every small array returns true",
+Assert.expectEq(    "every small array returns true",
         true,
         v1.every(checker1));
 
-AddTestCase(    "every small array check function",
+Assert.expectEq(    "every small array check function",
         "checker1(1,0,[1,2,3])checker1(2,1,[1,2,3])checker1(3,2,[1,2,3])",
         msg);
 
 var msg="";
 var v1=new Vector.<int>();
 for (var i=0;i<3;i++) v1.push(2-i);
-AddTestCase(    "every small array returns false on 0",
+Assert.expectEq(    "every small array returns false on 0",
                 false,
                 v1.every(checker1));
 
 var v1 = Vector.<Number>([3.1415, Number.MAX_VALUE, -0.00032]);
-AddTestCase("every: Number vector does not contain a zero",
+Assert.expectEq("every: Number vector does not contain a zero",
             true,
             v1.every(checker1));
 
 var v1 = Vector.<Number>([3.1415, Number.MAX_VALUE, 0.00, -0.00032]);
-AddTestCase("every: Number vector does contain a zero",
+Assert.expectEq("every: Number vector does contain a zero",
             false,
             v1.every(checker1));
 
 var v1 = Vector.<uint>([31415, uint.MAX_VALUE, 999999]);
-AddTestCase("every: uint vector does not contain a zero",
+Assert.expectEq("every: uint vector does not contain a zero",
             true,
             v1.every(checker1));
 
 var v1 = Vector.<uint>([31415, uint.MAX_VALUE,0, 999999]);
-AddTestCase("every: uint vector does not contain a zero",
+Assert.expectEq("every: uint vector does not contain a zero",
             false,
             v1.every(checker1));
 
@@ -78,7 +78,7 @@ var thisobj=new Object();
 thisobj.message="object";
 var v1=new Vector.<int>(5);
 v1.every(checker3,thisobj);
-AddTestCase(    "every small array with a specified this object",
+Assert.expectEq(    "every small array with a specified this object",
         "objectobjectobjectobjectobject",
         msg);
 
@@ -120,14 +120,14 @@ v4.push(new TestClass(44));
 v4.push(new TestClass(1));
 v4.push(new TestClass(50));
 
-AddTestCase("thisObject test 1",
+Assert.expectEq("thisObject test 1",
             true,
             v4.every(thisObjectTest, TestClass)
             );
 
 v4.push(new TestClass(500));
 
-AddTestCase("thisObject test 2",
+Assert.expectEq("thisObject test 2",
             false,
             v4.every(thisObjectTest, TestClass)
             );
@@ -139,9 +139,9 @@ try {
     errorMsg = e.toString();
 }
 
-AddTestCase("thisObject test 3",
+Assert.expectEq("thisObject test 3",
             "TypeError: Error #1006",
-            parseError(errorMsg,"TypeError: Error #1006".length)
+            Utils.parseError(errorMsg,"TypeError: Error #1006".length)
             );
 
 errorMsg = "";
@@ -151,9 +151,9 @@ try {
     errorMsg = e.toString();
 }
 
-AddTestCase("thisObject test 4",
+Assert.expectEq("thisObject test 4",
             "TypeError: Error #1006",
-            parseError(errorMsg,"TypeError: Error #1006".length)
+            Utils.parseError(errorMsg,"TypeError: Error #1006".length)
             );
 
 errorMsg = "";
@@ -163,9 +163,8 @@ try {
     errorMsg = e.toString();
 }
 
-AddTestCase("thisObject test 5",
+Assert.expectEq("thisObject test 5",
             "TypeError: Error #1006",
-            parseError(errorMsg,"TypeError: Error #1006".length)
+            Utils.parseError(errorMsg,"TypeError: Error #1006".length)
             );
 
-test();

@@ -1,12 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Proxy";
-var VERSION = "AS3";
-var TITLE   = "Proxy test ported from ATS: ATS9AS3 Automated/Proxy/deleteAndForInProxy";
+// var SECTION = "Proxy";
+// var VERSION = "AS3";
+// var TITLE   = "Proxy test ported from ATS: ATS9AS3 Automated/Proxy/deleteAndForInProxy";
 
-startTest();
 
 // instantiate a new object
 var myObject:* = new Object();
@@ -18,16 +18,16 @@ var proxyOfProxy:ProxySmoke = new ProxySmoke(myObjectProxy);
 myObjectProxy.property1 = Math.PI;
 myObject.property2 = "Hello, world!";
 
-AddTestCase("delete property on Object", true, delete myObject.property1);
-AddTestCase("delete property on Proxy Object", true,
+Assert.expectEq("delete property on Object", true, delete myObject.property1);
+Assert.expectEq("delete property on Proxy Object", true,
             delete myObjectProxy.property2);
-AddTestCase("delete Nonexistent property on Object", true,
+Assert.expectEq("delete Nonexistent property on Object", true,
             delete myObject.nonExistent00);
-AddTestCase("delete Nonexistent property on Proxy Object", true,
+Assert.expectEq("delete Nonexistent property on Proxy Object", true,
             delete myObjectProxy.nonExistent00);
-AddTestCase("delete function on Object", true,
+Assert.expectEq("delete function on Object", true,
             delete myObject.delEchoFunction0);
-AddTestCase("delete function on Proxy Object", true,
+Assert.expectEq("delete function on Proxy Object", true,
             delete myObjectProxy.delEchoFunction1);
 
 myObject.delEchoFunction0 = function(myArg:String):String
@@ -108,15 +108,15 @@ for each (var item in feProxy) {
 }
 feArray0.sort();
 
-AddTestCase("for in loop over Proxy Object variables", true,
+Assert.expectEq("for in loop over Proxy Object variables", true,
             checkProxy(proxyOfProxy, ansArray0, ansArray1));
-AddTestCase("for in loop over Proxy Object values", "spacer", "spacer");
-AddTestCase("for each in loop over Proxy Object", 0,
+Assert.expectEq("for in loop over Proxy Object values", "spacer", "spacer");
+Assert.expectEq("for each in loop over Proxy Object", 0,
             compareArray(feArray0, ansFeArray0));
 
-AddTestCase("delete proxy of proxy Object", false, delete proxyOfProxy);
-AddTestCase("delete proxy Object", false, delete feProxy);
-AddTestCase("delete original Object", false, delete obj);
+Assert.expectEq("delete proxy of proxy Object", false, delete proxyOfProxy);
+Assert.expectEq("delete proxy Object", false, delete feProxy);
+Assert.expectEq("delete original Object", false, delete obj);
 
 //proxy before and after then delete
 var ansProxyArray0 = ["foo","num","str"];
@@ -130,7 +130,7 @@ obj1Proxy1.foo = "bar";
 var obj1ProxyProxy1 = new ProxySmoke(obj1Proxy1);
 obj1ProxyProxy1.foo = "yo mama";
 
-AddTestCase("add properties one by one and for in on props", true,
+Assert.expectEq("add properties one by one and for in on props", true,
             checkProxy(obj1ProxyProxy1, ansProxyArray0, ansProxyArray1));
 
 var errorMsg = "no error";
@@ -140,7 +140,6 @@ try{
     errorMsg = e.toString().substring(0,"TypeError: Error #1006".length);
 }
 
-AddTestCase("call non existent function on proxy", "TypeError: Error #1006",
+Assert.expectEq("call non existent function on proxy", "TypeError: Error #1006",
             errorMsg);
 
-test();

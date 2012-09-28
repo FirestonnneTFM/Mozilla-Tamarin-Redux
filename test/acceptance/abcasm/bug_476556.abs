@@ -2,49 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Bug 476556 : If branches with NaN" 
-	callpropvoid START 1
 
-	newfunction .function_id(test_iflt)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifle)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifnlt)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifnle)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifgt)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifge)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifngt)
-	getlocal0
-	call 0
-    
-    newfunction .function_id(test_ifnge)
-	getlocal0
-	call 0
-
-	findproperty END
-	callpropvoid END 0
-	returnvoid
-}
 
 function test_iflt()
 {
@@ -541,3 +499,49 @@ ifnge_NaN_NaN_endit:
 
     returnvoid
 }
+
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Bug 476556 : If branches with NaN" 
+	callpropvoid START 1
+
+	newfunction test_iflt
+	getlocal0
+	call 0
+    
+    newfunction test_ifle
+	getlocal0
+	call 0
+    
+    newfunction test_ifnlt
+	getlocal0
+	call 0
+    
+    newfunction test_ifnle
+	getlocal0
+	call 0
+    
+    newfunction test_ifgt
+	getlocal0
+	call 0
+    
+    newfunction test_ifge
+	getlocal0
+	call 0
+    
+    newfunction test_ifngt
+	getlocal0
+	call 0
+    
+    newfunction test_ifnge
+	getlocal0
+	call 0
+
+	findproperty END
+	callpropvoid END 0
+	returnvoid
+}
+
+script_info{init: main}

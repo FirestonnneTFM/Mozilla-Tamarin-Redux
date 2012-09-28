@@ -1,9 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 
-startTest();                // leave this alone
 
 
 
@@ -39,8 +39,8 @@ function addNegUintInFunc(){
     return (a = b+c);
 }
 
-AddTestCase( "Calling function with 1 uint argument", 1 , Uint1Arg(1) );
-AddTestCase( "Calling function with 1 uint argument", 6 , UintMultiArgs(1,2,3) );
+Assert.expectEq( "Calling function with 1 uint argument", 1 , Uint1Arg(1) );
+Assert.expectEq( "Calling function with 1 uint argument", 6 , UintMultiArgs(1,2,3) );
 
 // RangeError precision exceptions
 
@@ -51,8 +51,8 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "Uint1Arg(-1)", "exception NOT caught" , pResult );
-AddTestCase( "Uint1Arg(-1)", 4294967295 , Uint1Arg(-1) );
+Assert.expectEq( "Uint1Arg(-1)", "exception NOT caught" , pResult );
+Assert.expectEq( "Uint1Arg(-1)", 4294967295 , Uint1Arg(-1) );
 pResult = null;
 try{
     UintMultiArgs(-1,-1,-1);
@@ -60,8 +60,8 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "UintMultiArgs(-1,-1,-1)", "exception NOT caught" , pResult );
-AddTestCase( "UintMultiArgs(-1,-1,-1)", 4294967293, UintMultiArgs(-1,-1,-1) )
+Assert.expectEq( "UintMultiArgs(-1,-1,-1)", "exception NOT caught" , pResult );
+Assert.expectEq( "UintMultiArgs(-1,-1,-1)", 4294967293, UintMultiArgs(-1,-1,-1) )
 pResult = null;
 try{
     diffArgs(-1,-1,-1);
@@ -69,8 +69,8 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "diffArgs(-1,-1,-1)", "exception NOT caught" , pResult );
-AddTestCase( "diffArgs(-1,-1,-1)", 4294967293 , diffArgs(-1,-1,-1) );
+Assert.expectEq( "diffArgs(-1,-1,-1)", "exception NOT caught" , pResult );
+Assert.expectEq( "diffArgs(-1,-1,-1)", 4294967293 , diffArgs(-1,-1,-1) );
 pResult = null;
 try{
     returnNegUint();
@@ -78,8 +78,8 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "returnNegUint()", "exception NOT caught" , pResult );
-AddTestCase( "returnNegUint()", 4294967286 , returnNegUint() );
+Assert.expectEq( "returnNegUint()", "exception NOT caught" , pResult );
+Assert.expectEq( "returnNegUint()", 4294967286 , returnNegUint() );
 
 var n:Number = -20;
 
@@ -90,7 +90,7 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "var n:Number = -20; Uint1Arg(n)", "exception NOT caught" , pResult );
+Assert.expectEq( "var n:Number = -20; Uint1Arg(n)", "exception NOT caught" , pResult );
 
 
 
@@ -101,7 +101,7 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "var n:Number = -20; UintMultiArgs(n,n,n)", "exception NOT caught" , pResult );
+Assert.expectEq( "var n:Number = -20; UintMultiArgs(n,n,n)", "exception NOT caught" , pResult );
 
 pResult = null;
 try{
@@ -110,7 +110,7 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "var n:Number = -20; diffArgs(n,n,n)", "exception NOT caught" , pResult );
+Assert.expectEq( "var n:Number = -20; diffArgs(n,n,n)", "exception NOT caught" , pResult );
 
 var i:int = -20;
 
@@ -121,7 +121,7 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "var i:int = -20; Uint1Arg(i)", "exception NOT caught" , pResult );
+Assert.expectEq( "var i:int = -20; Uint1Arg(i)", "exception NOT caught" , pResult );
 
 pResult = null;
 try{
@@ -130,7 +130,7 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "var i:int = -20; UintMultiArgs(i,i,i)", "exception NOT caught" , pResult );
+Assert.expectEq( "var i:int = -20; UintMultiArgs(i,i,i)", "exception NOT caught" , pResult );
 
 pResult = null;
 try{
@@ -139,7 +139,7 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "var i:int = -20; diffArgs(i,i,i)", "exception NOT caught" , pResult );
+Assert.expectEq( "var i:int = -20; diffArgs(i,i,i)", "exception NOT caught" , pResult );
 
 pResult = null;
 try{
@@ -148,7 +148,6 @@ try{
 } catch (e) {
     pResult = "exception caught";
 }
-AddTestCase( "add negitive number to uint in function", "exception NOT caught" , pResult );
+Assert.expectEq( "add negitive number to uint in function", "exception NOT caught" , pResult );
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

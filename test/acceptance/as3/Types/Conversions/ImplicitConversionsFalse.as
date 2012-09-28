@@ -1,12 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Types: Conversions";
-var VERSION = "as3";
-var TITLE   = "implicit type conversions";
+// var SECTION = "Types: Conversions";
+// var VERSION = "as3";
+// var TITLE   = "implicit type conversions";
 
-startTest();
 
 
 // Value = false
@@ -17,8 +18,8 @@ try{
 } catch (e0) {
     thisError = e0.toString();
 } finally {
-    AddTestCase("string:String = false", "no exception thrown", typeError(thisError) );
-    AddTestCase("string:String = false", "false", string);
+    Assert.expectEq("string:String = false", "no exception thrown", Utils.typeError(thisError) );
+    Assert.expectEq("string:String = false", "false", string);
 }
 
 thisError = "no exception thrown";
@@ -27,8 +28,8 @@ try{
 } catch (e) {
     thisError = e.toString();
 } finally {
-    AddTestCase("number:Number = false", "no exception thrown", typeError(thisError) );
-    AddTestCase("number:Number = false", 0, number );
+    Assert.expectEq("number:Number = false", "no exception thrown", Utils.typeError(thisError) );
+    Assert.expectEq("number:Number = false", 0, number );
 }
 
 thisError = "no exception thrown";
@@ -37,8 +38,8 @@ try{
 } catch(e1) {
     thisError = e1.toString();
 } finally {
-    AddTestCase("myInt:int = false", "no exception thrown", typeError(thisError) );
-    AddTestCase("myInt:int = false", 0, myInt );
+    Assert.expectEq("myInt:int = false", "no exception thrown", Utils.typeError(thisError) );
+    Assert.expectEq("myInt:int = false", 0, myInt );
 }
 
 thisError = "no exception thrown";
@@ -47,8 +48,8 @@ try{
 } catch(e2) {
     thisError = e2.toString();
 } finally {
-    AddTestCase("myUInt:uint = false", "no exception thrown", typeError(thisError) );
-    AddTestCase("myUInt:uint = false", 0, myUint );
+    Assert.expectEq("myUInt:uint = false", "no exception thrown", Utils.typeError(thisError) );
+    Assert.expectEq("myUInt:uint = false", 0, myUint );
 }
 
 thisError = "no exception thrown";
@@ -57,14 +58,13 @@ try{
 } catch(e3) {
     thisError = e3.toString();
 } finally {
-    AddTestCase("boolean:Boolean = false", "no exception thrown", typeError(thisError) );
+    Assert.expectEq("boolean:Boolean = false", "no exception thrown", Utils.typeError(thisError) );
 }
 
 var object:Object = false;
-AddTestCase( "var object:Object = false", false, object);
+Assert.expectEq( "var object:Object = false", false, object);
 
 
-test();
 
 
 

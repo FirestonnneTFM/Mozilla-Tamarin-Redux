@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "RegExp/function-001";
-    var VERSION = "ECMA_2";
-    var TITLE   = "RegExp( pattern, flags )";
+import com.adobe.test.Assert;
+//     var SECTION = "RegExp/function-001";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "RegExp( pattern, flags )";
 
-    startTest();
-    writeHeaderToLog(SECTION + " " + TITLE);
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -28,39 +26,39 @@ function getTestCases() {
     RegExp.prototype.getClassProperty = Object.prototype.toString;
     var re = new RegExp();
 
-    /*array[item++] = new TestCase(SECTION,
+    /*array[item++] = Assert.expectEq(
         "new RegExp().constructor.prototype",
         RegExp.prototype,
         re.constructor.prototype
     );*/
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "RegExp.prototype.getClassProperty = Object.prototype.toString; " +
         "(new RegExp()).getClassProperty()",
         "[object RegExp]",
         re.getClassProperty() );
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "(new RegExp()).source",
         "",
         re.source );
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "(new RegExp()).global",
         false,
         re.global );
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "(new RegExp()).ignoreCase",
         false,
         re.ignoreCase );
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "(new RegExp()).multiline",
         false,
         re.multiline );
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "(new RegExp()).lastIndex",
         0,
         re.lastIndex );

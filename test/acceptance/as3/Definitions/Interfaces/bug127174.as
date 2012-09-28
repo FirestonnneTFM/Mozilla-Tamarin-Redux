@@ -3,12 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import bug127174.*;
+import com.adobe.test.Assert;
 
-startTest();
 
-var t:InterfaceCorceErrorTest = new InterfaceCorceErrorTest();
-var k:ITestInterface = new CoerceErrorForInterfaces();
-AddTestCase("regress for bug 127714", true, t.causeCoerceError(k));
-test();
+var t:IFaceCorceErrorTest = new IFaceCorceErrorTest();
+var k:I2TestInterface = new IFaceCorceErrorZ();
+Assert.expectEq("regress for bug 127714", true, t.causeCoerceError(k));
 
 

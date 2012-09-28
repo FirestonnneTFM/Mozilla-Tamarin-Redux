@@ -5,13 +5,13 @@
  
 
 import DynamicClassPropPackage.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Add Properties to Dynamic Class";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Add Properties to Dynamic Class";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -40,8 +40,8 @@ Obj.prop6 = ob;
 //
 // ********************************************
 
-AddTestCase( "*** Access property of type Number ***", 1, 1 );
-AddTestCase( "Obj.prop1", 100, Obj.prop1 );
+Assert.expectEq( "*** Access property of type Number ***", 1, 1 );
+Assert.expectEq( "Obj.prop1", 100, Obj.prop1 );
 
 
 // ********************************************
@@ -49,8 +49,8 @@ AddTestCase( "Obj.prop1", 100, Obj.prop1 );
 //
 // ********************************************
 
-AddTestCase( "*** Access property of type String ***", 1, 1 );
-AddTestCase( "Obj.prop2", "Test", Obj.prop2 );
+Assert.expectEq( "*** Access property of type String ***", 1, 1 );
+Assert.expectEq( "Obj.prop2", "Test", Obj.prop2 );
 
 
 // ********************************************
@@ -58,8 +58,8 @@ AddTestCase( "Obj.prop2", "Test", Obj.prop2 );
 //
 // ********************************************
 
-AddTestCase( "*** Access property of type Boolean ***", 1, 1 );
-AddTestCase( "Obj.prop3", true, Obj.prop3 );
+Assert.expectEq( "*** Access property of type Boolean ***", 1, 1 );
+Assert.expectEq( "Obj.prop3", true, Obj.prop3 );
 
 
 // ********************************************
@@ -67,25 +67,24 @@ AddTestCase( "Obj.prop3", true, Obj.prop3 );
 //
 // ********************************************
 
-AddTestCase( "*** Access property of type Array ***", 1, 1 );
-AddTestCase( "Obj.prop4", arr, Obj.prop4 );
+Assert.expectEq( "*** Access property of type Array ***", 1, 1 );
+Assert.expectEq( "Obj.prop4", arr, Obj.prop4 );
 
 // ********************************************
 // Access property of type Date
 // ********************************************
 
-AddTestCase( "*** Access property of type Date ***", 1, 1 );
-AddTestCase( "Obj.prop5", d, Obj.prop5 );
+Assert.expectEq( "*** Access property of type Date ***", 1, 1 );
+Assert.expectEq( "Obj.prop5", d, Obj.prop5 );
 
 
 // ********************************************
 // Access property of type Object
 // ********************************************
 
-AddTestCase( "*** Access property of type Object ***", 1, 1 );
-AddTestCase( "Obj.prop6", ob, Obj.prop6 );
+Assert.expectEq( "*** Access property of type Object ***", 1, 1 );
+Assert.expectEq( "Obj.prop6", ob, Obj.prop6 );
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.3.5-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Properties of Function Instances";
+//     var SECTION = "15.3.5-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Properties of Function Instances";
 
-    writeHeaderToLog( SECTION + " "+TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -43,7 +41,7 @@ function getTestCases() {
     }
     finally{
         //print(e.toString());
-        array[item++] = new TestCase( SECTION,"Function('function body') not supported","EvalError: Error #1066",thisError);
+        array[item++] = Assert.expectEq( "Function('function body') not supported","EvalError: Error #1066",thisError);
     }
 
    
@@ -52,8 +50,8 @@ function getTestCases() {
     }
 
     
-    array[item++] = new TestCase( SECTION, "MyFunc.prototype.toString()",       "[object Object]",  MyFunc.prototype.toString() );
-    array[item++] = new TestCase( SECTION, "typeof MyFunc.prototype",           "object",           typeof MyFunc.prototype );
+    array[item++] = Assert.expectEq(  "MyFunc.prototype.toString()",       "[object Object]",  MyFunc.prototype.toString() );
+    array[item++] = Assert.expectEq(  "typeof MyFunc.prototype",           "object",           typeof MyFunc.prototype );
 
     return ( array );
 }

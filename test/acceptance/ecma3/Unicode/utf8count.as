@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 var str_utf16_codes = [0x31,
                 0x32,
@@ -35,11 +36,9 @@ var str_utf8_b:String = "𠮷野屋abc南巽駅";
 
 var str_utf8_ab:String = str_utf8_a + str_utf8_b;
 
-startTest();
 
-AddTestCase("str_utf8 == str_utf16", true, str_utf8 == str_utf16);
-AddTestCase("str_utf8.length == str_utf16.length", true, str_utf8.length == str_utf16.length);
-AddTestCase("str_utf8_ab == str_utf8", true, str_utf8_ab == str_utf8);
+Assert.expectEq("str_utf8 == str_utf16", true, str_utf8 == str_utf16);
+Assert.expectEq("str_utf8.length == str_utf16.length", true, str_utf8.length == str_utf16.length);
+Assert.expectEq("str_utf8_ab == str_utf8", true, str_utf8_ab == str_utf8);
 
-test();
 

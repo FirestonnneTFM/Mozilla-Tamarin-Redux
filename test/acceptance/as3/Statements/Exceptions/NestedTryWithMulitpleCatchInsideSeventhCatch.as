@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing try block with multiple catch blocks, the seventh catch block catching the type error";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing try block with multiple catch blocks, the seventh catch block catching the type error";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 thisError = "no error";
@@ -49,15 +49,14 @@ try{
            }catch(ei6:ArgumentError){
                thisError="This is inner Argument Error"+ei6.toString();
            }finally{
-               AddTestCase( "Testing Nested try block with multiple catch block inside the seventh catch block of the outer try block","This is inner finally:This is Inner Type Error:TypeError","This is inner finally:"+thisError );
+               Assert.expectEq( "Testing Nested try block with multiple catch block inside the seventh catch block of the outer try block","This is inner finally:This is Inner Type Error:TypeError","This is inner finally:"+thisError );
             }
    }catch(eo7:Error){
        thisError1="This is outer error:"+eo7.toString();
    }finally{
-       AddTestCase( "Testing Nested try block with multiple catch block inside the seventh catch block of the outer try block", "This is outer finally:This is outer Security Error!!!:SecurityError","This is outer finally:"+ thisError1 );
+       Assert.expectEq( "Testing Nested try block with multiple catch block inside the seventh catch block of the outer try block", "This is outer finally:This is outer Security Error!!!:SecurityError","This is outer finally:"+ thisError1 );
     }
  
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

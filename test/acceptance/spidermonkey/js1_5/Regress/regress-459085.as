@@ -4,7 +4,7 @@
  * http://creativecommons.org/licenses/publicdomain/
  * Contributor: Jason Orendorff
  */
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-459085.js';
 //-----------------------------------------------------------------------------
@@ -21,8 +21,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
   
 
 
@@ -32,9 +32,8 @@ function addtestcases()
 
 
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

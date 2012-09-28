@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          e15_4_4_6.as
  *  ECMA Section:       15.4.4.6 Array.prototype.pop()
@@ -31,26 +32,23 @@
  *
  */
 
-var SECTION = "15.4.4.6";
-var TITLE   = "Array.pop";
+// var SECTION = "15.4.4.6";
+// var TITLE   = "Array.pop";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
         var MYEMPTYARRAY = new Array();
-        array[item++] = new TestCase( SECTION, "MYEMPTYARRAY = new Array(); MYEMPTYARRAY.pop();", undefined, MYEMPTYARRAY.pop());
+        array[item++] = Assert.expectEq(  "MYEMPTYARRAY = new Array(); MYEMPTYARRAY.pop();", undefined, MYEMPTYARRAY.pop());
 
     // Create an array from which we will pop an element.
     var MYARR = new Array( 2, 1, 8, 6 );
@@ -59,13 +57,16 @@ function getTestCases() {
 
     var EXP_RESULT = MYARR.pop();
 
-    array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.pop();", 6, EXP_RESULT );
+    array[item++] = Assert.expectEq(  "MYARR = [2,1,8,6]; MYARR.pop();", 6, EXP_RESULT );
 
     for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.pop();", EXPARR[MYVAR], MYARR[MYVAR] );
+        array[item++] = Assert.expectEq(  "MYARR = [2,1,8,6]; MYARR.pop();", EXPARR[MYVAR], MYARR[MYVAR] );
     }
 
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+    // COMMENT OUT WHOLE BLOCK SINCE IT SHOULD ONLY RUN IF NOT as3Enabled (i.e. pre AS3)
+    /* 
     if (!as3Enabled) {
         //pop method is generic so can be transferred to other types of objects
         var obj = new Object();
@@ -77,13 +78,14 @@ function getTestCases() {
         obj[3] = 6;
         var EXP_OBJRESULT = obj.pop();
     
-        array[item++] = new TestCase( SECTION, "obj.pop()", 6, EXP_OBJRESULT );
+        array[item++] = Assert.expectEq(  "obj.pop()", 6, EXP_OBJRESULT );
     
         for (var MYVAR1 = 0; ( MYVAR1 < obj.length ); MYVAR1++)
         {
-            array[item++] = new TestCase( SECTION, "obj.pop()", EXPARR[MYVAR1], obj[MYVAR1] );
+            array[item++] = Assert.expectEq(  "obj.pop()", EXPARR[MYVAR1], obj[MYVAR1] );
         }
     }
+    */
 
 
 

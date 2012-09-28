@@ -1,16 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "12.6.3-12";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The for..in statment";
+import com.adobe.test.Assert;
+//     TODO: REVIEW AS4 CONVERSION ISSUE
+//     var SECTION = "12.6.3-12";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The for..in statment";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 class A {
     var result = "PASSED";
@@ -31,8 +30,8 @@ function getTestCases() {
 
     var actualResult = new A().doTest();
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        //SECTION,
         "var result=''; for ( aVar in this ) { " +
         "if (aVar == 'aVar') {return a failure}; result",
         "PASSED",

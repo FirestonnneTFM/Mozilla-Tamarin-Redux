@@ -5,13 +5,12 @@
 package {
     import avmplus.Domain
     import avmplus.System
+import com.adobe.test.Assert;
 
-    var SECTION = "Domain";
-    var VERSION = "Domain";
-    startTest();
-    var TITLE   = "Bug 567284";
+//     var SECTION = "Domain";
+//     var VERSION = "Domain";
+//     var TITLE   = "Bug 567284";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
     var support_path:String = System.argv[0];
 
@@ -25,7 +24,7 @@ package {
     var examiner = new cls();
     var value = examiner.examine();
 
-    AddTestCase("Test for non-crash in child Domain",
+    Assert.expectEq("Test for non-crash in child Domain",
       "Dup1",
       String(value));
 
@@ -36,10 +35,9 @@ package {
     // Note that we still expect "Dup1" as the first version of "Dup"
     // loaded should still take precedence, even though "Dup2" is higher
     // in the Domain chain, due to freeze-on-first-use
-    AddTestCase("Test for non-crash in parent Domain",
+    Assert.expectEq("Test for non-crash in parent Domain",
       "Dup1",
       String(value));
 
-    test();
 
 }

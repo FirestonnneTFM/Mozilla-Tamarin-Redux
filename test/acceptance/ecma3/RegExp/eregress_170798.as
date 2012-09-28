@@ -1,7 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+import com.adobe.test.Assert;
+/*
 *
 * Date:    20 Sep 2002
 * SUMMARY: RegExp conformance test
@@ -10,15 +12,12 @@
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_170798";
-var VERSION = "";
-var TITLE   = "RegExp conformance test";
-var bug = "170798";
+// var SECTION = "eregress_170798";
+// var VERSION = "";
+// var TITLE   = "RegExp conformance test";
+// var bug = "170798";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -30,15 +29,15 @@ function getTestCases() {
 
     var a:Array = [ /foo/, /bar/ ]
 
-    status = inSection(1);
+ //    status = inSection(1);
     actual = String(a[0]);
     expect = "/foo/";
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
-    status = inSection(2);
+ //    status = inSection(2);
     actual = String(a[1]);
     expect = "/bar/";
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

@@ -1,15 +1,53 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-package {
 
-    var SECTION = "15.2.2";
-    var VERSION = "ECMA_3";
-    startTest();
-    var TITLE   = "JSON ecma-262 testcases";
+function removeExceptionDetail(s:String) {
+    var fnd=s.indexOf(" ");
+    if (fnd>-1) {
+        if (s.indexOf(':',fnd)>-1) {
+                s=s.substring(0,s.indexOf(':',fnd));
+        }
+    }
+    return s;
+}
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
+function sortObject(o:Object) {
+    var keys=[];
+    var key;
+    for ( key in o ) {
+        if (o[key]===undefined) {
+           continue;
+        }
+        keys[keys.length]=key;
+    }
+    keys.sort();
+    var ret="{";
+    var value;
+    for (var i in keys) {
+        key=keys[i];
+        value=o[key];
+        if (value is String) {
+            value='"'+value+'"';
+        } else if (value is Array) {
+            value='['+value+']';
+        } else if (value is Object) {
+        }
+        ret += '"'+key+'":'+value+",";
+    }
+    ret=ret.substring(0,ret.length-1);
+    ret+="}";
+    return ret;
+}
+
+//package {
+
+//     var SECTION = "15.2.2";
+//     var VERSION = "ECMA_3";
+//     var TITLE   = "JSON ecma-262 testcases";
+
 
     // set the Object.toString and Array.toString to show each property value
     // instead of [Object object] for testing
@@ -50,10 +88,9 @@ package {
         return s + "]";
     });
 
-    startTest();
 
-    AddTestCase("15.12.2-0-1: JSON.parse must exist as a function","function",typeof(JSON.parse));
-    AddTestCase("15.12.2.0-2: JSON.parse must exist as a function taking 2 parameters",2,JSON.parse.length);
+    Assert.expectEq("15.12.2-0-1: JSON.parse must exist as a function","function",typeof(JSON.parse));
+    Assert.expectEq("15.12.2.0-2: JSON.parse must exist as a function taking 2 parameters",2,JSON.parse.length);
 
     //JSON.parse - parsing an object where property name is a null character
 
@@ -104,7 +141,7 @@ package {
         }
     }
 
-    AddTestCase("15.12.2-2-1: JSON.parse - parsing an object where property name is a null character",true,result1);
+    Assert.expectEq("15.12.2-2-1: JSON.parse - parsing an object where property name is a null character",true,result1);
 
     var result2=true;
     for (index in nullChars) {
@@ -115,7 +152,7 @@ package {
             result2 = (result2 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-2: JSON.parse - parsing an object where property name starts with a null character",true,result2);
+    Assert.expectEq("15.12.2-2-2: JSON.parse - parsing an object where property name starts with a null character",true,result2);
 
     var result3=true;
     for (index in nullChars) {
@@ -126,7 +163,7 @@ package {
             result3 = (result3 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-3: JSON.parse - parsing an object where property name ends with a null character",true,result3);
+    Assert.expectEq("15.12.2-2-3: JSON.parse - parsing an object where property name ends with a null character",true,result3);
 
     var result4=true;
     for (index in nullChars) {
@@ -137,7 +174,7 @@ package {
             result4 = (result4 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-4: JSON.parse - parsing an object where property name starts and ends with a null character",true,result4);
+    Assert.expectEq("15.12.2-2-4: JSON.parse - parsing an object where property name starts and ends with a null character",true,result4);
 
     var result5=true;
     for (index in nullChars) {
@@ -148,7 +185,7 @@ package {
             result5 = (result5 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-5: JSON.parse - parsing an object where property name middles with a null character",true,result5);
+    Assert.expectEq("15.12.2-2-5: JSON.parse - parsing an object where property name middles with a null character",true,result5);
 
     var result6=true;
     for (index in nullChars) {
@@ -159,7 +196,7 @@ package {
             result6 = (result6 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-6: JSON.parse - parsing an object where property value is a null character",true,result6);
+    Assert.expectEq("15.12.2-2-6: JSON.parse - parsing an object where property value is a null character",true,result6);
 
     var result7=true;
     for (index in nullChars) {
@@ -170,7 +207,7 @@ package {
             result7 = (result7 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-7: JSON.parse - parsing an object where property value starts with a null character",true,result7);
+    Assert.expectEq("15.12.2-2-7: JSON.parse - parsing an object where property value starts with a null character",true,result7);
 
     var result8=true;
     for (index in nullChars) {
@@ -181,7 +218,7 @@ package {
             result8 = (result8 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-8: JSON.parse - parsing an object where property value ends with a null character",true,result8);
+    Assert.expectEq("15.12.2-2-8: JSON.parse - parsing an object where property value ends with a null character",true,result8);
 
     var result9=true;
     for (index in nullChars) {
@@ -192,7 +229,7 @@ package {
             result9 = (result9 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-9: JSON.parse - parsing an object where property value starts and ends with a null character",true,result9);
+    Assert.expectEq("15.12.2-2-9: JSON.parse - parsing an object where property value starts and ends with a null character",true,result9);
 
     var result10=true;
     for (index in nullChars) {
@@ -203,11 +240,10 @@ package {
             result10 = (result10 && (e instanceof SyntaxError));
         }
     }
-    AddTestCase("15.12.2-2-10: JSON.parse - parsing an object where property value middles with a null character",true,result10);
+    Assert.expectEq("15.12.2-2-10: JSON.parse - parsing an object where property value middles with a null character",true,result10);
 
-    test();
     
     Object.prototype.toString = oldObject;
     Array.prototype.toString = oldArray;
 
-}
+//}

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-273931.js';
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@ var summary = 'Pop scope chain in exception handling';
 var actual = '';
 var expect = 'ReferenceError';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
-
-status = summary + ' ' + inSection(1) + ' ';
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
+  
+//status = summary + ' ' + inSection(1) + ' ';
 try
 {
   with ({foo:"bar"})
@@ -33,9 +33,9 @@ catch (e)
   }
 }
  
-AddTestCase(status, expect, actual);
-
-status = summary + ' ' + inSection(2) + ' ';
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + ' ' + inSection(2) + ' ';
 try
 {
   with ({foo:"bar"})
@@ -53,9 +53,9 @@ catch (e)
   }
 }
  
-AddTestCase(status, expect, actual);
-
-status = summary + ' ' + inSection(3) + ' ';
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + ' ' + inSection(3) + ' ';
 try
 {
   var s = "throw 42";
@@ -74,6 +74,5 @@ catch (e)
   }
 }
  
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

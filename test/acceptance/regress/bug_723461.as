@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "regress_723461";
-var VERSION = "AS3";
-var TITLE   = "ByteArray readUTFBytes does not properly update position when it starts at a UTF8 BOM";
-var bug = "723461";
+// var SECTION = "regress_723461";
+// var VERSION = "AS3";
+// var TITLE   = "ByteArray readUTFBytes does not properly update position when it starts at a UTF8 BOM";
+// var bug = "723461";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 
 import flash.utils.ByteArray;
-
+import com.adobe.test.Assert;
 function testCore(starting) {
     var results = {};
     var starting = 0;
@@ -47,15 +45,15 @@ function testCore(starting) {
 function testStartAt0() {
     var results = testCore(0);
 
-    AddTestCase("at 0 result string skips BOM",
+    Assert.expectEq("at 0 result string skips BOM",
                 "1234",
                 results.s1);
 
-    AddTestCase("at 0 result subsequent reads correct",
+    Assert.expectEq("at 0 result subsequent reads correct",
                 "5678",
                 results.s2);
 
-    AddTestCase("at 0 position updated correctly",
+    Assert.expectEq("at 0 position updated correctly",
                 results.posPostWrite,
                 results.posPostRead);
 }
@@ -63,15 +61,15 @@ function testStartAt0() {
 function testStartAt10() {
     var results = testCore(10);
 
-    AddTestCase("at 10 result string skips BOM",
+    Assert.expectEq("at 10 result string skips BOM",
                 "1234",
                 results.s1);
 
-    AddTestCase("at 10 result subsequent reads correct",
+    Assert.expectEq("at 10 result subsequent reads correct",
                 "5678",
                 results.s2);
 
-    AddTestCase("at 10 position updated correctly",
+    Assert.expectEq("at 10 position updated correctly",
                 results.posPostWrite,
                 results.posPostRead);
 }
@@ -80,4 +78,3 @@ testStartAt0();
 
 testStartAt10();
 
-test();

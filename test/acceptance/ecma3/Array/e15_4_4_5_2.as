@@ -1,18 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+     var SECTION = "15.4.4.5-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Array.prototype.sort(comparefn)";
 
-    var SECTION = "15.4.4.5-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Array.prototype.sort(comparefn)";
-
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = new Array();
     getTestCases();
-    test();
 
 function getTestCases() {
     var S = new Array();
@@ -67,21 +65,19 @@ function CheckItems( S ) {
     var E = Sort( A );
     A = S;
     A.sort(Compare);
-    testcases[testcases.length] = new TestCase(   SECTION,
+    testcases[testcases.length] = Assert.expectEq(   
                                     S +";  A.sort(Compare); A.length",
                                     E.length,
                                     A.length);
 
     for ( var i = 0; i < E.length; i++ ) {
-        testcases[testcases.length] = new TestCase(
-                                            SECTION,
+        testcases[testcases.length] = Assert.expectEq( 
                                             "A["+i+ "].toString()",
                                             E[i] +"",
                                             A[i] +"");
 
         if ( A[i] == void 0 && typeof A[i] == "undefined" ) {
-            testcases[testcases.length] = new TestCase(
-                                            SECTION,
+            testcases[testcases.length] = Assert.expectEq( 
                                             "typeof A["+i+ "]",
                                             typeof E[i],
                                             typeof A[i] );

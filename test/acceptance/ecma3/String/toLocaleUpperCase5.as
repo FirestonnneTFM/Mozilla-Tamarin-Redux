@@ -1,30 +1,28 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.4.19";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.prototype.toLocaleUpperCase()";
+//     var SECTION = "15.5.4.19";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.prototype.toLocaleUpperCase()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION,  "String.prototype.toUpperCase.length",        0,          String.prototype.toUpperCase.length );
-    array[item++] = new TestCase( SECTION,  "delete String.prototype.toUpperCase.length", false,      delete String.prototype.toUpperCase.length );
-    array[item++] = new TestCase( SECTION,  "delete String.prototype.toupperCase.length; String.prototype.toupperCase.length", 0,      (delete String.prototype.toUpperCase.length, String.prototype.toUpperCase.length) );
+    array[item++] = Assert.expectEq(   "String.prototype.toUpperCase.length",        0,          String.prototype.toUpperCase.length );
+    array[item++] = Assert.expectEq(   "delete String.prototype.toUpperCase.length", false,      delete String.prototype.toUpperCase.length );
+    array[item++] = Assert.expectEq(   "delete String.prototype.toupperCase.length; String.prototype.toupperCase.length", 0,      (delete String.prototype.toUpperCase.length, String.prototype.toUpperCase.length) );
 
     // Basic Latin, Latin-1 Supplement, Latin Extended A
     for ( var i = 0; i <= 0x017f; i++ ) {
         var U = new Unicode( i );
 
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase().charCodeAt(0)",
                                         U.upper,
                                         (s = new String( String.fromCharCode(i) ), s.toLocaleUpperCase().charCodeAt(0) ) );

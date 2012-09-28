@@ -2,29 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Opcodes that start with the letter I" 
-    callpropvoid START 1
-    
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest1)
-    getlocal0
-    call 0
-    
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
-
-
-
-
 
 function runTest()
 {
@@ -35,7 +12,7 @@ function runTest()
     pushnull
     setlocal1
     
-    .try {
+    try {
         pushstring "moo"
         pushnull
         in
@@ -50,7 +27,7 @@ function runTest()
         
         jump finished_in_null
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -98,7 +75,7 @@ function runTest()
     
     // initproperty opcode not implemented: see https://bugzilla.mozilla.org/show_bug.cgi?id=491024
     /*
-    .try {
+    try {
         pushnull
         initproperty no_such_property
         
@@ -110,7 +87,7 @@ function runTest()
         
         jump finished_initproperty_null
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -149,7 +126,7 @@ function runTest1()
     instanceof
     callpropvoid COMPARE_STRICTEQ 3
     
-    .try {
+    try {
         findproperty Array
         constructprop Array 0
         pushnull
@@ -165,7 +142,7 @@ function runTest1()
         
         jump finished_instanceof_null
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -178,7 +155,7 @@ function runTest1()
     
     finished_instanceof_null:
     
-    .try {
+    try {
         pushnull
         pushnull
         instanceof
@@ -194,7 +171,7 @@ function runTest1()
         jump finished_null_instanceof_null
         
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -207,65 +184,29 @@ function runTest1()
     }
     
     finished_null_instanceof_null:
-    
-    
-    findproperty COMPARE_STRICTEQ
-    pushstring "null istype Object"
-    pushfalse // expected
-    pushnull
-    istype Object
-    callpropvoid COMPARE_STRICTEQ 3
-    
-    // Will never work in avm - see https://bugzilla.mozilla.org/show_bug.cgi?id=491065
-    /*
-    findproperty COMPARE_STRICTEQ
-    pushstring "null istype Null"
-    pushtrue // expected
-    pushnull
-    istype Null
-    callpropvoid COMPARE_STRICTEQ 3
-    */
-    
-    
-    findproperty COMPARE_STRICTEQ
-    pushstring "null istypelate Object"
-    pushfalse // expected
-    pushnull
-    findproperty Object
-    getproperty Object
-    istypelate
-    callpropvoid COMPARE_STRICTEQ 3
-    
-    
-    .try {
-        pushnull
-        pushnull
-        istypelate
-        
-        pop
-        
-        findproperty FAIL
-        pushstring "null null istypelate"
-        pushstring "exception should have been thrown: TypeError: Error #1009: Cannot access a property or method of a null object reference."
-        getlocal1
-        callpropvoid FAIL 3
-        
-        jump finished_null_null_istypelate
-        
-    }
-    .catch {
-        getlocal0
-        pushscope
-        setlocal2   // save typeError
-        findproperty COMPARE_TYPEERROR
-        pushstring "null null istypelate"
-        pushstring "TypeError: Error #1009"   // expected
-        getlocal2
-        callpropvoid COMPARE_TYPEERROR 3
-        
-    }
-    
-    finished_null_null_istypelate:
-    
+ 
     returnvoid
 }
+
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Opcodes that start with the letter I" 
+    callpropvoid START 1
+    
+    newfunction runTest
+    getlocal0
+    call 0
+    
+    newfunction runTest1
+    getlocal0
+    call 0
+    
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+
+
+script_info{init:main}

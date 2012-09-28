@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "6.3.6";
-var VERSION = "AS3";
-var TITLE   = "The bitwise not ~ operator";
+// var SECTION = "6.3.6";
+// var VERSION = "AS3";
+// var TITLE   = "The bitwise not ~ operator";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var flt:float = new float(3.1413119f);
@@ -26,5 +24,4 @@ flt = 12.375f;
 AddStrictTestCase("ToInt32 of float value instead of float memory representation", true, Number(~flt) != -1095106561);
 AddStrictTestCase("~12.375f ", ~12, ~flt);
 
-test();
 

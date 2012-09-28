@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "dowhile-006";
-    var VERSION = "ECMA_2";
-    var TITLE   = "do...while";
+import com.adobe.test.Assert;
+//     var SECTION = "dowhile-006";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "do...while";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -69,14 +67,14 @@ function getTestCases() {
             result2 = true;
         }
     
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "hit code after loop in inner loop",
             ( object.breakIn || object.breakOut ) ? false : true ,
             result1 );
     
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "hit code after loop in outer loop",
             ( object.breakOut ) ? false : true,
             result2 );

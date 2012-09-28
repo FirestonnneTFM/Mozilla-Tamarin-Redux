@@ -9,12 +9,10 @@ Returns an implementation-dependent approximation to the arc cosine of x.
 The result is expressed in radians and ranges from +0 to +PI.
 */
 
-var SECTION = "4.5.16";
-var VERSION = "AS3";
-var TITLE   = "public function acos(x:float):float";
+// var SECTION = "4.5.16";
+// var VERSION = "AS3";
+// var TITLE   = "public function acos(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.acos(param); }
 
@@ -58,5 +56,4 @@ AddStrictTestCase("float.acos(-0f) FloatLiteral", float(float.PI/2.0f), float.ac
 AddStrictTestCase("float.acos(float.SQRT1_2)", float(float.PI/4.0f), float.acos(float.SQRT1_2));
 AddStrictTestCase("float.acos(-float.SQRT1_2)", float(float.PI/4.0f*3.0f), float.acos(-float.SQRT1_2));
 
-test();
 

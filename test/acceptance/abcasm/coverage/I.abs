@@ -2,69 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Opcodes that start with the letter I" 
-	callpropvoid START 1
-
-	newfunction .function_id(runTest1)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest2)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest3)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest4)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest5)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest6)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest7)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest8)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest9)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest10)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest11)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest12)
-	getlocal0
-	call 0
-
-	newfunction .function_id(runTest13)
-	getlocal0
-	call 0
-
-	findproperty END
-	callpropvoid END 0
-	returnvoid
-}
 
 /* Limit this to seven tests per function */
 
@@ -1410,60 +1347,75 @@ function runTest13()
 		instanceof
 		callpropvoid COMPARE_STRICTEQ 3
 
-		findproperty COMPARE_STRICTEQ
-	pushstring "Array istype Array"
-		pushtrue // expected
-		findproperty Array
-		constructprop Array 0
-		istype Array
-		callpropvoid COMPARE_STRICTEQ 3
 
-		findproperty COMPARE_STRICTEQ
-	pushstring "Array istype Object"
-		pushtrue // expected
-		findproperty Array
-		constructprop Array 0
-		istype Object
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "Array istype Number"
-		pushfalse // expected
-		findproperty Array
-		constructprop Array 0
-		istype Number
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "Array istypelate Array"
-		pushtrue // expected
-		findproperty Array
-		constructprop Array 0
-		findproperty Array
-		getproperty Array
-		istypelate
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "Array istypelate Object"
-		pushtrue // expected
-		findproperty Array
-		constructprop Array 0
-		findproperty Object
-		getproperty Object
-		istypelate
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "Array istypelate Number"
-		pushfalse // expected
-		findproperty Array
-		constructprop Array 0
-		findproperty Number
-		getproperty Number
-		istypelate
-		callpropvoid COMPARE_STRICTEQ 3
 
 
 		returnvoid
 }
+
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Opcodes that start with the letter I" 
+	callpropvoid START 1
+
+	newfunction runTest1
+	getlocal0
+	call 0
+
+	newfunction runTest2
+	getlocal0
+	call 0
+
+	newfunction runTest3
+	getlocal0
+	call 0
+
+	newfunction runTest4
+	getlocal0
+	call 0
+
+	newfunction runTest5
+	getlocal0
+	call 0
+
+	newfunction runTest6
+	getlocal0
+	call 0
+
+	newfunction runTest7
+	getlocal0
+	call 0
+
+	newfunction runTest8
+	getlocal0
+	call 0
+
+	newfunction runTest9
+	getlocal0
+	call 0
+
+	newfunction runTest10
+	getlocal0
+	call 0
+
+	newfunction runTest11
+	getlocal0
+	call 0
+
+	newfunction runTest12
+	getlocal0
+	call 0
+
+	newfunction runTest13
+	getlocal0
+	call 0
+
+	findproperty END
+	callpropvoid END 0
+	returnvoid
+}
+
+script_info{init: main}
+

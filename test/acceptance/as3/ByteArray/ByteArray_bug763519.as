@@ -1,19 +1,17 @@
 /* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
-
-/*  This Source Code Form is subject to the terms of the Mozilla Public
- *  License, v. 2.0. If a copy of the MPL was not distributed with this
- *  file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import flash.utils.ByteArray;
 import avmplus.System;
+import com.adobe.test.Assert;
 
-var SECTION = "ByteArray";
-var VERSION = "as3";
-startTest();
-var TITLE   = "test ByteArray capacity growth regression";
+// var SECTION = "ByteArray";
+// var VERSION = "as3";
+// var TITLE   = "test ByteArray capacity growth regression";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 var b:ByteArray = new ByteArray();
 var MB:uint = 1024*1024;
@@ -60,10 +58,9 @@ info.deltaNegative = deltaNegative;
 
 print(JSON.stringify(info));
 
-AddTestCase("small length increase incurs less than 2x capacity growth",
+Assert.expectEq("small length increase incurs less than 2x capacity growth",
             true, deltaLessThan2x);
 
-AddTestCase("huge length decrease causes capacity drop",
+Assert.expectEq("huge length decrease causes capacity drop",
             true, deltaNegative);
 
-test();

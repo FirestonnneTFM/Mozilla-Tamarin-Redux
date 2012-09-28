@@ -47,7 +47,7 @@ for arg in sys.argv[1:]:
         androidid=arg[12:]
         adbargs="-s %s" % androidid
     elif re.search(".abc",arg):
-        flatfile=os.path.basename(arg)
+        flatfile=arg.replace('/','.')
         filelist.append(arg)
         stdout=adb_proxy.main(["%s push %s /data/local/tamarin/%s" % (adbargs,arg,flatfile)])
         args+=" %s" % flatfile

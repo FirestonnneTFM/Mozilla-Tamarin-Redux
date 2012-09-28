@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /*
     In Ecma4 there are three sealed types; Boolean, Number and String
     You cannot set properties of an instance of a sealed type
@@ -8,14 +10,11 @@
     Should throw a ReferenceError
 
 */
-    var SECTION = "ECMA_4";
-    var VERSION = "ECMA_4";
-    startTest();
-    var TITLE   = "tostr=Number.prototype.toString;x=4;x.toString=tostr;";
-    writeHeaderToLog( TITLE );
+//     var SECTION = "ECMA_4";
+//     var VERSION = "ECMA_4";
+//     var TITLE   = "tostr=Number.prototype.toString;x=4;x.toString=tostr;";
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array:Array = new Array();
@@ -31,13 +30,14 @@ function getTestCases() {
     } catch (e:ReferenceError) {
         thisError = e.toString();
     } finally {
-        var expectedError = 1056;
+        var expectedError = 1037;
+         /*var expectedError = 1056;
         if (as3Enabled) {
             expectedError = 1037;
-        }
-        array[item] = new TestCase( SECTION,"toStr=Number.prototype.toString;x=4;x.toString=tostr",
-                     REFERENCEERROR+expectedError,
-                     referenceError(thisError) );
+        }*/
+        array[item] = Assert.expectEq( "toStr=Number.prototype.toString;x=4;x.toString=tostr",
+                     Utils.REFERENCEERROR+expectedError,
+                     Utils.referenceError(thisError) );
     }
     return ( array );
 }

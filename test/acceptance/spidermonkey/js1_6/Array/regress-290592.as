@@ -2,8 +2,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
+
 var gTestfile = 'regress-290592.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 290592;
@@ -11,8 +12,9 @@ var summary = 'Array extras: forEach, indexOf, filter, map';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+function reportCompare(expected, actual, summary){
+  Assert.expectEq(summary,expected,actual);
+}
 
 // Utility functions
 
@@ -656,4 +658,3 @@ if ('indexOf' in Array.prototype)
   reportCompare(expect, actual, 'indexOf begins searching at fromIndex');
 }
 
-test();

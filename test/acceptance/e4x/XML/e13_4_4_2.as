@@ -1,8 +1,101 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
+ 
 
 START("13.4.4.2 - XML addNamespace()");
 
@@ -36,10 +129,10 @@ var n4 = new Namespace('boo', 'http://hk.com');
 var xml = "<a><b s='1'><c>55</c><d>bird</d></b><b s='2'><c>5</c><d>dinosaur</d></b></a>";
 var xmlwithns = "<a xmlns:pfx=\"http://w3.org\"><a><b s='1'><c>55</c><d>bird</d></b><b s='2'><c>5</c><d>dinosaur</d></b></a>";
 
-AddTestCase( "addNamespace with prefix:", "http://w3.org",
+Assert.expectEq( "addNamespace with prefix:", "http://w3.org",
            (  x1 = new XML(xml), x1.addNamespace(n1), myGetNamespace(x1,'pfx').toString()));
 
-AddTestCase( "addNamespace without prefix:", undefined,
+Assert.expectEq( "addNamespace without prefix:", undefined,
            (  x1 = new XML(xml), x1.addNamespace(n2), myGetNamespace(x1, 'blah')));
 
 expectedStr = "ArgumentError: Error #1063: Argument count mismatch on XML/addNamespace(). Expected 1, got 0";
@@ -49,32 +142,32 @@ actual = "No error";
 try {
     x1.addNamespace();
 } catch(e1) {
-    actual = grabError(e1, e1.toString());
+    actual = Utils.grabError(e1, e1.toString());
 }
 
-AddTestCase( "addNamespace(): Error. Needs 1 argument", expected, actual);
+Assert.expectEq( "addNamespace(): Error. Needs 1 argument", expected, actual);
 
-AddTestCase( "Does namespace w/o prefix change XML object:", true,
+Assert.expectEq( "Does namespace w/o prefix change XML object:", true,
            (  x1 = new XML(xml), y1 = new XML(xml), x1.addNamespace(n1), (x1 == y1)));
 
-AddTestCase( "Does namespace w/ prefix change XML object:", true,
+Assert.expectEq( "Does namespace w/ prefix change XML object:", true,
            (  x1 = new XML(xml), y1 = new XML(xml), x1.addNamespace(n2), (x1 == y1)));
 
-AddTestCase( "Adding two different namespaces:", 'http://w3.org',
+Assert.expectEq( "Adding two different namespaces:", 'http://w3.org',
        (  x1 = new XML(xml), x1.addNamespace(n1), x1.addNamespace(n3), myGetNamespace(x1, 'pfx').toString()));
 
-AddTestCase( "Adding two different namespaces:", 'http://us.gov',
+Assert.expectEq( "Adding two different namespaces:", 'http://us.gov',
            (  x1 = new XML(xml), x1.addNamespace(n1), x1.addNamespace(n3), myGetNamespace(x1, 'boo').toString()));
 
-AddTestCase( "Adding namespace with pre-existing prefix:", 'http://hk.com',
+Assert.expectEq( "Adding namespace with pre-existing prefix:", 'http://hk.com',
            (  x1 = new XML(xml), x1.addNamespace(n3), x1.addNamespace(n4), myGetNamespace(x1, 'boo').toString()));
 
 
-AddTestCase( "Adding namespace to something other than top node:", 'http://hk.com',
+Assert.expectEq( "Adding namespace to something other than top node:", 'http://hk.com',
            (  x1 = new XML(xml), x1.b[0].d.addNamespace(n4), myGetNamespace(x1.b[0].d, 'boo').toString()));
 
 
-AddTestCase( "Adding namespace to XMLList element:", 'http://hk.com',
+Assert.expectEq( "Adding namespace to XMLList element:", 'http://hk.com',
            (  x1 = new XMLList(xml), x1.b[1].addNamespace(n4), myGetNamespace(x1.b[1], 'boo').toString()));
            
 
@@ -84,7 +177,7 @@ AddTestCase( "Adding namespace to XMLList element:", 'http://hk.com',
 x2 = <ns2:x xmlns:ns2="foo"><b>text</b></ns2:x>;
 x2s = x2.toString();
 correct = '<ns2:x xmlns:ns2="foo">\n  <b>text</b>\n</ns2:x>';
-AddTestCase("Original XML", x2s, correct);
+Assert.expectEq("Original XML", x2s, correct);
 
 // Adding a namespace to a node will clear a conflicting prefix
 var ns = new Namespace ("ns2", "newuri");
@@ -93,13 +186,9 @@ x2s = x2.toString();
  
 correct = '<x xmlns:ns2="newuri" xmlns="foo">\n  <b>text</b>\n</x>';
 
-AddTestCase("Adding namespace that previously existed with a different prefix", correct,
+Assert.expectEq("Adding namespace that previously existed with a different prefix", correct,
        x2s);
 
 
-correct = <newprefix:x xmlns:newprefix="foo"><b>text</b></newprefix:x>;
-
-AddTestCase("Adding totally new namespace", correct,
-(ns3 = new Namespace ("newprefix", "foo"), x2.addNamespace (ns3),x2));
 
 END();

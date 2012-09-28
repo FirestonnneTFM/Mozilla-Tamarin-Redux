@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-253150.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Do not warn on detecting properties';
 var actual = '';
 var expect = 'No warning';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var testobject = {};
 
@@ -27,7 +27,7 @@ catch(ex)
   actual = ex + '';
 }
 
-AddTestCase(summary + ': 1', expect, actual);
+Assert.expectEq(summary + ': 1', expect, actual);
 
 try
 {
@@ -42,7 +42,7 @@ catch(ex)
   actual = ex + '';
 }
 
-AddTestCase(summary + ': 2', expect, actual);
+Assert.expectEq(summary + ': 2', expect, actual);
 
 try
 {
@@ -57,7 +57,7 @@ catch(ex)
   actual = ex + '';
 }
 
-AddTestCase(summary + ': 3', expect, actual);
+Assert.expectEq(summary + ': 3', expect, actual);
 
 try
 {
@@ -72,7 +72,7 @@ catch(ex)
   actual = ex + '';
 }
 
-AddTestCase(summary + ': 4', expect, actual);
+Assert.expectEq(summary + ': 4', expect, actual);
 
 try
 {
@@ -87,6 +87,5 @@ catch(ex)
   actual = ex + '';
 }
 
-AddTestCase(summary + ': 3', expect, actual);
+Assert.expectEq(summary + ': 3', expect, actual);
 
-test();

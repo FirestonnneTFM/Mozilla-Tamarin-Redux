@@ -8,18 +8,19 @@ function main() {
     
 loop:
     label
-    .try {
+    try {
         jump loop
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save Error
         getlocal2
-        .print
         pushstring "Exception thrown outside try, should not have been caught FAILED!"
     }
     pushstring "End"
-    .print
+    
     returnvoid
 }
+
+script_info{init:main}

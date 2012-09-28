@@ -2,7 +2,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+// TODO: REVIEW AS4 CONVERSION ISSUE 
 /**
    File Name:          sort.as
    ECMA Section:       Vector.sort(comparefn)
@@ -14,12 +16,10 @@
 */
 
 
-var SECTION = "";
-var VERSION = "ECMA_1";
-startTest();
-var TITLE   = "Vector.sort(comparefn)";
+// var SECTION = "";
+// var VERSION = "ECMA_1";
+// var TITLE   = "Vector.sort(comparefn)";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var errormsg="";
 try {
@@ -28,27 +28,26 @@ try {
   errormsg=e.toString();
 }
 
-if (as3Enabled) {
-    AddTestCase(
-   "sort vector without setting compare function throws exception",
-   "ArgumentError: Error #1063",
-   parseError(errormsg,"ArgumentError: Error #1063".length));
-} else {
-    AddTestCase(
-   "sort vector without setting compare function throws exception",
-   "TypeError: Error #1034",
-   parseError(errormsg,"TypeError: Error #1034".length));
-}
+//if (as3Enabled) {
+//  Assert.expectEq(
+// "sort vector without setting compare function throws exception",
+// "ArgumentError: Error #1063",
+//  Utils.parseError(errormsg,"ArgumentError: Error #1063".length));
+//} else {
+//  Assert.expectEq(
+// "sort vector without setting compare function throws exception",
+// "TypeError: Error #1034",
+//  Utils.parseError(errormsg,"TypeError: Error #1034".length));
+//}
 
 
 
-AddTestCase(
+Assert.expectEq(
     "sort vector",
     "-12,2,17,56,999",
     new<Number>[999,2,56,-12,17].sort(Compare).toString());
 
 
-test();
 
 function Sort( a ) {
   for ( i = 0; i < a.length; i++ ) {

@@ -1,13 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "namespace assigned with AssignmentExpression";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "namespace assigned with AssignmentExpression";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -65,12 +66,12 @@ class C
 
 var obj:A = new A();
 
- AddTestCase("N1::v3=3", 3, obj.a1());
- AddTestCase("N1::['v3']=4", 4, obj.a6());
- AddTestCase("N2::n2='3'", 3, obj.a2());
- AddTestCase("v3='5'", 5, obj.v3);
- AddTestCase("N2::n2='5'", 5, obj.a3());
- AddTestCase("N4 = N3; N4::v1", 5, obj.a4());
+ Assert.expectEq("N1::v3=3", 3, obj.a1());
+ Assert.expectEq("N1::['v3']=4", 4, obj.a6());
+ Assert.expectEq("N2::n2='3'", 3, obj.a2());
+ Assert.expectEq("v3='5'", 5, obj.v3);
+ Assert.expectEq("N2::n2='5'", 5, obj.a3());
+ Assert.expectEq("N4 = N3; N4::v1", 5, obj.a4());
  
  namespace mx_internal;
  
@@ -79,21 +80,20 @@ use namespace mx_internal;
  var c:C = new C();
  
  try {
-    AddTestCase("c.v++", 1, (c.v++, c.v));
+    Assert.expectEq("c.v++", 1, (c.v++, c.v));
     result = "no exception";
  } catch (e1) {
     result = "exception";
  }
- AddTestCase("Increment in setter", "no exception", result);
+ Assert.expectEq("Increment in setter", "no exception", result);
  
  try {
-    AddTestCase("C.sv++", 1, (C.sv++, C.sv));
+    Assert.expectEq("C.sv++", 1, (C.sv++, C.sv));
     result = "no exception";
  } catch (e2) {
     result = "exception";
  }
- AddTestCase("Increment in static setter", "no exception", result);
+ Assert.expectEq("Increment in static setter", "no exception", result);
  
- AddTestCase("N1::v1=5 without declaring N2 var v1", "ReferenceError: Error #1056", referenceError(obj.a5()));
+ Assert.expectEq("N1::v1=5 without declaring N2 var v1", "ReferenceError: Error #1056", Utils.referenceError(obj.a5()));
 
- test();

@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  4.1 The type float
@@ -47,12 +48,10 @@ Note(5): The rest of this specification will use the term "float value" synonymo
 */
 
 
-var SECTION = "4.1";
-var VERSION = "AS3";
-var TITLE   = "The type float";
+// var SECTION = "4.1";
+// var VERSION = "AS3";
+// var TITLE   = "The type float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 /* TEST: The class type known as float models a 32-bit IEEE single-precision floating-point datum*/
@@ -67,7 +66,7 @@ try
 {
     byteArr.writeFloat(pi_dbl);
     /// Agree, not very relevant for the Float class per se; but let's leave it here, shall we?
-    AddTestCase("float is 32bits", 4, byteArr.length);
+    Assert.expectEq("float is 32bits", 4, byteArr.length);
     byteArr.position = 0;
     pi_float = byteArr.readFloat();
     byteArr.position = 0;
@@ -78,13 +77,13 @@ catch(e)
     pi_int = new String(e);
 }
 
-AddTestCase("float is 32-bit IEEE floating-point", expected_pi_float, pi_float);
-AddTestCase("float is 32-bit IEEE floating-point (bit representation)", expected_pi_int, pi_int);
+Assert.expectEq("float is 32-bit IEEE floating-point", expected_pi_float, pi_float);
+Assert.expectEq("float is 32-bit IEEE floating-point (bit representation)", expected_pi_int, pi_int);
 /* TEST: It is a direct subtype of Object. */
 var pi_obj:Object = pi_float as Object;
-AddTestCase("float is object", pi_float, pi_obj);
+Assert.expectEq("float is object", pi_float, pi_obj);
 
-AddTestCase("float is direct subtype of Object", "Object", getQualifiedSuperclassName(float));
+Assert.expectEq("float is direct subtype of Object", "Object", getQualifiedSuperclassName(float));
 
 
 /* TOTEST: A float instance is immutable (?). Don't know how that could be tested...*/
@@ -97,7 +96,7 @@ values and objects, with value equality implying object equality and vice versa,
 var new_pi_float = new float(3.1415927);
 var expected_obj:Object = expected_pi_float as Object;
 var new_obj:Object = new_pi_float as Object;
-AddTestCase("value equality implies object equality", true, expected_obj === new_obj);
+Assert.expectEq("value equality implies object equality", true, expected_obj === new_obj);
 
 /* // THE FOLOWING TEST IS DISABLED BECAUSE ByteArray.writeObject is not implemented in AVM Shell
 try
@@ -110,15 +109,15 @@ catch(e)
 {
     new_obj = new String(e);
 }
-AddTestCase("value equality implies object equality (part 2)", expected_obj, new_obj);
-AddTestCase("value equality implies object equality (part 2)", true, expected_obj===new_obj);
+Assert.expectEq("value equality implies object equality (part 2)", expected_obj, new_obj);
+Assert.expectEq("value equality implies object equality (part 2)", true, expected_obj===new_obj);
 */
 
 /* Note(3): As for any other class type, there is a class object for the float type. This class object is
 immutably bound to the name "float" in same domain of the environment where "Number" is already
 bound.
 */
-AddTestCase("Class object for type float", false, (float as Object) == null);
+Assert.expectEq("Class object for type float", false, (float as Object) == null);
 
 var flt_class_name;
 try
@@ -130,7 +129,6 @@ catch(e)
 {
     flt_class_name = "Exception: "+ new String(e);
 }
-AddTestCase("Class name for type float", "float", flt_class_name);
+Assert.expectEq("Class name for type float", "float", flt_class_name);
 
-test();
 

@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 // Bugzilla 707612
 
-var SECTION = "ASC";
-var VERSION = "AS3";
-var TITLE   = "Strict: Allow arithmetic on float4 and *";
+// var SECTION = "ASC";
+// var VERSION = "AS3";
+// var TITLE   = "Strict: Allow arithmetic on float4 and *";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // -- begin test
 
@@ -31,6 +30,5 @@ var w4 = y%x;                    // This should always be allowed
 
 // -- end test
 
-AddTestCase("Trivially true", true, true);
+Assert.expectEq("Trivially true", true, true);
 
-test();

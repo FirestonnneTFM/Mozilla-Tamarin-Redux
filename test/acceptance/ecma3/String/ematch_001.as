@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  *  String.match( regexp )
@@ -24,13 +25,11 @@
  *  transferred to other kinds of objects for use as a method.
  */
 
-    var SECTION = "String/match-001.js";
-    var VERSION = "ECMA_2";
-    var TITLE   = "String.prototype.match( regexp )";
+//     var SECTION = "String/match-001.js";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "String.prototype.match( regexp )";
 
-    startTest();
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -59,23 +58,23 @@ function getTestCases() {
     function AddRegExpCases(
         regexp, str_regexp, string, length, index, matches_array ) {
     
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string  + " ).match(" + str_regexp +").length",
             length,
             string.match(regexp).length );
     
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string + " ).match(" + str_regexp +").index",
             index,
             string.match(regexp).index );
     
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string + " ).match(" + str_regexp +").input",
             string,
             string.match(regexp).input );
     
         for ( var matches = 0; matches < matches_array.length; matches++ ) {
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                 "( " + string + " ).match(" + str_regexp +")[" + matches +"]",
                 matches_array[matches],
                 string.match(regexp)[matches] );
@@ -85,7 +84,7 @@ function getTestCases() {
     function AddGlobalRegExpCases(
         regexp, str_regexp, string, length, matches_array ) {
     
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string  + " ).match(" + str_regexp +").length",
             length,
             string.match(regexp).length );
@@ -93,7 +92,7 @@ function getTestCases() {
         for ( var matches = 0; matches < matches_array.length; matches++ ) {
             // adding toString on result... this is ok since we now distinguish
             // between string and object.
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                 "( " + string + " ).match(" + str_regexp +")[" + matches +"]",
                 matches_array[matches],
                 string.match(regexp)[matches].toString() );

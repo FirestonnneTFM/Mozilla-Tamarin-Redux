@@ -11,30 +11,30 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION:String = "mops";
-    var VERSION:String = "AS3";
-    var TITLE:String   = "li16";
+//     var SECTION:String = "mops";
+//     var VERSION:String = "AS3";
+//     var TITLE:String   = "li16";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("li16(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("li16(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ LI16(Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
     // Get a handle to the domainMemory after it is initialized
     var mem:ByteArray = Domain.currentDomain.domainMemory;
 
-    AddErrorTest("li16(-1)", RANGEERROR+1506, function(){ LI16(-1); });
-    AddErrorTest("li16(mem.length)", RANGEERROR+1506, function(){ LI16(mem.length); });
-    AddErrorTest("li16(mem.length-1)", RANGEERROR+1506, function(){ LI16(mem.length-1); });
-    AddTestCase("li16(mem.length-2)", 0, LI16(mem.length-2));
+    Assert.expectError("li16(-1)", Utils.RANGEERROR+1506, function(){ LI16(-1); });
+    Assert.expectError("li16(mem.length)", Utils.RANGEERROR+1506, function(){ LI16(mem.length); });
+    Assert.expectError("li16(mem.length-1)", Utils.RANGEERROR+1506, function(){ LI16(mem.length-1); });
+    Assert.expectEq("li16(mem.length-2)", 0, LI16(mem.length-2));
 
     SI16(0x7FDE, 1);
-    AddTestCase("li16(1) loads do not need to be aligned", 0x7FDE, LI16(1));
+    Assert.expectEq("li16(1) loads do not need to be aligned", 0x7FDE, LI16(1));
 
     testsi8();
     testsi16();
@@ -47,7 +47,6 @@ package {
     testwriteFloat();
     testwriteDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -72,22 +71,22 @@ package {
         clearMemory();
         SI8(0x7F, 0);
         SI8(0x80, 1);
-        AddTestCase("li16 load short written by si8()", 0x807F, LI16(0));
+        Assert.expectEq("li16 load short written by si8()", 0x807F, LI16(0));
     }
 
     function testsi16():void
     {
         clearMemory();
         SI16(0x80DE, 0);
-        AddTestCase("li16 load short written by si16(0x80DE)", 0x80DE, LI16(0));
+        Assert.expectEq("li16 load short written by si16(0x80DE)", 0x80DE, LI16(0));
     }
 
     function testsi32():void
     {
         clearMemory();
         SI32(0x80DE32F1, 0);
-        AddTestCase("li16 load 1st short written by si32(0x80DE32F1)", 0x80DE, LI16(2));
-        AddTestCase("li16 load 2nd short written by si32(0x80DE32F1)", 0x32F1, LI16(0));
+        Assert.expectEq("li16 load 1st short written by si32(0x80DE32F1)", 0x80DE, LI16(2));
+        Assert.expectEq("li16 load 2nd short written by si32(0x80DE32F1)", 0x32F1, LI16(0));
     }
 
     function testsf32():void
@@ -107,8 +106,8 @@ package {
          *****************************************/
         clearMemory();
         SF32(12.375, 0);
-        AddTestCase("li16 load 1st short written by sf32(12.375)", 0x4146, LI16(2));
-        AddTestCase("li16 load 2nd short written by sf32(12.375)", 0x0000, LI16(0));
+        Assert.expectEq("li16 load 1st short written by sf32(12.375)", 0x4146, LI16(2));
+        Assert.expectEq("li16 load 2nd short written by sf32(12.375)", 0x0000, LI16(0));
     }
 
     function testsf64():void
@@ -125,10 +124,10 @@ package {
          *****************************************/
         clearMemory();
         SF64(1.0241024102410242048E19, 0);
-        AddTestCase("li16 load 1st short written by sf64(10241024102410241024)", 0x43E1, LI16(6));
-        AddTestCase("li16 load 2nd short written by sf64(10241024102410241024)", 0xC3ED, LI16(4));
-        AddTestCase("li16 load 3rd short written by sf64(10241024102410241024)", 0xA52E, LI16(2));
-        AddTestCase("li16 load 4th short written by sf64(10241024102410241024)", 0x0C09, LI16(0));
+        Assert.expectEq("li16 load 1st short written by sf64(10241024102410241024)", 0x43E1, LI16(6));
+        Assert.expectEq("li16 load 2nd short written by sf64(10241024102410241024)", 0xC3ED, LI16(4));
+        Assert.expectEq("li16 load 3rd short written by sf64(10241024102410241024)", 0xA52E, LI16(2));
+        Assert.expectEq("li16 load 4th short written by sf64(10241024102410241024)", 0x0C09, LI16(0));
     }
 
     function testwriteByte():void
@@ -138,7 +137,7 @@ package {
         mem.writeByte(127);
         mem.writeByte(128);
 
-        AddTestCase("li16 load short written by writeByte()", 0x807F, LI16(0));
+        Assert.expectEq("li16 load short written by writeByte()", 0x807F, LI16(0));
     }
 
     function testwriteBoolean():void
@@ -148,7 +147,7 @@ package {
         mem.writeBoolean(false);
         mem.writeBoolean(true);
 
-        AddTestCase("li16 load short written by writeBoolean()", 0x0100, LI16(0));
+        Assert.expectEq("li16 load short written by writeBoolean()", 0x0100, LI16(0));
     }
 
     function testwriteInt():void
@@ -164,8 +163,8 @@ package {
         mem.position = 0;
         mem.writeInt(2147473647);
 
-        AddTestCase("li16 load 1st short written by writeInt(2147473647)", 0x7FFF, LI16(2));
-        AddTestCase("li16 load 2nd short written by writeInt(2147473647)", 0xD8EF, LI16(0));
+        Assert.expectEq("li16 load 1st short written by writeInt(2147473647)", 0x7FFF, LI16(2));
+        Assert.expectEq("li16 load 2nd short written by writeInt(2147473647)", 0xD8EF, LI16(0));
     }
 
     function testwriteFloat():void
@@ -186,8 +185,8 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeFloat(12.375);
-        AddTestCase("li16 load 1st short written by writeFloat(12.375)", 0x4146, LI16(2));
-        AddTestCase("li16 load 2nd short written by writeFloat(12.375)", 0x0000, LI16(0));
+        Assert.expectEq("li16 load 1st short written by writeFloat(12.375)", 0x4146, LI16(2));
+        Assert.expectEq("li16 load 2nd short written by writeFloat(12.375)", 0x0000, LI16(0));
     }
 
 
@@ -206,10 +205,10 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeDouble(1.0241024102410242048E19);
-        AddTestCase("li16 load 1st short written by writeDouble(1.0241024102410242048E19)", 0x43E1, LI16(6));
-        AddTestCase("li16 load 2nd short written by writeDouble(1.0241024102410242048E19)", 0xC3ED, LI16(4));
-        AddTestCase("li16 load 3rd short written by writeDouble(1.0241024102410242048E19)", 0xA52E, LI16(2));
-        AddTestCase("li16 load 4th short written by writeDouble(1.0241024102410242048E19)", 0x0C09, LI16(0));
+        Assert.expectEq("li16 load 1st short written by writeDouble(1.0241024102410242048E19)", 0x43E1, LI16(6));
+        Assert.expectEq("li16 load 2nd short written by writeDouble(1.0241024102410242048E19)", 0xC3ED, LI16(4));
+        Assert.expectEq("li16 load 3rd short written by writeDouble(1.0241024102410242048E19)", 0xA52E, LI16(2));
+        Assert.expectEq("li16 load 4th short written by writeDouble(1.0241024102410242048E19)", 0x0C09, LI16(0));
 
     }
 

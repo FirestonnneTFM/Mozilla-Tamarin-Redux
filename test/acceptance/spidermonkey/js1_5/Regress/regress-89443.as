@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 2001-07-12
@@ -18,8 +18,8 @@ var gTestfile = 'regress-89443.js';
 var BUGNUMBER = 89443;
 var summary = 'Testing this script will compile without stack overflow';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 
 //  I don't know what these functions are supposed to be; use dummies -
@@ -2119,6 +2119,5 @@ function FindProxyForURL(url, host)
     return "PROXY 172.16.100.20:8080";
 }
 
-AddTestCase('', 'No Crash', 'No Crash');
+Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

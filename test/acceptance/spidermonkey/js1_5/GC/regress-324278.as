@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import avmplus.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-324278.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ var summary = 'GC without recursion';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 // Number to push native stack size beyond 10MB if GC recurses generating
 // segfault on Fedora Core / Ubuntu Linuxes where the stack size by default
@@ -56,13 +56,12 @@ if (typeof gc != "function") {
 }
 
 var chainTop = build(N);
-printStatus("BUILT");
+//printStatus("BUILT");
 System.forceFullCollection();
 check(chainTop, N);
-printStatus("CHECKED");
+//printStatus("CHECKED");
 chainTop = null;
 System.forceFullCollection();
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

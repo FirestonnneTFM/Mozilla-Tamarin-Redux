@@ -11,12 +11,10 @@ is the float value that is closer to +Infinity. If x is already an integer,
 the result is x.
 */
 
-var SECTION = "4.5.29";
-var VERSION = "AS3";
-var TITLE   = "public function round(x:float):float";
+// var SECTION = "4.5.29";
+// var VERSION = "AS3";
+// var TITLE   = "public function round(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.round(param); }
 
@@ -103,5 +101,4 @@ AddStrictTestCase("float.round(3.124f) FloatLiteral", 3f, float.round(3.124f));
 AddStrictTestCase("float.round(float.MAX_VALUE)", float.MAX_VALUE, float.round(float.MAX_VALUE));
 
 
-test();
 

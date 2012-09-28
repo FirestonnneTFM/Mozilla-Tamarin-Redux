@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-256798.js';
 //-----------------------------------------------------------------------------
@@ -12,30 +12,29 @@ var summary = 'regexp zero-width positive lookahead';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var status;
-
-status = summary + ' ' + inSection(1);
+  
+//status = summary + ' ' + inSection(1);
 expect = 'aaaa,a';
 actual = /(?:(a)+)/.exec("baaaa") + '';
-AddTestCase(status, expect, actual);
-
-status = summary + ' ' + inSection(2);
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + ' ' + inSection(2);
 expect = ',aaa';
 actual = /(?=(a+))/.exec("baaabac") + '';
-AddTestCase(status, expect, actual);
-
-status = summary + ' ' + inSection(3);
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + ' ' + inSection(3);
 expect = 'b,aaa';
 actual = /b(?=(a+))/.exec("baaabac") + '';
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-// XXXbc revisit this
-status = summary + ' ' + inSection(4);
+// XXXbc revisit this  
+//status = summary + ' ' + inSection(4);
 expect = 'null';
 actual = /b(?=(b+))/.exec("baaabac") + '';
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

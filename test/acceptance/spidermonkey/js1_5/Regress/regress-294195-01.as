@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-294195-01.js';
 //-----------------------------------------------------------------------------
@@ -12,19 +12,18 @@ var summary = 'Do not crash during String replace when accessing methods on back
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var s = 'some text sample';
 
 // this first version didn't crash
 var result = s.replace(new RegExp('(^|\\s)(text)'), (new String('$1')));
 result = result.substr(0, 1);
-AddTestCase(inSection(1) + ' ' + summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 // the original version however did crash.
 result = s.replace(new RegExp('(^|\\s)(text)'),
                    (new String('$1')).substr(0, 1));
-AddTestCase(inSection(2) + ' ' + summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 23 October 2001
  *
@@ -46,15 +47,12 @@
  */
 //-----------------------------------------------------------------------------
 
-var SECTION = "e15_10_6_2_1";
-var VERSION = "";
-var TITLE   = "Testing regexps with the global flag set";
-var bug = "(none)";
+// var SECTION = "e15_10_6_2_1";
+// var VERSION = "";
+// var TITLE   = "Testing regexps with the global flag set";
+// var bug = "(none)";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -67,20 +65,20 @@ function getTestCases() {
     var expectedmatch = '';
 
 
-    status = inSection(1);
+ //    status = inSection(1);
     string = 'a b c d e';
     pattern = /\w\s\w/g;
     actualmatch = string.match(pattern);
     expectedmatch = ['a b','c d']; // see above explanation -
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
 
-    status = inSection(2);
+ //    status = inSection(2);
     string = '12345678';
     pattern = /\d\d\d/g;
     actualmatch = string.match(pattern);
     expectedmatch = ['123', '456'];
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

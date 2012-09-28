@@ -8,21 +8,20 @@ package extClass{
 }
 
 import extClass.*;
+import com.adobe.test.Assert;
 
-var SECTION = " ";
-var VERSION = "AS3";
-var TITLE   = "import a class defined in .abc file";
+// var SECTION = " ";
+// var VERSION = "AS3";
+// var TITLE   = "import a class defined in .abc file";
 
-startTest();
 
 pc = new parentClass();
 sc = new subClass();
 
 
-AddTestCase( "parent class from imported abc file", true, pc.test());
-AddTestCase( "sub class from imported abc file", true, sc.test());
+Assert.expectEq( "parent class from imported abc file", true, pc.test());
+Assert.expectEq( "sub class from imported abc file", true, sc.test());
 
 
-test();
 
 

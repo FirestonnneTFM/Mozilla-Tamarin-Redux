@@ -4,13 +4,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "uint and int compare";
-var VERSION = "AS3";
-var TITLE   = "uint and signed int comparisions, bz:747437 we:747437"
+// var SECTION = "uint and int compare";
+// var VERSION = "AS3";
+// var TITLE   = "uint and signed int comparisions, bz:747437 we:747437"
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function isIntGreaterUint(p_int:int, puint:uint):Boolean { return p_int > puint; }
 function isUintGreaterInt(p_uint:uint, pint:int):Boolean { return p_uint > pint; }
@@ -20,19 +19,18 @@ var myUint:uint;
 
 myInt = -30;
 myUint = 6;
-AddTestCase("isIntGreaterUint(-30, 6)", false, isIntGreaterUint(myInt, myUint));
-AddTestCase("isUintGreaterInt(6, -30)", true, isUintGreaterInt(myUint, myInt));
+Assert.expectEq("isIntGreaterUint(-30, 6)", false, isIntGreaterUint(myInt, myUint));
+Assert.expectEq("isUintGreaterInt(6, -30)", true, isUintGreaterInt(myUint, myInt));
 
 myInt = 0xFFFFFFE2;
 myUint = 0x00000006;
-AddTestCase("isIntGreaterUint(0xFFFFFFE2, 0x00000006)", false, isIntGreaterUint(myInt, myUint));
-AddTestCase("isUintGreaterInt(0x00000006, 0xFFFFFFE2)", true, isUintGreaterInt(myUint, myInt));
+Assert.expectEq("isIntGreaterUint(0xFFFFFFE2, 0x00000006)", false, isIntGreaterUint(myInt, myUint));
+Assert.expectEq("isUintGreaterInt(0x00000006, 0xFFFFFFE2)", true, isUintGreaterInt(myUint, myInt));
 
 // Compare a negative integer to an unsigned integer that would be negative if interpreted as an int..., but more negative.
 myInt = -1
 myUint = 0xFFFFFFF0; // would be -16 if misinterpreted as an int
-AddTestCase("isIntGreaterUint(-1, 0xFFFFFFF0)", false, isIntGreaterUint(myInt, myUint));
-AddTestCase("isUintGreaterInt(0xFFFFFFF0, -1)", true, isUintGreaterInt(myUint, myInt));
+Assert.expectEq("isIntGreaterUint(-1, 0xFFFFFFF0)", false, isIntGreaterUint(myInt, myUint));
+Assert.expectEq("isUintGreaterInt(0xFFFFFFF0, -1)", true, isUintGreaterInt(myUint, myInt));
 
-test();
 

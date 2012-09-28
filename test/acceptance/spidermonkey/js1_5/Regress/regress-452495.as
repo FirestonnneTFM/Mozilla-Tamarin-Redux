@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-452495.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Do not crash with JIT: @ TraceRecorder::getThis';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 
 
@@ -21,6 +21,5 @@ for (var j = 0; j < 4; ++j) { try { new 1(this); } catch(e) { } }
 
 
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

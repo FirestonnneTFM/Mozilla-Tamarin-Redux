@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.3.2-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.fromCharCode()";
+//     var SECTION = "15.5.3.2-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.fromCharCode()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 
 function getTestCases() {
@@ -32,19 +30,19 @@ function getTestCases() {
                     95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
                     113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126 );
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var MYSTRING = String.fromCharCode( args)",
                                   " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
                                   MYSTRING);
     
     /*
     var MYSTRING = String.fromCharCode(args);
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "MYSTRING",
                                   " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
                                   MYSTRING);
     */
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "MYSTRING.length",
                                     0x007f - 0x0020,
                                     MYSTRING.length );

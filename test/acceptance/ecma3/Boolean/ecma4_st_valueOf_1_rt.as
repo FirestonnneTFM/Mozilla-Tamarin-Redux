@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /*
     In Ecma4 there are three sealed types; Boolean, Number and String
     You cannot set properties of an instance of a sealed type
@@ -11,14 +13,11 @@
     Date:       October 13, 2004
 
 */
-    var SECTION = "ECMA_4";
-    var VERSION = "ECMA_4";
-    startTest();
-    var TITLE   = "valof=Boolean.prototype.valueOf;booleanobj=true;booleanobj.valueOf=valof;";
-    writeHeaderToLog( TITLE );
+//     var SECTION = "ECMA_4";
+//     var VERSION = "ECMA_4";
+//     var TITLE   = "valof=Boolean.prototype.valueOf;booleanobj=true;booleanobj.valueOf=valof;";
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var booleanObj:Boolean = new Boolean();
@@ -33,7 +32,7 @@ function getTestCases() {
     }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        array[item++] =new TestCase(SECTION,"Cannot create a property on Boolean","ReferenceError: Error #1056",referenceError( thisError ) );
+        array[item++] =Assert.expectEq("Cannot create a property on Boolean","ReferenceError: Error #1056",Utils.referenceError( thisError ) );
     }
 
     try{
@@ -41,7 +40,7 @@ function getTestCases() {
     }catch(e1:ReferenceError){
         thisError=e1.toString();
     }finally{
-        array[item++] =new TestCase(SECTION,"Cannot create a property on Boolean","ReferenceError: Error #1056",referenceError( thisError ) );
+        array[item++] =Assert.expectEq("Cannot create a property on Boolean","ReferenceError: Error #1056",Utils.referenceError( thisError ) );
     }
 
     return ( array );

@@ -10,13 +10,12 @@ package {
 
     import flash.sampler.*
     import avmplus.*
+import com.adobe.test.Assert;
 
-    var SECTION = "Sampling";
-    var VERSION = "AS3";
-    var TITLE   = "Function Activation";
+//     var SECTION = "Sampling";
+//     var VERSION = "AS3";
+//     var TITLE   = "Function Activation";
 
-    startTest();
-    writeHeaderToLog("Sampling function activation test");
 
     var isdebugger=System.isDebugger();
 
@@ -41,12 +40,11 @@ package {
     }
    }
 
-    AddTestCase("assert the activation object was in getLexicalScopes",
+    Assert.expectEq("assert the activation object was in getLexicalScopes",
         true,
         !isdebugger || activationWasInScopes );
 
-    AddTestCase("assert the activation object was right object",
+    Assert.expectEq("assert the activation object was right object",
         true,
         !isdebugger || activation && activation.a == arg );
-    test();
 }

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /**
    File Name:          reverse.as
    ECMA Section:       Vector.reverse()
@@ -19,18 +20,16 @@
    Author:             christine@netscape.com
    Date:               7 october 1997
 */
-var SECTION = "";
-var VERSION = "ECMA_1";
-startTest();
+// var SECTION = "";
+// var VERSION = "ECMA_1";
 
-writeHeaderToLog( SECTION + " Vector.reverse()");
-AddTestCase(
+Assert.expectEq(
           "Vector.<int>.prototype.reverse.length",
           0,
           Vector.<int>.prototype.reverse.length );
 var v1:Vector.<int>=new Vector.<int>();
 v1.reverse();
-AddTestCase(
+Assert.expectEq(
           "reverse empty vector",
           "",
           v1.toString());
@@ -38,7 +37,7 @@ AddTestCase(
 var v1:Vector.<int>=new Vector.<int>();
 v1[0]=111;
 v1.reverse();
-AddTestCase(
+Assert.expectEq(
           "reverse vector length 1",
           "111",
           v1.toString());
@@ -46,7 +45,7 @@ AddTestCase(
 var v1:Vector.<int>=new Vector.<int>();
 for (var i=0;i<20;i++) v1[i]=i;
 v1.reverse();
-AddTestCase(
+Assert.expectEq(
           "reverse vector of int",
           "19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0",
           v1.toString() );
@@ -54,9 +53,8 @@ AddTestCase(
 var v2:Vector.<String>=new Vector.<String>();
 v2[0]='one';v2[1]='two';v2[2]='three';
 v2.reverse();
-AddTestCase(
+Assert.expectEq(
           "reverse vector of String",
           "three,two,one",
           v2.toString() );
 
-test();

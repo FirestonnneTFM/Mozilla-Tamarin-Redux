@@ -4,13 +4,13 @@
 
 
 import NestedTryWithMultipleCatchInsideFinallyExceptionBubbling.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing nested try block with multiple catch blocks, inner try and catch blocks inside finally block of the outer try and multiple catch blocks";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing nested try block with multiple catch blocks, inner try and catch blocks inside finally block of the outer try and multiple catch blocks";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var z:NestedTryWithMultipleCatchInsideFinally = new NestedTryWithMultipleCatchInsideFinally();
@@ -41,11 +41,10 @@ try{
    }catch(eo10:Error){//print(e10.toString());
          thisError=eo10.toString();
    }finally{//print(eo1.toString());
-AddTestCase( "Testing catch block with Type Error", "This is outer Type Error:TypeError" ,thisError);
+Assert.expectEq( "Testing catch block with Type Error", "This is outer Type Error:TypeError" ,thisError);
     }
 
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

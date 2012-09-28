@@ -9,70 +9,69 @@ Returns the absolute value of x; the result has the same magnitude as x but has 
 */
 
 import avmplus.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "15.8.2.1";
-var VERSION = "AS3";
-var TITLE   = "public native static function abs (x:Number):Number;";
+// var SECTION = "15.8.2.1";
+// var VERSION = "AS3";
+// var TITLE   = "public native static function abs (x:Number):Number;";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:Number):Number { return Number.abs(param); }
 
-AddTestCase("Number.abs(3.14) returns a Number", "Number", getQualifiedClassName(Number.abs(3.14)));
-AddTestCase("Number.abs(-0) returns a int", "int", getQualifiedClassName(Number.abs(-0)));
-AddTestCase("Number.abs(1) returns a int", "int", getQualifiedClassName(Number.abs(1)));
-AddTestCase("Number.abs() length is 1", 1, Number.abs.length);
-AddErrorTest("Number.abs() with no args", ARGUMENTERROR+1063,  function(){ Number.abs(); });
+Assert.expectEq("Number.abs(3.14) returns a Number", "Number", getQualifiedClassName(Number.abs(3.14)));
+Assert.expectEq("Number.abs(-0) returns a int", "int", getQualifiedClassName(Number.abs(-0)));
+Assert.expectEq("Number.abs(1) returns a int", "int", getQualifiedClassName(Number.abs(1)));
+Assert.expectEq("Number.abs() length is 1", 1, Number.abs.length);
+Assert.expectError("Number.abs() with no args", Utils.ARGUMENTERROR+1063,  function(){ Number.abs(); });
 
 // If x is NaN, the result is NaN.
-AddTestCase("Number.abs(undefined)", NaN, Number.abs(undefined));
-AddTestCase("Number.abs(string)", NaN, Number.abs("string"));
-AddTestCase("Number.abs(NaN)", NaN, Number.abs(NaN));
-AddTestCase("Number.abs(NaN) check()", NaN, check(NaN));
+Assert.expectEq("Number.abs(undefined)", NaN, Number.abs(undefined));
+Assert.expectEq("Number.abs(string)", NaN, Number.abs("string"));
+Assert.expectEq("Number.abs(NaN)", NaN, Number.abs(NaN));
+Assert.expectEq("Number.abs(NaN) check()", NaN, check(NaN));
 
 // If x is -0, the result is +0.
-AddTestCase("Number.abs(0.0)", 0, Number.abs(0.0));
-AddTestCase("Number.POSITIVE_INFINITY/Number.abs(0.0)", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.abs(0.0));
-AddTestCase("Number.abs(-0.0)", 0, Number.abs(-0.0));
-AddTestCase("Number.POSITIVE_INFINITY/Number.abs(-0.0)", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.abs(-0.0));
-AddTestCase("Number.POSITIVE_INFINITY/cehck(-0.0)", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/check(-0.0));
+Assert.expectEq("Number.abs(0.0)", 0, Number.abs(0.0));
+Assert.expectEq("Number.POSITIVE_INFINITY/Number.abs(0.0)", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.abs(0.0));
+Assert.expectEq("Number.abs(-0.0)", 0, Number.abs(-0.0));
+Assert.expectEq("Number.POSITIVE_INFINITY/Number.abs(-0.0)", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.abs(-0.0));
+Assert.expectEq("Number.POSITIVE_INFINITY/cehck(-0.0)", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/check(-0.0));
 
 // If x is -Infinity, the result is +Infinity.
-AddTestCase("Number.abs(Number.NEGATIVE_INFINITY)", Number.POSITIVE_INFINITY, Number.abs(Number.NEGATIVE_INFINITY));
-AddTestCase("Number.abs(Number.POSITIVE_INFINITY)", Number.POSITIVE_INFINITY, Number.abs(Number.POSITIVE_INFINITY));
-AddTestCase("Number.abs(Number.NEGATIVE_INFINITY) check()", Number.POSITIVE_INFINITY, check(Number.NEGATIVE_INFINITY));
-AddTestCase("Number.abs(Number.POSITIVE_INFINITY) check()", Number.POSITIVE_INFINITY, check(Number.POSITIVE_INFINITY));
+Assert.expectEq("Number.abs(Number.NEGATIVE_INFINITY)", Number.POSITIVE_INFINITY, Number.abs(Number.NEGATIVE_INFINITY));
+Assert.expectEq("Number.abs(Number.POSITIVE_INFINITY)", Number.POSITIVE_INFINITY, Number.abs(Number.POSITIVE_INFINITY));
+Assert.expectEq("Number.abs(Number.NEGATIVE_INFINITY) check()", Number.POSITIVE_INFINITY, check(Number.NEGATIVE_INFINITY));
+Assert.expectEq("Number.abs(Number.POSITIVE_INFINITY) check()", Number.POSITIVE_INFINITY, check(Number.POSITIVE_INFINITY));
 
 var pi = 3.14;
-AddTestCase("Number.abs(-NumberLiteral)", pi, Number.abs(-pi));
-AddTestCase("Number.abs(NumberLiteral)", pi, Number.abs(pi));
-AddTestCase("Number.abs(-NumberLiteral) check()", pi, check(-pi));
-AddTestCase("Number.abs(NumberLiteral) check()", pi, check(pi));
+Assert.expectEq("Number.abs(-NumberLiteral)", pi, Number.abs(-pi));
+Assert.expectEq("Number.abs(NumberLiteral)", pi, Number.abs(pi));
+Assert.expectEq("Number.abs(-NumberLiteral) check()", pi, check(-pi));
+Assert.expectEq("Number.abs(NumberLiteral) check()", pi, check(pi));
 var pi:Number = 3.14;
-AddTestCase("Number.abs(-typed)", pi, Number.abs(-pi));
-AddTestCase("Number.abs(typed)", pi, Number.abs(pi));
-AddTestCase("Number.abs(-typed) check()", pi, check(-pi));
-AddTestCase("Number.abs(typed) check()", pi, check(pi));
+Assert.expectEq("Number.abs(-typed)", pi, Number.abs(-pi));
+Assert.expectEq("Number.abs(typed)", pi, Number.abs(pi));
+Assert.expectEq("Number.abs(-typed) check()", pi, check(-pi));
+Assert.expectEq("Number.abs(typed) check()", pi, check(pi));
 
-AddTestCase("Number.abs(null)", 0, Number.abs(null));
-AddTestCase("Number.abs(true)", 1, Number.abs(true));
-AddTestCase("Number.abs(false)", 0, Number.abs(false));
+Assert.expectEq("Number.abs(null)", 0, Number.abs(null));
+Assert.expectEq("Number.abs(true)", 1, Number.abs(true));
+Assert.expectEq("Number.abs(false)", 0, Number.abs(false));
 
-AddTestCase("Number.abs('1')", 1, Number.abs('1'));
-AddTestCase("Number.abs('0')", 0, Number.abs('0'));
-AddTestCase("Number.NEGATIVE_INFINITY/Number.abs('0')", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.abs('0'));
+Assert.expectEq("Number.abs('1')", 1, Number.abs('1'));
+Assert.expectEq("Number.abs('0')", 0, Number.abs('0'));
+Assert.expectEq("Number.NEGATIVE_INFINITY/Number.abs('0')", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.abs('0'));
 
-AddTestCase("Number.abs(-Number.MIN_VALUE)", Number.MIN_VALUE, Number.abs(-Number.MIN_VALUE));
-AddTestCase("Number.abs(-Number.MAX_VALUE)", Number.MAX_VALUE, Number.abs(-Number.MAX_VALUE));
-AddTestCase("Number.abs(Number.MIN_VALUE)", Number.MIN_VALUE, Number.abs(Number.MIN_VALUE));
-AddTestCase("Number.abs(Number.MAX_VALUE)", Number.MAX_VALUE, Number.abs(Number.MAX_VALUE));
-AddTestCase("Number.abs(-Number.MIN_VALUE) check()", Number.MIN_VALUE, check(-Number.MIN_VALUE));
-AddTestCase("Number.abs(-Number.MAX_VALUE) check()", Number.MAX_VALUE, check(-Number.MAX_VALUE));
-AddTestCase("Number.abs(Number.MIN_VALUE) check()", Number.MIN_VALUE, check(Number.MIN_VALUE));
-AddTestCase("Number.abs(Number.MAX_VALUE) check()", Number.MAX_VALUE, check(Number.MAX_VALUE));
+Assert.expectEq("Number.abs(-Number.MIN_VALUE)", Number.MIN_VALUE, Number.abs(-Number.MIN_VALUE));
+Assert.expectEq("Number.abs(-Number.MAX_VALUE)", Number.MAX_VALUE, Number.abs(-Number.MAX_VALUE));
+Assert.expectEq("Number.abs(Number.MIN_VALUE)", Number.MIN_VALUE, Number.abs(Number.MIN_VALUE));
+Assert.expectEq("Number.abs(Number.MAX_VALUE)", Number.MAX_VALUE, Number.abs(Number.MAX_VALUE));
+Assert.expectEq("Number.abs(-Number.MIN_VALUE) check()", Number.MIN_VALUE, check(-Number.MIN_VALUE));
+Assert.expectEq("Number.abs(-Number.MAX_VALUE) check()", Number.MAX_VALUE, check(-Number.MAX_VALUE));
+Assert.expectEq("Number.abs(Number.MIN_VALUE) check()", Number.MIN_VALUE, check(Number.MIN_VALUE));
+Assert.expectEq("Number.abs(Number.MAX_VALUE) check()", Number.MAX_VALUE, check(Number.MAX_VALUE));
 
 
 
-test();
 

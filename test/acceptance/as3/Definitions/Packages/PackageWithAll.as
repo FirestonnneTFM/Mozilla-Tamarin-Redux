@@ -59,29 +59,28 @@ package P
 import foo2.*;
 import P.*;
 import foo.*;
+import com.adobe.test.Assert;
 use namespace fletch;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
-AddTestCase( "namespace inside of package", "PASSED", (a = new A(), a.getFletch()));
+Assert.expectEq( "namespace inside of package", "PASSED", (a = new A(), a.getFletch()));
   
-AddTestCase( "import inside of package", "PASSED",b );
-AddTestCase( "function inside of package", "PASSED",fletchFunc() );
+Assert.expectEq( "import inside of package", "PASSED",b );
+Assert.expectEq( "function inside of package", "PASSED",fletchFunc() );
 
 var FLETCHCLASS = new fletch2();
-AddTestCase( "class inside of package", "PASSED",FLETCHCLASS.lives() );
+Assert.expectEq( "class inside of package", "PASSED",FLETCHCLASS.lives() );
 
 var FLETCHCLASS2 = new erwin();
-AddTestCase( "interface inside of package", "PASSED",FLETCHCLASS2.lives() );
+Assert.expectEq( "interface inside of package", "PASSED",FLETCHCLASS2.lives() );
 
 b = new B();
-AddTestCase("Overriding function within the same package", "override f", b.f());
+Assert.expectEq("Overriding function within the same package", "override f", b.f());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

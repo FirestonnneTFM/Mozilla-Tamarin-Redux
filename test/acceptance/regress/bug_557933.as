@@ -1,22 +1,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=557933
 *
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "557933";
-var VERSION = "";
-var TITLE   = "parseIndex/getIntItem reject leading zeroes";
-var bug = "557933";
+import com.adobe.test.Assert;
+// var SECTION = "557933";
+// var VERSION = "";
+// var TITLE   = "parseIndex/getIntItem reject leading zeroes";
+// var bug = "557933";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function concat_strs(a,b)
 {
@@ -71,7 +69,7 @@ function getTestCases() {
         
     for (var i = 0; i < tests.length; ++i)
     {
-        array[item++] = new TestCase(SECTION, String(item) + ": " + typeof(tests[i].key) + " " + String(tests[i].key), tests[i].expect, o[tests[i].key]);
+        array[item++] = Assert.expectEq( String(item) + ": " + typeof(tests[i].key) + " " + String(tests[i].key), tests[i].expect, o[tests[i].key]);
     }
 
     return array;

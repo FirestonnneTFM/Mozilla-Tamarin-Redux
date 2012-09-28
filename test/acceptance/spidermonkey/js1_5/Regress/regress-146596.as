@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -49,7 +49,7 @@ function F()
   return 'XYZ';
 }
 
-status = inSection(1);
+//status = inSection(1);
 actual = F();
 expect = "A simple exception";
 addThis();
@@ -89,7 +89,7 @@ function f(obj)
   return res;
 }
 
-status = inSection(2);
+//status = inSection(2);
 actual = f({e:24});
 expect = [24, 42, undefined];
 addThis();
@@ -115,15 +115,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

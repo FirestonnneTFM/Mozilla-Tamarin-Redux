@@ -1,8 +1,99 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
 
 START("11.6.2 - XMLList Assignment");
 
@@ -294,7 +385,7 @@ x1.b.d = "C";
 
 var y1 = new XML("<a><b><c>A</c><d>C</d></b></a>");
 
-AddTestCase( "property name is not array index :", true, (x1==y1) );
+Assert.expectEq( "property name is not array index :", true, (x1==y1) );
 
 
 x1 = new XML("<a><b><c>A</c><d>B</d></b></a>");
@@ -303,7 +394,7 @@ x1.v.b.d = "C";
 
 y1 = new XML("<a><b><c>A</c><d>B</d></b><v><b><d>C</d></b></v></a>");
 
-AddTestCase("Adding new nested node at root: " , true, (x1 == y1));
+Assert.expectEq("Adding new nested node at root: " , true, (x1 == y1));
 
 
 // property name is array index
@@ -314,7 +405,7 @@ x1.b[1] = new XML("<b><c>A3</c><d>B3</d></b>");
 
 y1 = new XML("<a><b><c>A0</c><d>B0</d></b><b><c>A3</c><d>B3</d></b><b><c>A2</c><d>B2</d></b></a>");
 
-AddTestCase( "property name exists in XMLList     :", true, (x1==y1) );
+Assert.expectEq( "property name exists in XMLList     :", true, (x1==y1) );
 
 
 // property name does NOT exist in XMLList
@@ -323,7 +414,7 @@ x1.b[3] = new XML("<b><c>A4</c><d>B4</d></b>");
 
 y1 = new XML("<a><b><c>A0</c><d>B0</d></b><b><c>A3</c><d>B3</d></b><b><c>A2</c><d>B2</d></b><b><c>A4</c><d>B4</d></b></a>");
 
-AddTestCase( "property name does NOT exist in XMLList :", true, (x1==y1) );
+Assert.expectEq( "property name does NOT exist in XMLList :", true, (x1==y1) );
 
 
 // property is XML with non-null parent
@@ -334,7 +425,7 @@ x1.b = new XMLList("<b>A</b><c>B</c>");
 
 y1 = new XML("<a><b>A</b><c>B</c></a>");
 
-AddTestCase( "property is XML with non-null parent    :", true, (x1==y1) );
+Assert.expectEq( "property is XML with non-null parent    :", true, (x1==y1) );
 
 
 // AssignmentExpression = XML value
@@ -345,7 +436,7 @@ x1.b[0] = new XML("<b><c>A3</c><d>B3</d></b>");
 
 y1 = new XML("<a><b><c>A3</c><d>B3</d></b><b><c>A1</c><d>B1</d></b><b><c>A2</c><d>B2</d></b></a>");
 
-AddTestCase( "AssignmentExpression = XML value        :", true, (x1==y1) );
+Assert.expectEq( "AssignmentExpression = XML value        :", true, (x1==y1) );
 
 
 // AssignmentExpression = XMLList object
@@ -356,7 +447,7 @@ x1.b = new XMLList("<b>A</b><b>B</b><b>C</b>");
 
 y1 = new XML("<a><b>A</b><b>B</b><b>C</b></a>");
 
-AddTestCase( "AssignmentExpression = XMLList object   :", true, (x1==y1) );
+Assert.expectEq( "AssignmentExpression = XMLList object   :", true, (x1==y1) );
 
 
 // AssignmentExpression != XML/XMLList
@@ -367,6 +458,6 @@ x1.b = "Hello World";
 
 y1 = new XML("<a><b>Hello World</b></a>");
 
-AddTestCase( "AssignmentExpression != XML/XMLList     :", true, (x1==y1) );
+Assert.expectEq( "AssignmentExpression != XML/XMLList     :", true, (x1==y1) );
 
 END();

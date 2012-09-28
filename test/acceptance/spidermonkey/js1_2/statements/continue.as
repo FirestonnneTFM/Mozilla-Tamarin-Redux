@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'continue.js';
 
@@ -13,13 +14,10 @@ gTestfile = 'continue.js';
    Date:         March 18, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE   = 'statements: continue';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE   = 'statements: continue';
 
-writeHeaderToLog("Executing script: continue.js");
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var i,j;
 
@@ -32,7 +30,7 @@ for (i = 0; i < 200; i++)
 }
 
 // '"continue" in a "for" loop'
-testcases[index++] = new TestCase ( SECTION, '"continue" in "for" loop',
+Assert.expectEq (  '"continue" in "for" loop',
            199, j);
 
 
@@ -53,7 +51,7 @@ for (i = 0; i < 1000; i++)
 }
 
 // '"continue" in a "for" loop with a "label"'
-testcases[index++] = new TestCase ( SECTION, '"continue" in "for" loop with a "label"',
+Assert.expectEq (  '"continue" in "for" loop with a "label"',
            999, j);
 
 i = 0;
@@ -67,7 +65,7 @@ while (i != j)
 }
 
 // '"continue" in a "while" loop'
-testcases[index++] = new TestCase ( SECTION, '"continue" in a "while" loop',
+Assert.expectEq (  '"continue" in a "while" loop',
            100, j );
 
 j = 0;
@@ -95,7 +93,7 @@ while (i < 1000)
 }
 
 // '"continue" in a "while" loop with a "label"'
-testcases[index++] = new TestCase ( SECTION, '"continue" in a "while" loop with a "label"',
+Assert.expectEq (  '"continue" in a "while" loop with a "label"',
            999, j);
 
 i = 0;
@@ -110,7 +108,7 @@ do
 
 
 // '"continue" in a "do" loop'
-testcases[index++] = new TestCase ( SECTION, '"continue" in a "do" loop',
+Assert.expectEq (  '"continue" in a "do" loop',
            100, j );
 
 j = 0;
@@ -138,7 +136,6 @@ do
 }while (i < 1000);
 
 // '"continue" in a "do" loop with a "label"'
-testcases[index++] = new TestCase ( SECTION, '"continue" in a "do" loop with a "label"',
+Assert.expectEq (  '"continue" in a "do" loop with a "label"',
            999, j);
 
-test();

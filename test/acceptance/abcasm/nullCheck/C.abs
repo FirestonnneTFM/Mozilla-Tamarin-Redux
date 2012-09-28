@@ -2,62 +2,29 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Instructions that start with the letter C" 
-    callpropvoid START 1
-    
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest1)
-    getlocal0
-    call 0
-
-    newfunction .function_id(runTest2)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest3)
-    getlocal0
-    call 0
-
-    newfunction .function_id(runTest4)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest5)
-    getlocal0
-    call 0
-
-    newfunction .function_id(runTest6)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest7)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest8)
-    getlocal0
-    call 0
-
-    newfunction .function_id(runTest9)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest10)
-    getlocal0
-    call 0
-    
-    findproperty END
-    callpropvoid END 0
+function noArgs()
+{
     returnvoid
 }
+
+function oneArg(*)
+{
+    getlocal1
+    returnvalue
+}
+
+function propertyOneImpl():int
+{
+    pushint 0x104b
+    returnvalue
+}
+
+function propertyTwoImpl():Object
+{
+    pushnull
+    returnvalue
+}
+
 
 function runTest()
 {
@@ -69,10 +36,10 @@ function runTest()
     callpropvoid START 1
     
     // "call null function ref"
-    newfunction .function_id(noArgs)
+    newfunction noArgs
     setlocal1
     
-    .try 
+    try 
     {
         pushnull    // null will be called as a function
         getlocal0   // reciever = this
@@ -87,7 +54,7 @@ function runTest()
         
         jump finished_call_null_function_ref
     }
-    .catch
+    catch
     {
         getlocal0
         pushscope
@@ -110,7 +77,7 @@ function runTest()
     findproperty COMPARE_STRICTEQ
     pushstring "call oneArg with null arg"
     pushnull    // expected
-    newfunction .function_id(oneArg)
+    newfunction oneArg
     getlocal0
     pushnull
     call 1      // actual
@@ -133,7 +100,7 @@ function runTest1()
     callpropvoid START 1
     
     // callproperty on null object
-    .try {
+    try {
         pushnull
         callproperty blah 0
         pop
@@ -146,7 +113,7 @@ function runTest1()
         
         jump finished_callproperty_on_null_object
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -164,6 +131,7 @@ function runTest1()
     returnvoid
 }
 
+/*not implemented
 function runTest2()
 {
     getlocal0
@@ -174,7 +142,7 @@ function runTest2()
     callpropvoid START 1
     
     // callproplex on null object
-    .try {
+    try {
         pushnull
         callproplex NoSuchProperty 0
         pop
@@ -187,7 +155,7 @@ function runTest2()
         
         jump finished_callproplex_on_null_object
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -205,7 +173,7 @@ function runTest2()
 
     returnvoid
 }
-
+*/
 function runTest3()
 {
     getlocal0
@@ -215,7 +183,7 @@ function runTest3()
     callpropvoid START 1
     
     // callpropvoid on null object
-    .try {
+    try {
         pushnull
         pushnull
         callpropvoid NoSuchProperty 1
@@ -228,7 +196,7 @@ function runTest3()
         
         jump finished_callpropvoid_on_null_object
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -259,7 +227,7 @@ function runTest4()
     callpropvoid START 1
     
     // checkfilter on null object
-    .try {
+    try {
         pushnull
         checkfilter
         pop
@@ -272,7 +240,7 @@ function runTest4()
         
         jump finished_checkfilter_on_null_object
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -382,7 +350,7 @@ function runTest7()
     callpropvoid START 1
     
     // construct null object
-    .try {
+    try {
         pushnull
         pushnull
         construct 1
@@ -396,7 +364,7 @@ function runTest7()
         
         jump finished_construct_null_object
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -423,7 +391,7 @@ function runTest8()
     callpropvoid START 1
     
     // constructprop null object
-    .try {
+    try {
         pushnull
         pushnull
         constructprop NoSuchProp 1
@@ -437,7 +405,7 @@ function runTest8()
         
         jump finished_constructprop_null_object
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -514,7 +482,7 @@ function runTest9()
     callpropvoid START 1
     
     // convert_o null
-    .try {
+    try {
         pushnull
         convert_o
         pop
@@ -527,7 +495,7 @@ function runTest9()
         
         jump finished_convert_o_null
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -591,25 +559,60 @@ function runTest10()
     returnvoid
 } 
 
-function noArgs()
-{
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Instructions that start with the letter C" 
+    callpropvoid START 1
+    
+    newfunction runTest
+    getlocal0
+    call 0
+    
+    newfunction runTest1
+    getlocal0
+    call 0
+
+/* not implemented
+    newfunction runTest2
+    getlocal0
+    call 0
+*/    
+    newfunction runTest3
+    getlocal0
+    call 0
+
+    newfunction runTest4
+    getlocal0
+    call 0
+    
+    newfunction runTest5
+    getlocal0
+    call 0
+
+    newfunction runTest6
+    getlocal0
+    call 0
+    
+    newfunction runTest7
+    getlocal0
+    call 0
+    
+    newfunction runTest8
+    getlocal0
+    call 0
+
+    newfunction runTest9
+    getlocal0
+    call 0
+    
+    newfunction runTest10
+    getlocal0
+    call 0
+    
+    findproperty END
+    callpropvoid END 0
     returnvoid
 }
-
-function oneArg(*)
-{
-    getlocal1
-    returnvalue
-}
-
-function propertyOneImpl():int
-{
-    pushint 0x104b
-    returnvalue
-}
-
-function propertyTwoImpl():Object
-{
-    pushnull
-    returnvalue
-}
+script_info{init: main}

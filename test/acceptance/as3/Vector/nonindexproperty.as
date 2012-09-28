@@ -9,32 +9,33 @@
    * Coverage is rather poor, and this test has been superseded by vectorIndexRangeExceptions.as for
    * SWF version 11 and above.  It is retained to preserve existing tests applicable to prior versions.
    */
-
+import flash.system.*;
 import avmplus.*;
-
-var SECTION = " ";
-var VERSION = "AS3";
-startTest();
-writeHeaderToLog( SECTION + " Vector non-index properties");
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+// TODO: REVIEW AS4 CONVERSION ISSUE
+// var SECTION = " ";
+// var VERSION = "AS3";
 
 Vector.<*>.prototype[3.14]="three";
 var v1:Vector.<*>=new Vector.<*>();
+var playerType:String = Capabilities.playerType;
 
 v1[0]="zero";
 v1["1"]="one";
 v1[2.0]="two";
 v1["3.0"]="three";
 
-AddTestCase(    "standard 0 uint index",
+Assert.expectEq(    "standard 0 uint index",
         "zero",
         v1[0]);
-AddTestCase(    "uint 1 as string index",
+Assert.expectEq(    "uint 1 as string index",
         "one",
         v1[1]);
-AddTestCase(    "number 3.0 as string index",
+Assert.expectEq(    "number 3.0 as string index",
         "two",
         v1[2]);
-AddTestCase(    "number 2.0 index",
+Assert.expectEq(    "number 2.0 index",
         "three",
         v1["3.0"]);
 
@@ -55,9 +56,9 @@ function AddVectorReadExceptionTest(description, index, expected)
         err = e.toString();
     }
 
-    AddTestCase("read index " + description + " throws exception because non-uint property",
+    Assert.expectEq("read index " + description + " throws exception because non-uint property",
                 expected,
-                parseError(err, expected.length));
+                Utils.parseError(err, expected.length));
 }
 
 function AddVectorWriteExceptionTest(description, index, expected)
@@ -69,9 +70,9 @@ function AddVectorWriteExceptionTest(description, index, expected)
         err = e.toString();
     }
 
-    AddTestCase("write index " + description + " throws exception because non-uint property",
+    Assert.expectEq("write index " + description + " throws exception because non-uint property",
                 expected,
-                parseError(err, expected.length));
+                Utils.parseError(err, expected.length));
 }
 
 // Index specialized to Number.
@@ -86,9 +87,9 @@ function AddVectorReadExceptionTest_D(description, index, expected)
         err = e.toString();
     }
 
-    AddTestCase("read index " + description + " throws exception because non-uint property",
+    Assert.expectEq("read index " + description + " throws exception because non-uint property",
                 expected,
-                parseError(err, expected.length));
+                Utils.parseError(err, expected.length));
 }
 
 function AddVectorWriteExceptionTest_D(description, index, expected)
@@ -101,9 +102,9 @@ function AddVectorWriteExceptionTest_D(description, index, expected)
         err = e.toString();
     }
 
-    AddTestCase("write index " + description + " throws exception because non-uint property",
+    Assert.expectEq("write index " + description + " throws exception because non-uint property",
                 expected,
-                parseError(err, expected.length));
+                Utils.parseError(err, expected.length));
 }
 
 // Index specialized to int.
@@ -118,9 +119,9 @@ function AddVectorReadExceptionTest_I(description, index, expected)
         err = e.toString();
     }
 
-    AddTestCase("read index " + description + " throws exception because non-uint property",
+    Assert.expectEq("read index " + description + " throws exception because non-uint property",
                 expected,
-                parseError(err, expected.length));
+                Utils.parseError(err, expected.length));
 }
 
 function AddVectorWriteExceptionTest_I(description, index, expected)
@@ -133,9 +134,9 @@ function AddVectorWriteExceptionTest_I(description, index, expected)
         err = e.toString();
     }
 
-    AddTestCase("write index " + description + " throws exception because non-uint property",
+    Assert.expectEq("write index " + description + " throws exception because non-uint property",
                 expected,
-                parseError(err, expected.length));
+                Utils.parseError(err, expected.length));
 }
 
 // 5.1
@@ -259,13 +260,13 @@ try {
 }
 
 if (System.swfVersion >= 11) {
-   AddTestCase("when Vector.<*>.prototype[3.14] is set throws exception because non-uint property",
+   Assert.expectEq("when Vector.<*>.prototype[3.14] is set throws exception because non-uint property",
                RANGE,
-               parseError(err1, RANGE.length));
+               Utils.parseError(err1, RANGE.length));
 } else {
-   AddTestCase("when Vector.<*>.prototype[3.14] is set throws exception because non-uint property",
+   Assert.expectEq("when Vector.<*>.prototype[3.14] is set throws exception because non-uint property",
                REFREAD,
-               parseError(err1, REFREAD.length));
+               Utils.parseError(err1, REFREAD.length));
 }
 
 // Check high and low extremes.
@@ -344,7 +345,6 @@ if (System.swfVersion >= 11) {
     AddVectorWriteExceptionTest ("min_int_m1",  min_int_m1,    REFWRITE);  // Negative index not allowed.
 }
 
-test();
 
 // restore prototype properties
 delete Vector.<*>.prototype[3.14];

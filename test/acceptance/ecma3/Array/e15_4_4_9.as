@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          e15_4_4_9.as
  *  ECMA Section:       15.4.4.9 Array.prototype.shift()
@@ -42,19 +43,16 @@
  *  Added test cases to test shift function called on an empty array and test cases to test  *  shift function on other objects which are not array objects
  */
 
-var SECTION = "15.4.4.9";
-var TITLE   = "Array.shift";
+// var SECTION = "15.4.4.9";
+// var TITLE   = "Array.shift";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -62,24 +60,24 @@ function getTestCases() {
 
         var MYEMPTYARR = new Array();
 
-        array[item++] = new TestCase( SECTION, "MYEMPTYARR = []; MYEMPTYARR.shift();", undefined, MYEMPTYARR.shift() );
+        array[item++] = Assert.expectEq(  "MYEMPTYARR = []; MYEMPTYARR.shift();", undefined, MYEMPTYARR.shift() );
 
 
     // Create an array from which we will shift an element.
     var MYARR = new Array( 2, 1, 8, 6 );
     var EXPARR = [ 1, 8, 6 ];
 
-    array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.shift();", 2, MYARR.shift() );
+    array[item++] = Assert.expectEq(  "MYARR = [2,1,8,6]; MYARR.shift();", 2, MYARR.shift() );
 
 
 
     for (var MYVAR = 0; ( MYVAR < EXPARR.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.shift();", EXPARR[MYVAR], MYARR[MYVAR] );
+        array[item++] = Assert.expectEq(  "MYARR = [2,1,8,6]; MYARR.shift();", EXPARR[MYVAR], MYARR[MYVAR] );
     }
 
 
-    array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.shift();MYARR.length", 3, MYARR.length );
+    array[item++] = Assert.expectEq(  "MYARR = [2,1,8,6]; MYARR.shift();MYARR.length", 3, MYARR.length );
 
 
         var MYBIGARR = []
@@ -88,10 +86,13 @@ function getTestCases() {
             MYBIGARR[MYBIGARR.length] = i;
        }
 
-       array[item++] = new TestCase( SECTION, "MYBIGARR = [0,1,2,.....,100]; MYBIGARR.shift();", 0, MYBIGARR.shift() );
+       array[item++] = Assert.expectEq(  "MYBIGARR = [0,1,2,.....,100]; MYBIGARR.shift();", 0, MYBIGARR.shift() );
 
-       array[item++] = new TestCase( SECTION, "MYBIGARR = [0,1,2,.....,100]; MYBIGARR.shift();MYBIGARR.length", 100, MYBIGARR.length );
+       array[item++] = Assert.expectEq(  "MYBIGARR = [0,1,2,.....,100]; MYBIGARR.shift();MYBIGARR.length", 100, MYBIGARR.length );
 
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+    // COMMENT OUT WHOLE BLOCK SINCE IT SHOULD ONLY RUN IF NOT as3Enabled (i.e. pre AS3)
+    /* 
     if (!as3Enabled) {
        //shift method is not generic it can transferred to other objects for use as method
         var obj = new Object();
@@ -102,10 +103,11 @@ function getTestCases() {
         obj[2] = 2;
         obj[3] = 3;
 
-        array[item++] = new TestCase( SECTION, "obj = new Object(); obj.shift()", 0, obj.shift() );
+        array[item++] = Assert.expectEq(  "obj = new Object(); obj.shift()", 0, obj.shift() );
 
-        array[item++] = new TestCase( SECTION, "obj = new Object(); obj.shift();obj.length", 3, obj.length );
+        array[item++] = Assert.expectEq(  "obj = new Object(); obj.shift();obj.length", 3, obj.length );
     }
+    */
     
     return ( array );
 

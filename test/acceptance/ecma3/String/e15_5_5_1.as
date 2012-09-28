@@ -1,16 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = "15.5.5.1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.length";
+//     var SECTION = "15.5.5.1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.length";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -22,10 +21,10 @@ function getTestCases() {
     }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        array[item++]=new TestCase(SECTION,"var s= new String();s.length=10","ReferenceError: Error #1074",referenceError(thisError));
+        array[item++]=Assert.expectEq("var s= new String();s.length=10","ReferenceError: Error #1074",Utils.referenceError(thisError));
     }
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); s.length",
                                     0,
                                     (s.length ) );
@@ -41,7 +40,7 @@ function getTestCases() {
         props += p;
     }
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); var props = ''; for ( var p in s ) {  props += p; };  props",
                                     '',
                                    s);
@@ -54,13 +53,13 @@ function getTestCases() {
     }catch(e1:ReferenceError){
         thisError = e1.toString();
     }
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); delete s.length",
                                     "ReferenceError: Error #1120",
-                                    referenceError(thisError) );
+                                    Utils.referenceError(thisError) );
     
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); delete s.length",
                                     0,
                                     (s = new String(), s.length ) );
@@ -70,30 +69,30 @@ function getTestCases() {
     }catch(e2:ReferenceError){
         thisError = e2.toString();
     }
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String('hello'); delete s.length",
                                     "ReferenceError: Error #1120",
-                                    referenceError(thisError) );
+                                    Utils.referenceError(thisError) );
      
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String('hello'); delete s.length; s.length",
                                     5,
                                     ( s.length ) );
     s='abcdefghijklmnopqrstuvwxyz';
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "delete s.length",
                                     "ReferenceError: Error #1120",
-                                    referenceError(thisError) );
+                                    Utils.referenceError(thisError) );
     try{
         s.length=10;
     }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        array[item++]=new TestCase(SECTION,"var s= new String();s.length=10","ReferenceError: Error #1074",referenceError(thisError));
+        array[item++]=Assert.expectEq("var s= new String();s.length=10","ReferenceError: Error #1074",Utils.referenceError(thisError));
     }
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String('hello');s='abcdefghijklmnopqrstuvwxyz'; delete s.length; s.length",
                                     26,
                                     ( s.length ) );

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
  
 /**
    File Name:    in.es
@@ -9,52 +10,49 @@
    *
    */
 
-var SECTION = " ";
-var VERSION = "AS3";
-startTest();
-writeHeaderToLog( SECTION + " Vector in statement");
+// var SECTION = " ";
+// var VERSION = "AS3";
 
-AddTestCase(    "in value valid index",
+Assert.expectEq(    "in value valid index",
         true,
         (0 in new <int>["zero","one","two","three","four","five"]));
-AddTestCase(    "in value for empty vector",
+Assert.expectEq(    "in value for empty vector",
         false,
         (0 in new <*>[]));
 
-AddTestCase(    "in value valid index does not exist",
+Assert.expectEq(    "in value valid index does not exist",
         false,
         (6 in new <*>[]));
 
-AddTestCase(    "in value valid index in string form",
+Assert.expectEq(    "in value valid index in string form",
         true,
         ("2" in new <int>["zero","one","two","three","four","five"]));
 
 err1="no exception";
 try {
-AddTestCase(    "in value is push function index ",
+Assert.expectEq(    "in value is push function index ",
         true,
         ("push" in new <*>[]));
-AddTestCase(    "in value is concat function index ",
+Assert.expectEq(    "in value is concat function index ",
         true,
         ("concat" in new <*>[]));
-AddTestCase(    "in value negative number index ",
+Assert.expectEq(    "in value negative number index ",
         false,
         (-2 in new <*>[]));
-AddTestCase(    "in value decimal index",
+Assert.expectEq(    "in value decimal index",
         false,
         (1.1 in new <*>[]));
-AddTestCase(    "in value decimal in string index",
+Assert.expectEq(    "in value decimal in string index",
         false,
         ("1.1" in new <*>[]));
-AddTestCase(    "in value valid string",
+Assert.expectEq(    "in value valid string",
         false,
         ("string" in new <*>[]));
 } catch(e) {
   err1=e.toString();
-  AddTestCase(    "in throws exception for invalid vector indexes",
+  Assert.expectEq(    "in throws exception for invalid vector indexes",
                   "no exception",
                   err1);
 }
 
-test();
 

@@ -5,11 +5,11 @@
 package {
     import avmplus.*;
     import flash.utils.*;
+import com.adobe.test.Assert;
 
-    var SECTION = "15.2";
-    var VERSION = "ECMA_5";
-    startTest();
-    var TITLE   = "JSON AS3 Classs types";
+//     var SECTION = "15.2";
+//     var VERSION = "ECMA_5";
+//     var TITLE   = "JSON AS3 Classs types";
 
 
     public class testclass1 {
@@ -55,14 +55,50 @@ package {
         }
     }
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
     
 
-    startTest();
+function removeExceptionDetail(s:String) {
+    var fnd=s.indexOf(" ");
+    if (fnd>-1) {
+        if (s.indexOf(':',fnd)>-1) {
+                s=s.substring(0,s.indexOf(':',fnd));
+        }
+    }
+    return s;
+}
 
-    AddTestCase("stringify an AS3 class with getters, transient properties",'{"getonly":"getonly_value","var1":"var1_value","var2":false}',sortObject(JSON.parse(JSON.stringify(new testclass1()))));
+function sortObject(o:Object) {
+    var keys=[];
+    var key;
+    for ( key in o ) {
+        if (o[key]===undefined) {
+           continue;
+        }
+        keys[keys.length]=key;
+    }
+    keys.sort();
+    var ret="{";
+    var value;
+    for (var i in keys) {
+        key=keys[i];
+        value=o[key];
+        if (value is String) {
+            value='"'+value+'"';
+        } else if (value is Array) {
+            value='['+value+']';
+        } else if (value is Object) {
+        }
+        ret += '"'+key+'":'+value+",";
+    }
+    ret=ret.substring(0,ret.length-1);
+    ret+="}";
+    return ret;
+}
 
-    AddTestCase("stringify an AS3 class",'{"var1":-1,"var2":-3.14,"var3":[1,2,3],"var4":[object Object],"var5":null}',sortObject(JSON.parse(JSON.stringify(new testclass2()))));
+
+    Assert.expectEq("stringify an AS3 class with getters, transient properties",'{"getonly":"getonly_value","var1":"var1_value","var2":false}',sortObject(JSON.parse(JSON.stringify(new testclass1()))));
+
+    Assert.expectEq("stringify an AS3 class",'{"var1":-1,"var2":-3.14,"var3":[1,2,3],"var4":[object Object],"var5":null}',sortObject(JSON.parse(JSON.stringify(new testclass2()))));
 
     var testobj:Object=new Object();
     testobj.prop1="1";
@@ -74,14 +110,14 @@ package {
     testobj.prop7=NaN;
     testobj.prop8=-Infinity;
 
-   AddTestCase("stringify an AS3 object with various methods",'{"prop1":"1","prop2":true,"prop4":null,"prop5":10,"prop6":10.11,"prop7":null,"prop8":null}',sortObject(JSON.parse(JSON.stringify(testobj))));
+   Assert.expectEq("stringify an AS3 object with various methods",'{"prop1":"1","prop2":true,"prop4":null,"prop5":10,"prop6":10.11,"prop7":null,"prop8":null}',sortObject(JSON.parse(JSON.stringify(testobj))));
 
     var testobj2:Object=new Object();
     testobj2.prop1=10;
     testobj2.toJSON=function() {
         return "testobj2";
     }
-    AddTestCase("stringify an AS3 object with toJSON","\"testobj2\"",JSON.stringify(testobj2));
+    Assert.expectEq("stringify an AS3 object with toJSON","\"testobj2\"",JSON.stringify(testobj2));
 
     var testobj3:Object=new Object();
     testobj3.prop1=10;
@@ -94,12 +130,11 @@ package {
     } catch (e) {
         exception1=e.toString();
     }
-    AddTestCase("stringify an AS3 object with toJSON","Error: toJSON error",exception1);
+    Assert.expectEq("stringify an AS3 object with toJSON","Error: toJSON error",exception1);
 
     var testobj4:Object=new Object();
     testobj4.toJSON=true;
-    AddTestCase("stringify an AS3 object with non-function toJSON",'{"toJSON":true}',JSON.stringify(testobj4));
+    Assert.expectEq("stringify an AS3 object with non-function toJSON",'{"toJSON":true}',JSON.stringify(testobj4));
 
-    test();
 
 }

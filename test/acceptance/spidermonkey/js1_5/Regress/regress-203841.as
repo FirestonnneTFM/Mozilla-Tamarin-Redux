@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -26,7 +26,7 @@ var expect= '';
 var expectedvalues = [];
 
 
-status = inSection(1);
+//status = inSection(1);
 var a = 0;
 var b = 0;
 var c = 0;
@@ -35,7 +35,7 @@ actual = c;
 expect = 0;
 addThis();
 
-status = inSection(2);
+//status = inSection(2);
 a = 5;
 b = 0;
 c = 0;
@@ -44,7 +44,7 @@ actual = c;
 expect = 0;
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 a = 5;
 b = 6;
 c = 0;
@@ -56,7 +56,7 @@ addThis();
 /*
  * Now get tricky and use the = operator inside the if-clause
  */
-status = inSection(4);
+//status = inSection(4);
 a = 0;
 b = 6;
 c = 0;
@@ -65,7 +65,7 @@ actual = c;
 expect = 1;
 addThis();
 
-status = inSection(5);
+//status = inSection(5);
 c = 0;
 if (1, 1 == 6) { c = 1; }
 actual = c;
@@ -78,21 +78,21 @@ addThis();
  */
 var x=[];
 
-status = inSection(6); // get element case
+//status = inSection(6); // get element case
 c = 0;
 if (x[1==2]) { c = 1; }
 actual = c;
 expect = 0;
 addThis();
 
-status = inSection(7); // set element case
+//status = inSection(7); // set element case
 c = 0;
 if (x[1==2]=1) { c = 1; }
 actual = c;
 expect = 1;
 addThis();
 
-status = inSection(8); // delete element case
+//status = inSection(8); // delete element case
 c = 0;
 if (delete x[1==2]) { c = 1; }
 actual = c;
@@ -121,15 +121,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

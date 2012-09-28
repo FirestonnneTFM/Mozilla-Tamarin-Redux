@@ -4,13 +4,14 @@
 
 
 import MultipleCatchBlocksWithTwoType.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing try block with multiple catch blocks and using a catch block with parameter of type TypeError to catch the type error";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing try block with multiple catch blocks and using a catch block with parameter of type TypeError to catch the type error";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var z = new TypeErrors();
@@ -41,12 +42,11 @@ try{
    }catch(e10:Error){//print(e10.toString());
          thisError1=e10.toString();
    }finally{//print(thisError1);
-         AddTestCase( "Testing catch block with Type Error", "TypeError: Error #1009" ,typeError(thisError)+""  );
-         AddTestCase( "Testing catch block with Type Error", "no error" ,typeError(thisError1)+""  );
+         Assert.expectEq( "Testing catch block with Type Error", "TypeError: Error #1009" ,Utils.typeError(thisError)+""  );
+         Assert.expectEq( "Testing catch block with Type Error", "no error" ,Utils.typeError(thisError1)+""  );
     }
 
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

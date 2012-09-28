@@ -11,17 +11,17 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION = "mops";
-    var VERSION = "AS3";
-    var TITLE   = "sf32";
+//     var SECTION = "mops";
+//     var VERSION = "AS3";
+//     var TITLE   = "sf32";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("sf32(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("sf32(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ SF32(0x41460200, Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
@@ -34,13 +34,13 @@ package {
 
     // Test the memory boundaries
     clearMemory();
-    AddErrorTest("sf32(0x41460200, -1)", RANGEERROR+1506, function(){ SF32(0x41460200, -1); });
-    AddErrorTest("sf32(0x41460200, mem.length)", RANGEERROR+1506, function(){ SF32(0x41460200, mem.length); });
-    AddErrorTest("sf32(0x41460200, mem.length-1)", RANGEERROR+1506, function(){ SF32(0x41460200, mem.length-1); });
-    AddErrorTest("sf32(0x41460200, mem.length-2)", RANGEERROR+1506, function(){ SF32(0x41460200, mem.length-2); });
-    AddErrorTest("sf32(0x41460200, mem.length-3)", RANGEERROR+1506, function(){ SF32(0x41460200, mem.length-3); });
+    Assert.expectError("sf32(0x41460200, -1)", Utils.RANGEERROR+1506, function(){ SF32(0x41460200, -1); });
+    Assert.expectError("sf32(0x41460200, mem.length)", Utils.RANGEERROR+1506, function(){ SF32(0x41460200, mem.length); });
+    Assert.expectError("sf32(0x41460200, mem.length-1)", Utils.RANGEERROR+1506, function(){ SF32(0x41460200, mem.length-1); });
+    Assert.expectError("sf32(0x41460200, mem.length-2)", Utils.RANGEERROR+1506, function(){ SF32(0x41460200, mem.length-2); });
+    Assert.expectError("sf32(0x41460200, mem.length-3)", Utils.RANGEERROR+1506, function(){ SF32(0x41460200, mem.length-3); });
 
-    AddTestCase("sf32(0x41460200, mem.length-4)", undefined, SF32(0x01010101, mem.length-4));
+    Assert.expectEq("sf32(0x41460200, mem.length-4)", undefined, SF32(0x01010101, mem.length-4));
 
     testli8();
     testli16();
@@ -52,7 +52,6 @@ package {
     testreadUnsignedInt();
     testreadFloat();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -77,10 +76,10 @@ package {
         clearMemory();
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
-        AddTestCase("li8 load 1st byte written by sf32(12.37548828125)", uint(0x00), LI8(0));
-        AddTestCase("li8 load 2nd byte written by sf32(12.37548828125)", uint(0x02), LI8(1));
-        AddTestCase("li8 load 3rd byte written by sf32(12.37548828125)", uint(0x46), LI8(2));
-        AddTestCase("li8 load 4th byte written by sf32(12.37548828125)", uint(0x41), LI8(3));
+        Assert.expectEq("li8 load 1st byte written by sf32(12.37548828125)", uint(0x00), LI8(0));
+        Assert.expectEq("li8 load 2nd byte written by sf32(12.37548828125)", uint(0x02), LI8(1));
+        Assert.expectEq("li8 load 3rd byte written by sf32(12.37548828125)", uint(0x46), LI8(2));
+        Assert.expectEq("li8 load 4th byte written by sf32(12.37548828125)", uint(0x41), LI8(3));
     }
 
     function testli16():void
@@ -88,8 +87,8 @@ package {
         clearMemory();
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
-        AddTestCase("li16 load bytes written by sf32()", 0x0200, LI16(0));
-        AddTestCase("li16 load bytes written by sf32()", 0x4146, LI16(2));
+        Assert.expectEq("li16 load bytes written by sf32()", 0x0200, LI16(0));
+        Assert.expectEq("li16 load bytes written by sf32()", 0x4146, LI16(2));
     }
 
     function testli32():void
@@ -97,7 +96,7 @@ package {
         clearMemory();
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
-        AddTestCase("li32 load bytes written by sf32()", int(0x41460200), LI32(0));
+        Assert.expectEq("li32 load bytes written by sf32()", int(0x41460200), LI32(0));
     }
 
     function testlf32():void
@@ -105,7 +104,7 @@ package {
         clearMemory();
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
-        AddTestCase("lf32 load bytes written by sf32()", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load bytes written by sf32()", 12.37548828125, LF32(0));
 
     }
 
@@ -115,10 +114,10 @@ package {
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
         mem.position = 0;
-        AddTestCase("readByte() load bytes written by sf32()", 0x00, mem.readByte());
-        AddTestCase("readByte() load bytes written by sf32()", 0x02, mem.readByte());
-        AddTestCase("readByte() load bytes written by sf32()", 0x46, mem.readByte());
-        AddTestCase("readByte() load bytes written by sf32()", 0x41, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by sf32()", 0x00, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by sf32()", 0x02, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by sf32()", 0x46, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by sf32()", 0x41, mem.readByte());
     }
 
     function testreadUnsignedByte():void
@@ -127,10 +126,10 @@ package {
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
         mem.position = 0;
-        AddTestCase("readUnsignedByte() load bytes written by sf32()", 0x00, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load bytes written by sf32()", 0x02, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load bytes written by sf32()", 0x46, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load bytes written by sf32()", 0x41, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by sf32()", 0x00, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by sf32()", 0x02, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by sf32()", 0x46, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by sf32()", 0x41, mem.readUnsignedByte());
     }
 
     function testreadInt():void
@@ -139,7 +138,7 @@ package {
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
         mem.position = 0;
-        AddTestCase("readInt() load bytes written by sf32()", int(0x41460200), mem.readInt());
+        Assert.expectEq("readInt() load bytes written by sf32()", int(0x41460200), mem.readInt());
     }
 
     function testreadUnsignedInt():void
@@ -148,7 +147,7 @@ package {
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
         mem.position = 0;
-        AddTestCase("readUnsignedInt() load bytes written by sf32()", uint(0x41460200), mem.readUnsignedInt());
+        Assert.expectEq("readUnsignedInt() load bytes written by sf32()", uint(0x41460200), mem.readUnsignedInt());
     }
 
     function testreadFloat():void
@@ -157,7 +156,7 @@ package {
         // 0x41460200 == 12.37548828125
         SF32(12.37548828125, 0);
         mem.position = 0;
-        AddTestCase("readFloat() load bytes written by sf32()", 12.37548828125, mem.readFloat());
+        Assert.expectEq("readFloat() load bytes written by sf32()", 12.37548828125, mem.readFloat());
     }
 
 }

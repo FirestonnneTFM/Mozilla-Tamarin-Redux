@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import avmplus.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-360681-01.js';
 //-----------------------------------------------------------------------------
@@ -21,8 +21,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   expect = actual = 'No Crash';
 
@@ -31,9 +31,8 @@ function addtestcases()
   a[1] = 2;
   a.sort(function () { System.forceFullCollection(); return 1; });
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

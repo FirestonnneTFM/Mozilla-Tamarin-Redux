@@ -3,26 +3,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import PublicClass.*;
+import com.adobe.test.Assert;
 
 
-var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
-var TITLE   = "Override default function in dynamic class extending public class";      // Provide ECMA section title or a description
+// var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
+// var TITLE   = "Override default function in dynamic class extending public class";      // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                            // leave this alone
 
 
 var CLASSDEFN = new DynExtPublicOverRideDefault();
 var booleanValue:Boolean = true;
 
-AddTestCase( "CLASSDEFN.superSetBoolean(booleanValue); CLASSDEFN.superGetBoolean()", booleanValue, (CLASSDEFN.superSetBoolean(booleanValue), CLASSDEFN.superGetBoolean()));
-AddTestCase( "CLASSDEFN.orSet", false, CLASSDEFN.orSet );
-AddTestCase( "CLASSDEFN.orGet", false, CLASSDEFN.orGet );
-AddTestCase( "CLASSDEFN.setBoolean( booleanValue ); CLASSDEFN.getBoolean()", booleanValue, CLASSDEFN.setGetBoolean( booleanValue ));
-AddTestCase( "CLASSDEFN.orSet", true, CLASSDEFN.orSet );
-AddTestCase( "CLASSDEFN.orGet", true, CLASSDEFN.orGet );
+Assert.expectEq( "CLASSDEFN.superSetBoolean(booleanValue); CLASSDEFN.superGetBoolean()", booleanValue, (CLASSDEFN.superSetBoolean(booleanValue), CLASSDEFN.superGetBoolean()));
+Assert.expectEq( "CLASSDEFN.orSet", false, CLASSDEFN.orSet );
+Assert.expectEq( "CLASSDEFN.orGet", false, CLASSDEFN.orGet );
+Assert.expectEq( "CLASSDEFN.setBoolean( booleanValue ); CLASSDEFN.getBoolean()", booleanValue, CLASSDEFN.setGetBoolean( booleanValue ));
+Assert.expectEq( "CLASSDEFN.orSet", true, CLASSDEFN.orSet );
+Assert.expectEq( "CLASSDEFN.orGet", true, CLASSDEFN.orGet );
 
-test();             // Leave this function alone.
             // This function is for executing the test case and then
             // displaying the result on to the console or the LOG file.

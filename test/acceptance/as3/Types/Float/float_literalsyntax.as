@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "4.2";
-var VERSION = "AS3";
-var TITLE   = "Literal syntax";
+// var SECTION = "4.2";
+// var VERSION = "AS3";
+// var TITLE   = "Literal syntax";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 /*
 The NumericLiteral rule of the lexical grammar (lines 160-161) is extended as follows:
@@ -36,14 +35,13 @@ as well as a pushfloat instructions.
 
 var one_f = 1f;
 var one_float:float = float(1);
-AddTestCase("literal 1f", one_float, one_f);
+Assert.expectEq("literal 1f", one_float, one_f);
 
 var pi_f = 31.4159e-1f;
 var pi_float:float = float(31.4159e-1);
-AddTestCase("Literal 31.4159e-1f", pi_float, pi_f);
+Assert.expectEq("Literal 31.4159e-1f", pi_float, pi_f);
 
 /* The "Note" is tested in section 9.8 (operation ToString) and 9.2 (operation ToFloat),
    as well as section 11 (parseFloat). We don't add specific testcases here. */
 
-test();
 

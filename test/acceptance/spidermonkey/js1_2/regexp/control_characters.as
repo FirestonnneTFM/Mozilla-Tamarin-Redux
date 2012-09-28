@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'control_characters.js';
 
@@ -13,30 +14,26 @@ gTestfile = 'control_characters.js';
    Date:         April 8, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-var TITLE = 'RegExp: .';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'RegExp: .';
 var BUGNUMBER="123802";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog('Executing script: control_characters.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-// 'àOÐ ê:i¢Ø'.match(new RegExp('.+'))
-testcases[index++] = new TestCase ( SECTION, "'àOÐ ê:i¢Ø'.match(new RegExp('.+'))",
-	       String(['àOÐ ê:i¢Ø']), String('àOÐ ê:i¢Ø'.match(new RegExp('.+'))));
+// 'ï¿½Oï¿½ ï¿½:iï¿½ï¿½'.match(new RegExp('.+'))
+Assert.expectEq (  "'ï¿½Oï¿½ ï¿½:iï¿½ï¿½'.match(new RegExp('.+'))",
+	       String(['ï¿½Oï¿½ ï¿½:iï¿½ï¿½']), String('ï¿½Oï¿½ ï¿½:iï¿½ï¿½'.match(new RegExp('.+'))));
 
 // string1.match(new RegExp(string1))
-var string1 = 'àOÐ ê:i¢Ø';
-testcases[index++] = new TestCase ( SECTION, "string1 = " + string1 + " string1.match(string1)",
+var string1 = 'ï¿½Oï¿½ ï¿½:iï¿½ï¿½';
+Assert.expectEq (  "string1 = " + string1 + " string1.match(string1)",
 	       String([string1]), String(string1.match(string1)));
 
 /*
 string1 = "";
 for (var i = 0; i < 32; i++)
   string1 += String.fromCharCode(i);
-testcases[index++] = new TestCase ( SECTION, "string1 = " + string1 + " string1.match(string1)",
+Assert.expectEq (  "string1 = " + string1 + " string1.match(string1)",
 	       String(['|'+string1+'|']), String(string1.match(string1)));
 */
-test();

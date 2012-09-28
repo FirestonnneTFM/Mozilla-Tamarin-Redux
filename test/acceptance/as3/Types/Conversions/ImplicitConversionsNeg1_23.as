@@ -1,12 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Types: Conversions";
-var VERSION = "as3";
-var TITLE   = "implicit type conversions";
+// var SECTION = "Types: Conversions";
+// var VERSION = "as3";
+// var TITLE   = "implicit type conversions";
 
-startTest();
 
 
 // Value = -1.23
@@ -17,14 +18,14 @@ try{
 } catch (e0) {
     thisError = e0.toString();
 } finally {
-    AddTestCase( "var string:String = -1.23", "no exception thrown", typeError(thisError));
-    AddTestCase( "var string:String = -1.23", "-1.23", string);
+    Assert.expectEq( "var string:String = -1.23", "no exception thrown", Utils.typeError(thisError));
+    Assert.expectEq( "var string:String = -1.23", "-1.23", string);
 }
 
 
 
 var number:Number = -1.23;
-AddTestCase("number:Number = undefined", -1.23, number );
+Assert.expectEq("number:Number = undefined", -1.23, number );
 
 thisError = "no exception thrown";
 try{
@@ -32,8 +33,8 @@ try{
 } catch(e1) {
     thisError = e1.toString();
 } finally {
-    AddTestCase("myInt:int = -1.23", "no exception thrown", rangeError(thisError) );
-        AddTestCase("myInt:int = -1.23", -1, myInt );
+    Assert.expectEq("myInt:int = -1.23", "no exception thrown", Utils.rangeError(thisError) );
+        Assert.expectEq("myInt:int = -1.23", -1, myInt );
 }
 
 
@@ -43,8 +44,8 @@ try{
 } catch(e2) {
     thisError = e2.toString();
 } finally {
-    AddTestCase("myUInt:uint = -1.23", "no exception thrown", rangeError(thisError) );
-        AddTestCase("myUInt:uint = -1.23", 4294967295, myUint);
+    Assert.expectEq("myUInt:uint = -1.23", "no exception thrown", Utils.rangeError(thisError) );
+        Assert.expectEq("myUInt:uint = -1.23", 4294967295, myUint);
 }
 
 
@@ -55,15 +56,14 @@ try{
 } catch(e3) {
     thisError = e3.toString();
 } finally {
-    AddTestCase("boolean:Boolean = -1.23", "no exception thrown", typeError(thisError) );
-    AddTestCase("boolean:Boolean = -1.23", true, boolean );
+    Assert.expectEq("boolean:Boolean = -1.23", "no exception thrown", Utils.typeError(thisError) );
+    Assert.expectEq("boolean:Boolean = -1.23", true, boolean );
 }
 
 var object:Object = -1.23;
-AddTestCase( "var object:Object = -1.23", -1.23, object);
+Assert.expectEq( "var object:Object = -1.23", -1.23, object);
 
 
-test();
 
 
 

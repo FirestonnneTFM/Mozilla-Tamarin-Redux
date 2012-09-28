@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package LengthSpoofing
 {
     public dynamic class SpoofingArray extends Array
@@ -32,12 +33,11 @@ package LengthSpoofing
 }
 
 
-    var SECTION = "regress";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test splice assumes length is correct bug";
+import com.adobe.test.Assert;
+//     var SECTION = "regress";
+//     var VERSION = "as3";
+//     var TITLE   = "test splice assumes length is correct bug";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
 
 //print("concat");
@@ -46,13 +46,13 @@ package LengthSpoofing
     foo.push(2);
     foo.push(3);
     foo.Spoofing = true;
-    AddTestCase(
+    Assert.expectEq(
       "test concat spoofing=true",
       "1,2,3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4,5,6",
       foo.concat([4,5,6]).toString()
       );
     foo.Spoofing = false;
-    AddTestCase(
+    Assert.expectEq(
       "test concat spoofing=false",
       "1,2,3,4,5,6",
       foo.concat([4,5,6]).toString()
@@ -66,13 +66,13 @@ package LengthSpoofing
     foo.push(3);
     foo.Spoofing = true;
     foo.pop();
-    AddTestCase(
+    Assert.expectEq(
       "test pop spoofing=true",
       100,
       foo.length
       );
     foo.Spoofing = false;
-    AddTestCase(
+    Assert.expectEq(
       "test pop spoofing=false",
       foo.length,
       2
@@ -86,13 +86,13 @@ package LengthSpoofing
 
     foo.Spoofing = true;
     foo.reverse();
-    AddTestCase(
+    Assert.expectEq(
       "test reverse spoofing=true",
       100,
       foo.length
       );
     foo.Spoofing = false;
-    AddTestCase(
+    Assert.expectEq(
       "test reverse spoofing=false",
       3,
       foo.length
@@ -103,7 +103,7 @@ package LengthSpoofing
 
     foo.Spoofing = true;
     foo.shift();
-    AddTestCase(
+    Assert.expectEq(
       "test shift spoofing=true",
       ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
       foo.toString()
@@ -115,7 +115,7 @@ package LengthSpoofing
     foo.push(3);
     foo.Spoofing = false;
     foo.shift();
-    AddTestCase(
+    Assert.expectEq(
       "test shift spoofing=false",
       "2,3",
       foo.toString()
@@ -127,16 +127,15 @@ package LengthSpoofing
 
     foo.Spoofing = true;
     foo.splice(90,0,1,2,3,4,5);
-    AddTestCase(
+    Assert.expectEq(
       "test splice spoofing=true",
       ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,2,3,4,5,,,,,",
       foo.toString()
       );
     foo.Spoofing = false;
-    AddTestCase(
+    Assert.expectEq(
       "test splice spoofing=false",
       ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,2,3,4,5,,,,,,,,,,",
       foo.toString()
       );
     
-    test();

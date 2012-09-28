@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "4.5.21";
-var VERSION = "AS3";
-var TITLE   = "public function cos(x:float):float";
+// var SECTION = "4.5.21";
+// var VERSION = "AS3";
+// var TITLE   = "public function cos(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 AddStrictTestCase("float.cos() returns a float", "float", getQualifiedClassName(float.cos(0)));
@@ -36,5 +34,4 @@ AddStrictTestCase("float.cos(float.NEGATIVE_INFINITY)", float.NaN, float.cos(flo
 
 AddStrictTestCase("float.cos(float.MIN_VALUE)", float(1), float.cos(float.MIN_VALUE));
 
-test();
 

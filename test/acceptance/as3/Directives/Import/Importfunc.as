@@ -20,12 +20,11 @@ package Importfunc {
 
 
 
-var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
-var TITLE   = "Import only a public function";          // Provide ECMA section title or a description
+// var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+// var TITLE   = "Import only a public function";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                    // leave this alone
 
 
 
@@ -35,20 +34,21 @@ import Importfunc.array;
 import Importfunc.setPubArray;
 import Importfunc.pubArray;
 
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-AddTestCase( "setPubArray(arr)", arr, setPubArray(arr) );
-AddTestCase( "pubArray", arr, pubArray );
+Assert.expectEq( "setPubArray(arr)", arr, setPubArray(arr) );
+Assert.expectEq( "pubArray", arr, pubArray );
 thisError="no error";
 try{
     array
    }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        AddTestCase( "Trying to import a not a public Array", "ReferenceError: Error #1065", referenceError(thisError) );
+        Assert.expectEq( "Trying to import a not a public Array", "ReferenceError: Error #1065", Utils.referenceError(thisError) );
    }
 /*===========================================================================*/
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 include "floatUtil.as";
 
 
-var SECTION = "6.3.11";
-var VERSION = "AS3";
-var TITLE   = "The postfix -- operator";
+// var SECTION = "6.3.11";
+// var VERSION = "AS3";
+// var TITLE   = "The postfix -- operator";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var flt:float = new float(3.1413119f);
@@ -24,10 +23,10 @@ flt = ++flt;
 var o = new MyObject(flt);
 var u = o--;
 
-AddTestCase("postfix -- on Object (that converts to float through ToPrimitive)", u, flt)
-AddTestCase("postfix -- on Object (that converts to float through ToPrimitive)", o, flt_minus_1)
-AddTestCase("postfix -- on Object returns a float", "float", getQualifiedClassName(u));
-AddTestCase("postfix -- on Object returns a float", "float", getQualifiedClassName(o));
+Assert.expectEq("postfix -- on Object (that converts to float through ToPrimitive)", u, flt)
+Assert.expectEq("postfix -- on Object (that converts to float through ToPrimitive)", o, flt_minus_1)
+Assert.expectEq("postfix -- on Object returns a float", "float", getQualifiedClassName(u));
+Assert.expectEq("postfix -- on Object returns a float", "float", getQualifiedClassName(o));
 
 /*
 12.375f--
@@ -67,9 +66,9 @@ fraction = 011011
 flt = new float(12.375f);
 var flt_as_int = 1095106560;
 var flt_minus_1_as_int = 1094057984;
-AddTestCase("verify float bits", flt_as_int, FloatRawBits(flt));
-AddTestCase("verify float bits calling --", flt_as_int, FloatRawBits(flt--));
-AddTestCase("verify float is correct int representation", flt_minus_1_as_int, FloatRawBits(flt));
+Assert.expectEq("verify float bits", flt_as_int, FloatRawBits(flt));
+Assert.expectEq("verify float bits calling --", flt_as_int, FloatRawBits(flt--));
+Assert.expectEq("verify float is correct int representation", flt_minus_1_as_int, FloatRawBits(flt));
 
 
 flt = float.MAX_VALUE;
@@ -87,5 +86,4 @@ AddStrictTestCase("float.NEGATIVE_INFINITY after call", float.NEGATIVE_INFINITY,
 
 
 
-test();
 

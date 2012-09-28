@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 function test_pos()
 {
@@ -63,10 +64,8 @@ function test_neg()
     results.push({expected: 0, actual: ~u});
     results.push({expected: -4294967295, actual: -u});
     
-startTest();
 for (var i in results)
 {
     var o = results[i]
-    AddTestCase("test_"+i, o.expected, o.actual);
+    Assert.expectEq("test_"+i, o.expected, o.actual);
 }
-test();

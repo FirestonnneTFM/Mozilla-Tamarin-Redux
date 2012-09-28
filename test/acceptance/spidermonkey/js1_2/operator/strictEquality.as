@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'strictEquality.js';
 
@@ -13,48 +14,44 @@ gTestfile = 'strictEquality.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'operator "==="';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'operator "==="';
 
-writeHeaderToLog('Executing script: strictEquality.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-testcases[index++] = new TestCase( SECTION, "('8' === 8)                              ",
+Assert.expectEq(  "('8' === 8)                              ",
           false,  ('8' === 8));
 
-testcases[index++] = new TestCase( SECTION, "(8 === 8)                                ",
+Assert.expectEq(  "(8 === 8)                                ",
           true,   (8 === 8));
 
-testcases[index++] = new TestCase( SECTION, "(8 === true)                             ",
+Assert.expectEq(  "(8 === true)                             ",
           false,  (8 === true));
 
-testcases[index++] = new TestCase( SECTION, "(new String('') === new String(''))      ",
+Assert.expectEq(  "(new String('') === new String(''))      ",
           true,  (new String('') === new String('')));
 
-testcases[index++] = new TestCase( SECTION, "(new Boolean(true) === new Boolean(true))",
+Assert.expectEq(  "(new Boolean(true) === new Boolean(true))",
           true,  (new Boolean(true) === new Boolean(true)));
 
 var anObject = { one:1 , two:2 };
 
-testcases[index++] = new TestCase( SECTION, "(anObject === anObject)                  ",
+Assert.expectEq(  "(anObject === anObject)                  ",
           true,  (anObject === anObject));
 
-testcases[index++] = new TestCase( SECTION, "(anObject === { one:1 , two:2 })         ",
+Assert.expectEq(  "(anObject === { one:1 , two:2 })         ",
           false,  (anObject === { one:1 , two:2 }));
 
-testcases[index++] = new TestCase( SECTION, "({ one:1 , two:2 } === anObject)         ",
+Assert.expectEq(  "({ one:1 , two:2 } === anObject)         ",
           false,  ({ one:1 , two:2 } === anObject));
 
-testcases[index++] = new TestCase( SECTION, "(null === null)                          ",
+Assert.expectEq(  "(null === null)                          ",
           true,  (null === null));
 
-testcases[index++] = new TestCase( SECTION, "(null === 0)                             ",
+Assert.expectEq(  "(null === 0)                             ",
           false,  (null === 0));
 
-testcases[index++] = new TestCase( SECTION, "(true === !false)                        ",
+Assert.expectEq(  "(true === !false)                        ",
           true,  (true === !false));
 
-test();
 

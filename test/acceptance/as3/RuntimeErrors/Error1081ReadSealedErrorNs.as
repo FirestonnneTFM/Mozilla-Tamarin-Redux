@@ -24,10 +24,11 @@ package
 
 
 import Main;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 var CODE = 1081; // Property name not found on name and there is no default value.
 
 //-----------------------------------------------------------
-startTest();
 //-----------------------------------------------------------
 
 try {
@@ -35,9 +36,8 @@ try {
 } catch (err) {
     result = err.toString();
 } finally {
-    AddTestCase("Reference Error", REFERENCEERROR + CODE, referenceError(result));
+    Assert.expectEq("Reference Error", Utils.REFERENCEERROR + CODE, Utils.referenceError(result));
 }
 
 //-----------------------------------------------------------
-test();
 //-----------------------------------------------------------

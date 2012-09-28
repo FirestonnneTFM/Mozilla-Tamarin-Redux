@@ -2,65 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Instructions that start with the letter G" 
-    callpropvoid START 1
-    
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest1)
-    getlocal0
-    call 0
-    
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
-
-.script_info {
-    traits: {
-        .trait { kind: Trait_Slot  name: globalSlot1 }
-    }
-}
 
 function runTest()
 {
     getlocal0
     pushscope 
 
-    .try {
-        pushnull
-        getdescendants no_such_index
-        pop
-        
-        findproperty FAIL
-        pushstring "getdescendants null"
-        pushstring "exception should have been thrown: TypeError: Error #1009: Cannot access a property or method of a null object reference."
-        getlocal1
-        callpropvoid FAIL 3
-        
-        jump finished_getdescendants_null
-    }
-    .catch {
-        getlocal0
-        pushscope
-        setlocal2   // save typeError
-        findproperty COMPARE_TYPEERROR
-        pushstring "getdescendants null"
-        pushstring "TypeError: Error #1009" //Cannot access a property or method of a null object reference.  // expected
-        getlocal2
-        callpropvoid COMPARE_TYPEERROR 3
-    }
-    
-    finished_getdescendants_null:
 
 
-    .try {
+
+    try {
         pushnull
         getproperty length
         pop
@@ -73,7 +24,7 @@ function runTest()
         
         jump finished_getproperty_null
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save typeError
@@ -146,3 +97,29 @@ function runTest1()
     returnvoid
 }
 
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Instructions that start with the letter G" 
+    callpropvoid START 1
+    
+    newfunction runTest
+    getlocal0
+    call 0
+    
+    newfunction runTest1
+    getlocal0
+    call 0
+    
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+
+script_info {
+init: main
+    traits: {
+        trait { kind: Trait_Slot  name: globalSlot1 }
+    }
+}

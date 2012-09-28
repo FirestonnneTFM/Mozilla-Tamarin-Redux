@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-321971.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'JSOP_FINDNAME replaces JSOP_BINDNAME';
 var actual = 'no error';
 var expect = 'no error';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var x = {};
 
@@ -25,6 +25,5 @@ foo=i;
 
 foo;
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

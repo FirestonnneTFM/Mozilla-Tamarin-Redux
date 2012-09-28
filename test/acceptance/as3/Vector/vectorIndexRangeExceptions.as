@@ -5,11 +5,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.System;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = " ";
-var VERSION = "AS3";
-startTest();
-writeHeaderToLog( SECTION + " Vector index range exceptions");
+// var SECTION = " ";
+// var VERSION = "AS3";
 
 var REFWRITE_MSG  = "ReferenceError: Error #1056";
 var REFREAD_MSG   = "ReferenceError: Error #1069";
@@ -78,7 +78,7 @@ function RecordResult(mode, element_kind, index, index_type, error, expected)
 
     var description = mode + " v_" + element_kind + "[" + index + ":" + index_type + "]";
 
-    AddTestCase(description, errmsg, parseError(error, errmsg.length));
+    Assert.expectEq(description, errmsg, Utils.parseError(error, errmsg.length));
 }
 
 function Read_A(index, c, expected)
@@ -507,8 +507,7 @@ if (System.swfVersion >= 11) {
 
  } else {
 
-    AddTestCase("Test is not applicable prior to SWF11", NOERROR_MSG, NOERROR_MSG);
+    Assert.expectEq("Test is not applicable prior to SWF11", NOERROR_MSG, NOERROR_MSG);
 
  }
 
-test();

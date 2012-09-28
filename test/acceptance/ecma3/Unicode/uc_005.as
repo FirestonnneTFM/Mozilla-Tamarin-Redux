@@ -1,7 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+/*
 *
 * Date:    15 July 2002
 * SUMMARY: Testing identifiers with double-byte names
@@ -38,18 +39,15 @@
 */
 //-----------------------------------------------------------------------------
 
-    var SECTION = "";
-    var VERSION = "";
+//     var SECTION = "";
+//     var VERSION = "";
 
-    startTest();
 
-    var TITLE   = "Testing identifiers with double-byte names";
-    var bug = 58274;
+//     var TITLE   = "Testing identifiers with double-byte names";
+//     var bug = 58274;
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
-
+import com.adobe.test.Assert;
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
 
@@ -113,65 +111,65 @@ function getTestCases() {
      * Now check that we got back what we put in -
      */
     
-    status = inSection(1);
+    status = "unicode string 1";
     actual = arrID[1];
     expect = s1.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(2);
+    status = "unicode string 2";
     actual = arrID[2];
     expect = s2.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(3);
+    status = "unicode string 3"
     actual = arrID[3];
     expect = s3.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(4);
+    status = "unicode string 4";
     actual = arrID[4];
     expect = s4.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(5);
+    status = "unicode string 5";
     actual = arrID[5];
     expect = s5.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(6);
+    status = "unicode string 6";
     actual = arrID[6];
     expect = s6.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(7);
+    status = "unicode string 7";
     actual = arrID[7];
     expect = s7.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(8);
+    status = "unicode string 8";
     actual = arrID[8];
     expect = s8.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(9);
+    status = "unicode string 9";
     actual = arrID[9];
     expect = s9.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(10);
+    status = "unicode string 10";
     actual = arrID[10];
     expect = s10.charAt(0);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     return array;
 }

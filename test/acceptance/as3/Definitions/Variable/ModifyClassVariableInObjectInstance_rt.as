@@ -11,8 +11,9 @@ package Package1
 }
 
 import Package1.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-startTest();
 
 var c1 = new Class1();
 
@@ -28,7 +29,6 @@ catch(err)
 }
 finally
 {
-    AddTestCase("Attempt to modified class variable in an object instance", "ReferenceError: Error #1056", referenceError(thisError));
+    Assert.expectEq("Attempt to modified class variable in an object instance", "ReferenceError: Error #1056", Utils.referenceError(thisError));
 }
 
-test();

@@ -3,9 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
+import com.adobe.test.Assert;
 
-var TITLE =  "FLOAT TEST";
-var VERSION = "AS3";
+// var TITLE =  "FLOAT TEST";
+// var VERSION = "AS3";
 
 var STEP = "initial";
 var floatTest:Array = [];
@@ -13,9 +14,9 @@ var ft_count:int = 0;
 
 function   EQ(expected:float,actual:float):void{
    if(expected!=actual)
-       AddTestCase(   STEP+ " !FAILED! ", expected, actual);
+       Assert.expectEq(   STEP+ " !FAILED! ", expected, actual);
    else
-       AddTestCase(   STEP, "", "");// just print it
+       Assert.expectEq(   STEP, "", "");// just print it
 
    STEP=">> "+STEP;
 }
@@ -24,12 +25,12 @@ function APPROX_EQ(expected:float,actual:float):void{
     var epsilon = 0.0001f;
    var result:float = expected>actual? expected - actual:actual-expected;
    if(result==0)
-       AddTestCase(   STEP, "", "");
+       Assert.expectEq(   STEP, "", "");
    else
    if(result<epsilon)
-       AddTestCase(   STEP, "~", "~");
+       Assert.expectEq(   STEP, "~", "~");
    else
-       AddTestCase(   STEP+ " !FAILED! ", expected, actual);
+       Assert.expectEq(   STEP+ " !FAILED! ", expected, actual);
    STEP=">> "+STEP;
 }
 
@@ -38,10 +39,7 @@ function TestSection(section , initTests ){
 
    this.RUN = function(){
        SECTION = section;
-       startTest();
-       writeHeaderToLog( TITLE + ": " + SECTION );
        initTests();
-       test();
    }
 }
 
@@ -298,7 +296,7 @@ function initFltAr(){
      cmpres="OK";
   }
 
-  AddTestCase("float-typed comparisons with floats ", "OK",cmpres);
+  Assert.expectEq("float-typed comparisons with floats ", "OK",cmpres);
 
 /*===========================================================================================================================*/
 
@@ -313,9 +311,9 @@ function initFltAr(){
   APPROX_EQ(2.427746773f,y2);
   APPROX_EQ(-10.50044727f,z2);
 
-  AddTestCase("x2 type", "float",getQualifiedClassName(x2));
-  AddTestCase("y2 type", "float",getQualifiedClassName(y2));
-  AddTestCase("z2 type", "float",getQualifiedClassName(z2));
+  Assert.expectEq("x2 type", "float",getQualifiedClassName(x2));
+  Assert.expectEq("y2 type", "float",getQualifiedClassName(y2));
+  Assert.expectEq("z2 type", "float",getQualifiedClassName(z2));
 
   cmpres"FAIL";
   if(x2<y2)
@@ -347,16 +345,16 @@ function initFltAr(){
      cmpres="OK";
   }
 
-  AddTestCase("Any-typed comparisons with floats", "OK",cmpres);
+  Assert.expectEq("Any-typed comparisons with floats", "OK",cmpres);
 /*===========================================================================================================================*/
 
   STEP = "Any-typed arithmetic with mixed types ";
   x2 = 3.1415; y2=2.73f; z2=1.44f;
   x2 += y2*z2++; y2 -= (z2--)/(++x2);
   z2 = -x2---y2;
-  AddTestCase("x2 type", "Number",getQualifiedClassName(x2));
-  AddTestCase("y2 type", "Number",getQualifiedClassName(y2));
-  AddTestCase("z2 type", "Number",getQualifiedClassName(z2));
+  Assert.expectEq("x2 type", "Number",getQualifiedClassName(x2));
+  Assert.expectEq("y2 type", "Number",getQualifiedClassName(y2));
+  Assert.expectEq("z2 type", "Number",getQualifiedClassName(z2));
   /* convert to float */
   x1=x2;y1=y2;z1=z2;x2=x1;y2=y1;z2=z1;
   x2 = x2 + z2 % +y2;
@@ -365,9 +363,9 @@ function initFltAr(){
   APPROX_EQ(2.427746773f,y2);
   APPROX_EQ(-10.50044727f,z2);
 
-  AddTestCase("x2 type", "float",getQualifiedClassName(x2));
-  AddTestCase("y2 type", "float",getQualifiedClassName(y2));
-  AddTestCase("z2 type", "float",getQualifiedClassName(z2));
+  Assert.expectEq("x2 type", "float",getQualifiedClassName(x2));
+  Assert.expectEq("y2 type", "float",getQualifiedClassName(y2));
+  Assert.expectEq("z2 type", "float",getQualifiedClassName(z2));
 
   y2 = 2.427746773;
   cmpres"FAIL";
@@ -400,7 +398,7 @@ function initFltAr(){
      cmpres="x2!==z2";
   }
 
-  AddTestCase("Any-typed comparisons with mixed types ", "OK",cmpres);
+  Assert.expectEq("Any-typed comparisons with mixed types ", "OK",cmpres);
 
 
 }

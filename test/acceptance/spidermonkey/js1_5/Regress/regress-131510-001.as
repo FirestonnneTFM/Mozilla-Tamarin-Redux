@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -16,8 +16,8 @@ startTest();
 var gTestfile = 'regress-131510-001.js';
 var BUGNUMBER = 131510;
 var summary = "Shouldn't crash if define |var arguments| inside a function";
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 
 function f() {var arguments;}
@@ -34,6 +34,5 @@ function f() {var arguments;}; f();;
 
 function g() { function f() {var arguments;}; f();}; g();
 
-AddTestCase('', 'No Crash', 'No Crash');
+Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

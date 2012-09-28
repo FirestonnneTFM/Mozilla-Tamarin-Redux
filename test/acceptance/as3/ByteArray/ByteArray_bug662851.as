@@ -4,13 +4,13 @@
 
     import flash.utils.ByteArray
     import avmplus.* ;      // System class in the avmshell
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = "ByteArray";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test ByteArray class exceeding MMgc::GCHeap::kMaxObjectSize";
+//     var SECTION = "ByteArray";
+//     var VERSION = "as3";
+//     var TITLE   = "test ByteArray class exceeding MMgc::GCHeap::kMaxObjectSize";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
     /* bz: Bug 662851 - Make EnsureWritableCapacity take uint32_t instead of uint64_t since all callers pass uint32_t
        First 2 testcases will produce an error via mmfx_new_array_opt() returning null WHEN  run on 32bit platform,
@@ -35,11 +35,10 @@
 	try {
 	    new ByteArray().length = i;
 	} catch(err) {
-	    result = grabError(err, err.toString());
+	    result = Utils.grabError(err, err.toString());
 	}
-	AddTestCase("ByteArray.length "+ i, expected, result);
+	Assert.expectEq("ByteArray.length "+ i, expected, result);
     }
 
-    test();
 
 

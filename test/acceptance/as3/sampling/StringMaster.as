@@ -10,26 +10,24 @@ package {
 
     import flash.sampler.*
     import avmplus.*
+import com.adobe.test.Assert;
 
-    var SECTION = "Sampling";
-    var VERSION = "AS3";
-    var TITLE   = "Master String";
+//     var SECTION = "Sampling";
+//     var VERSION = "AS3";
+//     var TITLE   = "Master String";
 
-    startTest();
-    writeHeaderToLog("Sampling master string test");
 
     var isdebugger=System.isDebugger();
 
     var helloWorld = "hello, world";
     var hello = helloWorld.substr(0, 5);
 
-    AddTestCase("assert that static string constant does not have a master string",
+    Assert.expectEq("assert that static string constant does not have a master string",
         null,
         getMasterString(helloWorld));
 
-    AddTestCase("assert that substring has a master string",
+    Assert.expectEq("assert that substring has a master string",
         isdebugger ? helloWorld : null,
         getMasterString(hello));
 
-    test();
 }

@@ -1,22 +1,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=557933
 *
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "561191";
-var VERSION = "";
-var TITLE   = "unescape bugginess";
-var bug = "561191";
+import com.adobe.test.Assert;
+// var SECTION = "561191";
+// var VERSION = "";
+// var TITLE   = "unescape bugginess";
+// var bug = "561191";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array:Array = new Array();
@@ -47,7 +45,7 @@ function getTestCases() {
     for (var i = 0; i < tests.length; ++i)
     {
         var x:XML = new XML(tests[i].xml);
-        array[item++] = new TestCase(SECTION, tests[i].xml, tests[i].expect, x.toXMLString());
+        array[item++] = Assert.expectEq( tests[i].xml, tests[i].expect, x.toXMLString());
     }
 
     return array;

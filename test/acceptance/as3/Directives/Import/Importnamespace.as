@@ -9,20 +9,20 @@ package Importnamespace  {
 
 
 
-var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
-var TITLE   = "Import a public namespace";          // Provide ECMA section title or a description
+// var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+// var TITLE   = "Import a public namespace";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                    // leave this alone
 
 
 var x:Number = 3;
-AddTestCase("Local variable", 3, x);
+Assert.expectEq("Local variable", 3, x);
 
 
 import Importnamespace.N1
 
+import com.adobe.test.Assert;
 class A{
     public namespace N2
     N1 var x:Number = 4;
@@ -37,12 +37,11 @@ public function a2(){
 }
 var obj:A = new A();
 
-AddTestCase("Public namespace imported", 4, obj.a1());
-AddTestCase("Local namespace", 6, obj.a2());
+Assert.expectEq("Public namespace imported", 4, obj.a1());
+Assert.expectEq("Local namespace", 6, obj.a2());
 
 
 /*===========================================================================*/
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

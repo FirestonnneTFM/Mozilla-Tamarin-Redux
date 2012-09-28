@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "RegExp/properties-001.js";
-    var VERSION = "ECMA_2";
-    var TITLE   = "Properties of RegExp Instances";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "RegExp/properties-001.js";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "Properties of RegExp Instances";
     var BUGNUMBER ="http://scopus/bugsplat/show_bug.cgi?id=346000";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -32,28 +31,28 @@ function getTestCases() {
 
         
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".toString == RegExp.prototype.toString",
                      true,
                      re.toString == RegExp.prototype.toString );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".constructor == RegExp.prototype.constructor",
                      true,
                      re.constructor == RegExp.prototype.constructor );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".compile == RegExp.prototype.compile",
                      true,
                      re.compile == RegExp.prototype.compile );
 
-        if (!as3Enabled) {
-            array[item++] = new TestCase(SECTION,
+        if (false) {
+            array[item++] = Assert.expectEq(
                          re + ".test == RegExp.prototype.test",
                          true,
                          re.test == RegExp.prototype.test );
             
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                          re + ".exec == RegExp.prototype.exec",
                          true,
                          re.exec == RegExp.prototype.exec );
@@ -61,7 +60,7 @@ function getTestCases() {
         
         // properties
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".source",
                      s,
                      re.source );
@@ -70,27 +69,27 @@ function getTestCases() {
         }catch(e:ReferenceError){
             thisError = e.toString();
         }finally{
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                      re + ".source='k'",
                      "ReferenceError: Error #1074",
-                     referenceError(thisError) );
+                     Utils.referenceError(thisError) );
         }
 
 
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      "delete"+re + ".source",
                      false,
                     delete re.source);
 
 
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".toString()",
                      "/" + s +"/" + (g?"g":"") + (i?"i":"") +(m?"m":""),
                      re.toString() );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".global",
                      g,
                      re.global );
@@ -100,20 +99,20 @@ function getTestCases() {
         }catch(e:ReferenceError){
              thisError = e.toString();
         }finally{
-             array[item++] = new TestCase(SECTION,
+             array[item++] = Assert.expectEq(
                      re + ".global=true",
                      "ReferenceError: Error #1074",
-                     referenceError(thisError) );
+                     Utils.referenceError(thisError) );
         }
 
 
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      "delete"+re + ".global",
                      false,
                     delete re.global);
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".ignoreCase",
                      i,
                      re.ignoreCase );
@@ -123,20 +122,20 @@ function getTestCases() {
         }catch(e:ReferenceError){
              thisError = e.toString();
         }finally{
-             array[item++] = new TestCase(SECTION,
+             array[item++] = Assert.expectEq(
                      re + ".ignoreCase=true",
                      "ReferenceError: Error #1074",
-                     referenceError(thisError) );
+                     Utils.referenceError(thisError) );
         }
 
 
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      "delete"+re + ".ignoreCase",
                      false,
                     delete re.ignoreCase);
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".multiline",
                      m,
                      re.multiline);
@@ -146,25 +145,25 @@ function getTestCases() {
         }catch(e:ReferenceError){
              thisError = e.toString();
         }finally{
-             array[item++] = new TestCase(SECTION,
+             array[item++] = Assert.expectEq(
                      re + ".multiline=true",
                      "ReferenceError: Error #1074",
-                     referenceError(thisError) );
+                     Utils.referenceError(thisError) );
         }
 
 
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      "delete"+re + ".multiline",
                      false,
                     delete re.multiline);
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".lastIndex",
                      l,
                      re.lastIndex  );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      "delete"+re + ".lastIndex",
                      false,
                     delete re.lastIndex);

@@ -2,31 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Instructions that start with the letter D" 
-	callpropvoid START 1
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-	findproperty END
-	callpropvoid END 0
-	returnvoid
-}
-
-.method_info { 
+method_info { 
 	name: runTest 
-	flags: SETS_DXNS
+//	flags: SETS_DXNS
 }
-.method_body_info {
+method_body_info {
 
-	method: .function_id(runTest)
+	method: runTest
 
-	traits: {
-		.trait { kind: Trait_Slot name: var1 }
+/*	traits: {
+		trait { kind: Trait_Slot name: var1 }
 	}
+	*/
 	code:
 	{
 		getlocal0
@@ -153,7 +140,7 @@ function main() {
 		add
 		equals
 		callpropvoid COMPARE_STRICTEQ 3
-
+/* not implemented
 		findproperty COMPARE_STRICTEQ
 	pushstring "esc_xattr"
 		pushstring "7" // expected
@@ -184,7 +171,7 @@ function main() {
 		pushstring "<foo>"
 		esc_xelem
 		callpropvoid COMPARE_STRICTEQ 3
-
+*/
 
 
 
@@ -192,3 +179,22 @@ function main() {
 		returnvoid
 	}
 }
+
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Instructions that start with the letter D" 
+	callpropvoid START 1
+	newfunction runTest
+	getlocal0
+	call 0
+	findproperty END
+	callpropvoid END 0
+	returnvoid
+}
+script_info{init: main 
+	traits: {
+		trait { kind: Trait_Slot name: var1 }
+	}
+	}

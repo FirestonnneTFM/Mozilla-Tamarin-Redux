@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 12 Mar 2001
  *
@@ -20,15 +21,12 @@
  * global variable. Therefore the end value of this variable should be myArray.length.
  */
 //-------------------------------------------------------------------------------------------------
-var SECTION = "15.4.4.3.1";
-var VERSION = "ECMA";
-var TITLE = 'Testing Array.prototype.toLocaleString()';
-var bug = 56883;
+// var SECTION = "15.4.4.3.1";
+// var VERSION = "ECMA";
+ var TITLE = 'Testing Array.prototype.toLocaleString()';
+// var bug = 56883;
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -44,7 +42,12 @@ function getTestCases() {
     actual = n;
     expect = 3; // (see explanation above)
 
-    array[item++] = new TestCase(SECTION, TITLE, 3, n);
+
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+   // Uncommented TITLE above
+ 
+
+    array[item++] = Assert.expectEq( TITLE, 3, n);
 
     return ( array );
 }

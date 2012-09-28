@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "forin-002";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The for...in  statement";
+import com.adobe.test.Assert;
+//     var SECTION = "forin-002";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The for...in  statement";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -47,8 +45,8 @@ function getTestCases() {
             for ( property in object ) {
                 switch( property ){
                     case "value":
-                        array[tcValue] = new TestCase(
-                            SECTION,
+                        array[tcValue] = Assert.expectEq(
+                            
                             "for...in loop in a with loop.  ("+object+")["+property +"] == "+
                              property,
                             true,
@@ -57,8 +55,8 @@ function getTestCases() {
                         break;
 
                     case "valueOf":
-                        array[tcValueOf] = new TestCase(
-                            SECTION,
+                        array[tcValueOf] = Assert.expectEq(
+                            
                             "for...in loop in a with loop.  ("+object+")["+property +"] == "+
                              property,
                             true,
@@ -67,8 +65,8 @@ function getTestCases() {
                         break;
 
                     case "toString":
-                        array[tcString] = new TestCase(
-                            SECTION,
+                        array[tcString] = Assert.expectEq(
+                            
                             "for...in loop in a with loop.  ("+object+")["+property +"] == "+
                              property,
                             true,
@@ -77,8 +75,8 @@ function getTestCases() {
                         break;
 
                     case "toNumber":
-                        array[tcNumber] = new TestCase(
-                            SECTION,
+                        array[tcNumber] = Assert.expectEq(
+                            
                             "for...in loop in a with loop.  ("+object+")["+property +"] == "+
                              property,
                             true,
@@ -87,8 +85,8 @@ function getTestCases() {
                         break;
 
                     case "toBoolean":
-                        array[tcBoolean] = new TestCase(
-                            SECTION,
+                        array[tcBoolean] = Assert.expectEq(
+                            
                             "for...in loop in a with loop.  ("+object+")["+property +"] == "+
                              property,
                             true,
@@ -114,8 +112,8 @@ function getTestCases() {
             with ( object ) {
                 switch( property ){
                     case "value":
-                        array[tcValue] = new TestCase(
-                            SECTION,
+                        array[tcValue] = Assert.expectEq(
+                            
                             "with loop in a for...in loop.  ("+object+")["+property +"] == "+
                                 property,
                             true,
@@ -124,8 +122,8 @@ function getTestCases() {
                         break;
 
                     case "valueOf":
-                        array[tcValueOf] = new TestCase(
-                            SECTION,
+                        array[tcValueOf] = Assert.expectEq(
+                            
                             "with loop in a for...in loop.  ("+object+")["+property +"] == "+
                                 property,
                             true,
@@ -134,8 +132,8 @@ function getTestCases() {
                         break;
 
                     case "toString":
-                        array[tcString] = new TestCase(
-                            SECTION,
+                        array[tcString] = Assert.expectEq(
+                            
                             "with loop in a for...in loop.  ("+object+")["+property +"] == "+
                                 property,
                             true,
@@ -144,8 +142,8 @@ function getTestCases() {
                         break;
 
                     case "toNumber":
-                        array[tcNumber] = new TestCase(
-                            SECTION,
+                        array[tcNumber] = Assert.expectEq(
+                            
                             "with loop in a for...in loop.  ("+object+")["+property +"] == "+
                                 property,
                             true,
@@ -154,8 +152,8 @@ function getTestCases() {
                         break;
 
                     case "toBoolean":
-                        array[tcBoolean] = new TestCase(
-                            SECTION,
+                        array[tcBoolean] = Assert.expectEq(
+                            
                             "with loop in a for...in loop.  ("+object+")["+property +"] == "+
                                 property,
                             true,

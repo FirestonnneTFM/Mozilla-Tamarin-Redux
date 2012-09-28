@@ -5,13 +5,13 @@
  
 
 import DynamicClassMethPackage.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Add function to Dynamic Class";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Add function to Dynamic Class";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -25,9 +25,8 @@ Obj.foo = function () { return 100;}
 //
 // ********************************************
 
-AddTestCase( "*** Access function added to a dynamic class ***", 1, 1 );
-AddTestCase( "Obj.foo()", 100, Obj.foo() );
+Assert.expectEq( "*** Access function added to a dynamic class ***", 1, 1 );
+Assert.expectEq( "Obj.foo()", 100, Obj.foo() );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

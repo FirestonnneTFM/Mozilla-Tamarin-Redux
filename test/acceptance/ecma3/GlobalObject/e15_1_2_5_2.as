@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.1.2.5-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "unescape(string)";
+//     var SECTION = "15.1.2.5-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "unescape(string)";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -20,7 +18,7 @@ function getTestCases() {
     // since there is only one character following "%", no conversion should occur.
 
     for ( var CHARCODE = 0; CHARCODE < 256; CHARCODE += 16 ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "unescape( %"+ (ToHexString(CHARCODE)).substring(0,1) +" )",
                             "%"+(ToHexString(CHARCODE)).substring(0,1),
                             unescape( "%" + (ToHexString(CHARCODE)).substring(0,1) )  );
@@ -29,7 +27,7 @@ function getTestCases() {
     // since there is only one character following "%u", no conversion should occur.
 
     for ( var CHARCODE = 0; CHARCODE < 256; CHARCODE +=16 ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "unescape( %u"+ (ToHexString(CHARCODE)).substring(0,1) +" )",
                             "%u"+(ToHexString(CHARCODE)).substring(0,1),
                             unescape( "%u" + (ToHexString(CHARCODE)).substring(0,1) )  );
@@ -39,8 +37,8 @@ function getTestCases() {
     // three char unicode string.  no conversion should occur
 
     for ( var CHARCODE = 1024; CHARCODE < 65536; CHARCODE+= 1234 ) {
-        array[item++] = new TestCase
-                        (   SECTION,
+        array[item++] = Assert.expectEq
+                        (    
                             "unescape( %u"+ (ToUnicodeString(CHARCODE)).substring(0,3)+ " )",
 
                             "%u"+(ToUnicodeString(CHARCODE)).substring(0,3),

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'slice.js';
 
@@ -13,13 +14,10 @@ gTestfile = 'slice.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'String.slice';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'String.slice';
 
-writeHeaderToLog('Executing script: slice.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var a = new String("abcdefghijklmnopqrstuvwxyz1234567890");
 var b = new String("this is a test string");
@@ -27,7 +25,6 @@ var b = new String("this is a test string");
 exhaustiveStringSliceTest("exhaustive String.slice test 1", a);
 exhaustiveStringSliceTest("exhaustive String.slice test 2", b);
 
-test();
 
 
 function myStringSlice(a, from, to)
@@ -79,12 +76,11 @@ function exhaustiveStringSliceTest(testname, a)
       "               a: " + String(a) + "\n" +
       "   actual result: " + String(b) + "\n" +
       " expected result: " + String(c) + "\n";
-    writeHeaderToLog(errorMessage);
     reason = reason + errorMessage;
     passed = false;
       }
     }
-  var testCase = testcases[index++] = new TestCase(SECTION, testname, true, passed);
+  var testCase = Assert.expectEq( testname, true, passed);
   if (passed == false)
     testCase.reason = reason;
   return testCase;

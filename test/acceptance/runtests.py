@@ -142,6 +142,7 @@ class AcceptanceRuntest(RuntestBase):
         self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
+        self.check_harness_files()
         self.preProcessTests()
         if self.rebuildtests:
             self.rebuildTests()
@@ -151,9 +152,9 @@ class AcceptanceRuntest(RuntestBase):
 
     def preProcessTests(self):
         RuntestBase.preProcessTests(self)
-        if not isfile(self.abcasmShell+'.abc'):
-            self.js_print("Precompiling %s" % self.abcasmShell)
-            self.compile_test(self.abcasmShell+'.as')
+        #if not isfile(self.abcasmShell+'.abc'):
+        #    self.js_print("Precompiling %s" % self.abcasmShell)
+        #    self.compile_test(self.abcasmShell+'.as')
         # Are we running esc - depends on a valid avm
         if self.runESC:
             self.runSource = True
@@ -250,6 +251,13 @@ class AcceptanceRuntest(RuntestBase):
         if exists(root+self.supportFolderExt) and not (self.runSource or self.eval):
             self.compile_support_files(root+self.supportFolderExt, outputCalls)
         
+        # compile any files in subdir with same name as test (were previously included)
+        if exists(root):
+            self.compile_support_files(root, outputCalls)
+            for testfile in sorted(glob(join(root,'/*.abc'))):
+                extraVmArgs += ' %s' % testfile
+            if 'Interface' in extraVmArgs:
+                extraVmArgs = self.sortInterfaces(extraVmArgs) 
         # compile file if needed
         if not isfile(testName):
             compileOutput = self.compile_test(ast, outputCalls=outputCalls)
@@ -268,7 +276,7 @@ class AcceptanceRuntest(RuntestBase):
                     return outputCalls
                 else:
                     self.allfails += 1
-                    outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+                    outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')))
                     outputCalls.append((self.js_print, ('%s' % '\n'.join(compileOutput),)))
                     outputCalls.append((self.fail,(testName, 'FAILED! file did not compile: %s' %
                                                    testName, self.failmsgs)))
@@ -276,11 +284,6 @@ class AcceptanceRuntest(RuntestBase):
 
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
-            # With eval, shell.as must come first
-            incfiles.append("shell" + self.sourceExt)
-            for incfile in incfiles:
-                if not (incfile == "./shell.as"):
-                    testName=incfile+" "+testName
 
         # read any extra avm arguments, each line will execute the avm with those args
         if isfile('%s.avm_args' % ast):
@@ -322,7 +325,7 @@ class AcceptanceRuntest(RuntestBase):
                                                 settings, extraVmArgs, abcargs, multiabc))
             avm_args_file.close()
         else:
-            outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
+            outputCalls.extend(self.runTest(ast, root, testName, testnum, settings, extraVmArgs))
 
         return outputCalls
 
@@ -377,6 +380,12 @@ class AcceptanceRuntest(RuntestBase):
         return line, extraVmArgs, abcargs, multiabc
 
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs='', multiabc=''):
+        # add as harness files to extra vm args
+        harnessAbcString = ''
+        for harness_abc in self.harness_abcs:
+            harnessAbcString += " %s" % harness_abc
+        extraVmArgs += harnessAbcString
+        
         passByEnv=None
         if self.passthreadid:
             try:
@@ -440,7 +449,7 @@ class AcceptanceRuntest(RuntestBase):
         elif ast.endswith(self.abcasmExt):
             # make sure util file has been compiled
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
-                self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'), outputCalls=outputCalls)
+                self.run_pipe('"%s" -jar %s -import %s %s' % (self.java, self.asc, self.builtinabc, self.abcasmShell+'.as'), outputCalls=outputCalls)
             (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName), outputCalls=outputCalls, envVars=passByEnv)
         elif self.verify:
             # get the abcdump for the file
@@ -463,6 +472,12 @@ class AcceptanceRuntest(RuntestBase):
             else:
                 lpass += 1
         else:
+            # escape any $ chars in extraVmArgs
+            if '$' in extraVmArgs:
+                # escape $ on all platforms 
+                # if self.osName != 'win' or self.cygwin:
+                extraVmArgs = extraVmArgs.replace('$', '\$')
+            
             if abcargs:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, multiabc, testName, abcargs), outputCalls=outputCalls, envVars=passByEnv)
             elif multiabc:
@@ -470,6 +485,9 @@ class AcceptanceRuntest(RuntestBase):
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls, envVars=passByEnv)
 
+        # Scrub extraVmArgsString as it does not need to be displayed in the output
+        extraVmArgs = extraVmArgs.replace(harnessAbcString, '')
+        
         # Test has been run, handle output
         if self.verifyonly:
             # only check the exit code when running a verifyonly pass
@@ -702,5 +720,19 @@ class AcceptanceRuntest(RuntestBase):
             return ':'.join(line.split(':')[0:2])
         except:
             return line
+
+    # custom sort on filenames passed to avmshell
+    # puts Interfaces first in a list, followed by all other classes
+    
+    def sortInterfaces(self, fileList):
+        result = ''
+        files = fileList.split();
+        for f in files:
+            if 'Interface' in f:
+                result += ' %s' % f
+        for c in files:
+            if 'Interface' not in c:
+                result += ' %s' % c
+        return result
 
 runtest = AcceptanceRuntest()

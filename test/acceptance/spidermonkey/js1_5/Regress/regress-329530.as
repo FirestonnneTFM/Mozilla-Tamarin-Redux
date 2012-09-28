@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-329530.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Do not crash when calling toString on a deeply nested function';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 
 var nestingLevel = 1000;
@@ -30,14 +30,13 @@ function buildTestFunction(N) {
 try
 {
   var testSource = buildTestFunction(nestingLevel).toString();
-  printStatus(testSource.length);
+//printStatus(testSource.length);
 }
 catch(ex)
 {
-  printStatus(ex + '');
+//  printStatus(ex + '');
 }
 
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

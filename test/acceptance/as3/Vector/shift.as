@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    shift.as
    Description:  shift(object)
@@ -8,51 +10,49 @@
      and decrements the length property of object by 1.
    *
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " Vector.shift()");
 
 var v1=new Vector.<int>();
-AddTestCase(
+Assert.expectEq(
         "shift on empty vector returns undefined",
         0,
         v1.shift());
-AddTestCase(
+Assert.expectEq(
         "shift on empty vector original vector is empty",
         "",
         v1.toString());
 
 var v1=new Vector.<int>();
 v1.push(10);
-AddTestCase(
+Assert.expectEq(
         "shift on single element vector returns element[0]",
         10,
         v1.shift());
-AddTestCase(
+Assert.expectEq(
         "shift on single element vector removes first element",
         "",
         v1.toString());
 
 var v1=new Vector.<int>();
 for (var i=0;i<5;i++) v1[i]=10+i;
-AddTestCase(
+Assert.expectEq(
         "shift on vector returns element[0]",
         10,
         v1.shift());
-AddTestCase(
+Assert.expectEq(
         "shift on vector removes first element",
         "11,12,13,14",
         v1.toString());
 
 var v1=new Vector.<int>(10);
-AddTestCase(
+Assert.expectEq(
         "shift on initialized vector returns element[0]",
         0,
         v1.shift());
-AddTestCase(
+Assert.expectEq(
         "shift on initialized vector removes first element",
         "0,0,0,0,0,0,0,0,0",
         v1.toString());
@@ -66,17 +66,17 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "shift on fixed vector throws exception",
         "RangeError: Error #1126",
-        parseError(errormsg,"RangeError: Error #1126".length));
+        Utils.parseError(errormsg,"RangeError: Error #1126".length));
 
-AddTestCase(
+Assert.expectEq(
         "shift on fixed vector does not shift",
         "10,11,12,13,14,15,16,17,18,19",
         v1.toString());
 
-AddTestCase("Shift string vector",
+Assert.expectEq("Shift string vector",
             "h",
             Vector.<String>(['h','e','l','l','o']).shift()
             );
@@ -91,9 +91,8 @@ class TestClass {
     }
 }
 
-AddTestCase("Shift custom vector class",
+Assert.expectEq("Shift custom vector class",
             "-Infinity",
             Vector.<TestClass>([new TestClass(-Infinity), new TestClass(55), new TestClass(789)]).shift().toString()
             );
 
-test();

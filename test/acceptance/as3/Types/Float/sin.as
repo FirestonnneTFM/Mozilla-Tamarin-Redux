@@ -9,12 +9,10 @@ Returns an implementation-dependent approximation to the sine of x. The argument
 is expressed in radians.
 */
 
-var SECTION = "4.5.30";
-var VERSION = "AS3";
-var TITLE   = "public function sin(x:float):float";
+// var SECTION = "4.5.30";
+// var VERSION = "AS3";
+// var TITLE   = "public function sin(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.sin(param); }
 
@@ -55,5 +53,4 @@ AddStrictTestCase("float.sin(float.PI/2f)", 1f, float.sin(float.PI/2f));
 AddStrictTestCase("float.sin(2.356194490192f)", float(0.7071067811867916), float.sin(2.356194490192f));
 AddStrictTestCase("float.sin(float.PIf)", -8.74227766e-8f, float.sin(float.PI));
 
-test();
 

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Creation Date:   30 May 2001
  * Correction Date: 14 Aug 2001
@@ -32,18 +33,15 @@
  **********************************************************************
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "eregress_104375";
-    var VERSION = "";
-    var bug = 103351; // <--- (Outgrowth of original bug 83293)
+//     var SECTION = "eregress_104375";
+//     var VERSION = "";
+//     var bug = 103351; // <--- (Outgrowth of original bug 83293)
 
-    startTest();
     var summ_OLD = 'Testing str.replace(strA, strB) == str.replace(new RegExp(strA),strB)';
-    var TITLE   = "Testing String.prototype.replace(x,y) when x is a string";
+//     var TITLE   = "Testing String.prototype.replace(x,y) when x is a string";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -61,47 +59,47 @@ function getTestCases() {
     status = 'Section 1 of test';
     actual = 'abc'.replace('a', 'Z');
     expect = 'Zbc';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 2 of test';
     actual = 'abc'.replace('b', 'Z');
     expect = 'aZc';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 3 of test';
     actual = 'abc'.replace(undefined, 'Z');
     expect = 'abc'; // String(undefined) == 'undefined'; no replacement possible
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 4 of test';
     actual = 'abc'.replace(null, 'Z');
     expect = 'abc'; // String(null) == 'null'; no replacement possible
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 5 of test';
     actual = 'abc'.replace(true, 'Z');
     expect = 'abc'; // String(true) == 'true'; no replacement possible
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 6 of test';
     actual = 'abc'.replace(false, 'Z');
     expect = 'abc'; // String(false) == 'false'; no replacement possible
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 7 of test';
     actual = 'aa$aa'.replace('$', 'Z');
     expect = 'aaZaa'; // NOT 'aa$aaZ' as in ECMA Final Draft; see above
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 8 of test';
     actual = 'abc'.replace('.*', 'Z');
     expect = 'abc';  // not 'Z' as in EMCA Final Draft
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section 9 of test';
     actual = 'abc'.replace('', 'Z');
     expect = 'Zabc';  // Still expect 'Zabc' for this
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

@@ -11,10 +11,11 @@ package Package1
 }
 
 import Package1.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 var c1 = new Class1();
 
-startTest();
 
 var thisError = "no error";
 try
@@ -27,7 +28,6 @@ catch(err)
 }
 finally
 {
-    AddTestCase("Attempt to modify class const globally", "ReferenceError: Error #1056", referenceError(thisError));
+    Assert.expectEq("Attempt to modify class const globally", "ReferenceError: Error #1056", Utils.referenceError(thisError));
 }
 
-test();

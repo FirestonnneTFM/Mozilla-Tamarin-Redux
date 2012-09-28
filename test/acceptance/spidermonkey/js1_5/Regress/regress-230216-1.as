@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-230216-1.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,9 @@ var actual = '';
 var expect = '';
 var status = '';
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+ function inSection(x) {
+   return "Section "+x+" of test -";
+}
 
 status = inSection(1) + ' check for overflow in backref';
 
@@ -27,7 +28,7 @@ try {
     status += ' Error: ' + e;
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(status, expect, actual);
 
 status = inSection(1.1) + ' check for overflow in backref';
 
@@ -41,7 +42,7 @@ try {
     status += ' Error: ' + e;
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(status, expect, actual);
 
 status = inSection(1.2) + ' check for overflow in backref';
 
@@ -54,7 +55,7 @@ try {
     status += ' Error: ' + e;
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(status, expect, actual);
 
 
 status = inSection(2) + ' check for overflow in backref';
@@ -68,7 +69,7 @@ try {
     status += ' Error: ' + e;
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(status, expect, actual);
 
 status = inSection(3) + ' check for overflow in backref';
 
@@ -83,6 +84,5 @@ try {
     status += ' Error: ' + e;
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(status, expect, actual);
 
-test();

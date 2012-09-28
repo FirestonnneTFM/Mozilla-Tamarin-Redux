@@ -3,13 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
     import avmplus.System;
+import com.adobe.test.Assert;
 
-    var SECTION = "Vector";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "bug 504525";
+//     var SECTION = "Vector";
+//     var VERSION = "as3";
+//     var TITLE   = "bug 504525";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
     function vtest()
     {
@@ -24,13 +23,12 @@
     var result = vtest();
     
     if (System.swfVersion < 11) {
-        AddTestCase("Test Vector.concat with SWF 9 or 10 behavior",
+        Assert.expectEq("Test Vector.concat with SWF 9 or 10 behavior",
           "1,4,3,2",
           result.toString());
     } else { // swf 11+
-        AddTestCase("Test Vector.concat with Latest behavior",
+        Assert.expectEq("Test Vector.concat with Latest behavior",
           "1,2,3,4",
           result.toString());
     }
 
-    test();

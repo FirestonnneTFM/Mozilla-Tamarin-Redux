@@ -29,16 +29,15 @@ package foo{
 }
 
 import foo.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "116491";
 
-startTest();                // leave this alone
 
 
-AddTestCase( "access variable in second package from first", "This is var b", a );
+Assert.expectEq( "access variable in second package from first", "This is var b", a );
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

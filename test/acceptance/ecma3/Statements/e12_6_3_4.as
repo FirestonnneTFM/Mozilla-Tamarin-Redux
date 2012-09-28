@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "12.6.3-4";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The for..in statment";
+import com.adobe.test.Assert;
+//     var SECTION = "12.6.3-4";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The for..in statment";
     var BUGNUMBER="http://scopus.mcom.com/bugsplat/show_bug.cgi?id=344855";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -28,7 +26,7 @@ function getTestCases() {
     }
    
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "for ( MyObject in o ) { result += o[MyObject] }",6,result);
         
     
@@ -39,7 +37,7 @@ function getTestCases() {
         result += o[value];
     }
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "for ( value in o ) { result += o[value]",
         6,
         result );
@@ -50,7 +48,7 @@ function getTestCases() {
         result += o[value];
     }
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "value = \"value\"; for ( value in o ) { result += o[value]",
         6,
         result );
@@ -61,7 +59,7 @@ function getTestCases() {
         result += o[value];
     }
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "value = 0; for ( value in o ) { result += o[value]",
         6,
         result );
@@ -73,7 +71,7 @@ function getTestCases() {
     for ( ob[0] in o ) {
         result += o[ob[0]];
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "ob = { 0:\"hello\" }; for ( ob[0] in o ) { result += o[ob[0]]",
         6,
         result );
@@ -82,7 +80,7 @@ function getTestCases() {
     for ( ob["0"] in o ) {
         result += o[ob["0"]];
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "value = 0; for ( ob[\"0\"] in o ) { result += o[o[\"0\"]]",
         6,
         result );
@@ -92,7 +90,7 @@ function getTestCases() {
     for ( ob[value] in o ) {
         result += o[ob[value]];
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "ob = { 0:\"hello\" }; for ( ob[value] in o ) { result += o[ob[value]]",
         6,
         result );
@@ -101,7 +99,7 @@ function getTestCases() {
     for ( ob["value"] in o ) {
         result += o[ob["value"]];
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "value = 0; for ( ob[\"value\"] in o ) { result += o[ob[\"value\"]]",
         6,
         result );
@@ -110,7 +108,7 @@ function getTestCases() {
     for ( ob.value in o ) {
         result += o[ob.value];
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "value = 0; for ( ob.value in o ) { result += o[ob.value]",
         6,
         result );

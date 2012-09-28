@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'function-001.js';
 
@@ -36,34 +37,31 @@ gTestfile = 'function-001.js';
  *  Author:             christine@netscape.com
  *  Date:               11 August 1998
  */
-var SECTION = "function-001.js";
-var VERSION = "JS1_4";
-var TITLE   = "Accessing the arguments property of a function object";
+// var SECTION = "function-001.js";
+// var VERSION = "JS1_4";
+// var TITLE   = "Accessing the arguments property of a function object";
 var BUGNUMBER="324455";
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 /*
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "return function.arguments",
   "P",
   TestFunction_2("P", "A","S","S")[0] +"");
 */
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "return arguments",
   "P",
   TestFunction_1( "P", "A", "S", "S" )[0] +"");
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "return arguments when function contains an arguments property",
   "PASS",
   TestFunction_3( "P", "A", "S", "S" ) +"");
 
-test();
 
 function TestFunction_1( a, b, c, d, e ) {
   return arguments;

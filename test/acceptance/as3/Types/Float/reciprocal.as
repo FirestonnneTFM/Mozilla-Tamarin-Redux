@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "4.5.29";
-var VERSION = "AS3";
-var TITLE   = "public function reciprocal(x:float):float";
+// var SECTION = "4.5.29";
+// var VERSION = "AS3";
+// var TITLE   = "public function reciprocal(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.reciprocal(param); }
 
@@ -44,5 +42,4 @@ AddStrictTestCase("float.reciprocal(-0f) check", float.NEGATIVE_INFINITY, check(
 AddStrictTestCase("float.reciprocal(8)", float(0.125), float.reciprocal(8));
 AddStrictTestCase("float.reciprocal(null)", float.POSITIVE_INFINITY, float.reciprocal(null));
 
-test();
 

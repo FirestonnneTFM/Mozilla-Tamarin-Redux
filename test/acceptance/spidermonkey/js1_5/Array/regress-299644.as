@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-299644.js';
 //-----------------------------------------------------------------------------
@@ -12,12 +12,12 @@ var summary = 'Arrays with holes';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 actual = (new Array(10).concat()).length;
 expect = 10;
-AddTestCase('(new Array(10).concat()).length', expect, actual);
+Assert.expectEq('(new Array(10).concat()).length', expect, actual);
 
 var a = new Array(10);
 actual = true;
@@ -27,6 +27,5 @@ for (var p in a)
   actual = false;
   break;
 }
-AddTestCase('Array holes are not enumerable', expect, actual );
+Assert.expectEq('Array holes are not enumerable', expect, actual );
 
-test();

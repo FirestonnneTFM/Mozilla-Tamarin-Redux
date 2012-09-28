@@ -7,13 +7,12 @@ package
     public var num1 = 3;
 }
 
-var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "access default package variable globally";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+// var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "access default package variable globally";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();
 
-AddTestCase("Using default package variable globally", 3, num1);
+Assert.expectEq("Using default package variable globally", 3, num1);
 
-test();

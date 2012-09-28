@@ -10,12 +10,10 @@ than x and is equal to a mathematical integer. If x is already an integer, the
 result is x.
 */
 
-var SECTION = "4.5.23";
-var VERSION = "AS3";
-var TITLE   = "public function floor(x:float):float";
+// var SECTION = "4.5.23";
+// var VERSION = "AS3";
+// var TITLE   = "public function floor(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.floor(param); }
 
@@ -81,5 +79,4 @@ AddStrictTestCase("float.floor(-1f) FloatLiteral", -float(1), float.floor(-1f));
 
 
 
-test();
 

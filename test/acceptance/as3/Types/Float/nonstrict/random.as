@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
 /*
 Returns a float value with positive sign, greater than or equal to 0 but less
@@ -11,14 +12,11 @@ over that range, using an implementation-dependent algorithm or strategy. This
 function takes no arguments.
 */
 
-var SECTION = "4.5.28";
-var VERSION = "AS3";
-var TITLE   = "public function random():float";
+// var SECTION = "4.5.28";
+// var VERSION = "AS3";
+// var TITLE   = "public function random():float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddErrorTest("float.random() with args", ARGUMENTERROR+1063,  function(){ float.random(12); });
+Assert.expectError("float.random() with args", Utils.ARGUMENTERROR+1063,  function(){ float.random(12); });
 
-test();
 

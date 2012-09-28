@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 function test_switch(i)
 {
@@ -12,7 +13,5 @@ function test_switch(i)
     return j;
 }
 
-startTest();
-AddTestCase("test", "PASSED", test_switch(0));
+Assert.expectEq("test", "PASSED", test_switch(0));
 
-test();

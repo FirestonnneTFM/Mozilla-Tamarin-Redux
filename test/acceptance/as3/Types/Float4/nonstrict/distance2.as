@@ -3,15 +3,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
-var SECTION = "4.4.16.31";
-var VERSION = "AS3";
-var TITLE   = "Math and geometric methods public function distance2(arg1:float4, arg2:float4):float";
+// var SECTION = "4.4.16.31";
+// var VERSION = "AS3";
+// var TITLE   = "Math and geometric methods public function distance2(arg1:float4, arg2:float4):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddErrorTest("float4.distance2() with no args", ARGUMENTERROR+1063,  function(){ float4.distance2(); });
+Assert.expectError("float4.distance2() with no args", Utils.ARGUMENTERROR+1063,  function(){ float4.distance2(); });
 
-test();
 

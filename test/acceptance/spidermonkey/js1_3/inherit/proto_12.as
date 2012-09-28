@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_12.js';
 
@@ -21,12 +22,10 @@ gTestfile = 'proto_12.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_12";
-var VERSION = "JS1_3";
-var TITLE   = "No Multiple Inheritance";
+// var SECTION = "proto_12";
+// var VERSION = "JS1_3";
+// var TITLE   = "No Multiple Inheritance";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Employee ( name, dept ) {
   this.name = name || "";
@@ -73,41 +72,40 @@ var les = new Engineer( "Morris, Les",  new Array("JavaScript"), "indy" );
 
 Hobbyist.prototype.equipment = [ "horn", "mountain", "goat" ];
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.name",
           "Morris, Les",
           les.name );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.dept",
           "engineering",
           les.dept );
 
 Array.prototype.getClass = Object.prototype.toString;
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.projects.getClass()",
           "[object Array]",
           les.projects.getClass() );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.projects[0]",
           "JavaScript",
           les.projects[0] );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.machine",
           "indy",
           les.machine );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.hobby",
           "yodeling",
           les.hobby );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.equpment",
           void 0,
           les.equipment );
 
-test();

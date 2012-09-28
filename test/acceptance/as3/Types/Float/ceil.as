@@ -3,18 +3,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
 Returns the smallest (closest to -Infinity) float value that is not less than x
 and is equal to a mathematical integer. If x is already an integer, the result is x.
 */
 
-var SECTION = "4.5.20";
-var VERSION = "AS3";
-var TITLE   = "public function ceil(x:float):float";
+// var SECTION = "4.5.20";
+// var VERSION = "AS3";
+// var TITLE   = "public function ceil(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.ceil(param); }
 
@@ -71,7 +70,7 @@ var myfloat:float = 1f;
 AddStrictTestCase("float.ceil(myfloat=1f)", float(1f), float.ceil(myfloat));
 myfloat = 0f;
 AddStrictTestCase("float.ceil(myfloat=0f)", float(0), float.ceil(myfloat));
-AddTestCase("float.INFINITY/float.ceil(myfloat=0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(myfloat));
+Assert.expectEq("float.INFINITY/float.ceil(myfloat=0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(myfloat));
 myfloat = -0f;
 AddStrictTestCase("float.ceil(myfloat=-0f)", -float(0), float.ceil(myfloat));
 AddStrictTestCase("float.INFINITY/float.ceil(myfloat=-0f)", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(myfloat));
@@ -84,5 +83,4 @@ AddStrictTestCase("float.ceil(-0f) FloatLiteral", -float(0), float.ceil(-0f));
 AddStrictTestCase("float.ceil(-1f) FloatLiteral", -float(1), float.ceil(-1f));
 
 
-test();
 

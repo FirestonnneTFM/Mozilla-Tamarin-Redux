@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-245113.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'instanceof operator should return false for class prototype';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 Date.prototype.test = function() {
   return (this instanceof Date);
@@ -22,31 +22,30 @@ Date.prototype.test = function() {
 String.prototype.test = function() {
   return (this instanceof String);
 };
-
-status = summary + inSection(1);
+  
+//status = summary + inSection(1);
 expect = false;
 actual = (Date.prototype.test instanceof Date);
-AddTestCase(status, expect, actual);
-
-status = summary + inSection(2);
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + inSection(2);
 expect = false;
 actual = Date.prototype.test();
-AddTestCase(status, expect, actual);
-
-status = summary + inSection(3);
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + inSection(3);
 expect = false;
 actual = String.prototype.test();
-AddTestCase(status, expect, actual);
-
-status = summary + inSection(4);
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + inSection(4);
 expect = true;
 actual = (new Date()).test();
-AddTestCase(status, expect, actual);
-
-status = summary + inSection(5);
+Assert.expectEq(summary, expect, actual);
+  
+//status = summary + inSection(5);
 expect = true;
 actual = (new String()).test();
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 
-test();

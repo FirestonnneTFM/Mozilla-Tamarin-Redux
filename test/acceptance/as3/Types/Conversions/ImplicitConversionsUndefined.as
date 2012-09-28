@@ -1,12 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Types: Conversions";
-var VERSION = "as3";
-var TITLE   = "implicit type conversions";
+// var SECTION = "Types: Conversions";
+// var VERSION = "as3";
+// var TITLE   = "implicit type conversions";
 
-startTest();
 
 
 // Value = undefined
@@ -17,8 +18,8 @@ try{
 } catch (e0) {
     thisError = e0.toString();
 } finally {
-    AddTestCase( "var string:String =null", "no exception thrown", typeError(thisError));
-        AddTestCase( "var string:String =null", null,string);
+    Assert.expectEq( "var string:String =null", "no exception thrown", Utils.typeError(thisError));
+        Assert.expectEq( "var string:String =null", null,string);
 }
 
 thisError = "no exception thrown";
@@ -27,8 +28,8 @@ try{
 } catch (e) {
     thisError = e.toString();
 } finally {
-    AddTestCase("number:Number = undefined", "no exception thrown", typeError(thisError) );
-        AddTestCase("number:Number = undefined", NaN, mynumber );
+    Assert.expectEq("number:Number = undefined", "no exception thrown", Utils.typeError(thisError) );
+        Assert.expectEq("number:Number = undefined", NaN, mynumber );
 }
 
 thisError = "no exception thrown";
@@ -37,8 +38,8 @@ try{
 } catch(e1) {
     thisError = e1.toString();
 } finally {
-    AddTestCase("myInt:int = undefined", "no exception thrown", typeError(thisError) );
-        AddTestCase("myInt:int = undefined", 0, myInt );
+    Assert.expectEq("myInt:int = undefined", "no exception thrown", Utils.typeError(thisError) );
+        Assert.expectEq("myInt:int = undefined", 0, myInt );
 }
 
 thisError = "no exception thrown";
@@ -47,9 +48,9 @@ try{
 } catch(e2) {
     thisError = e2.toString();
 } finally {
-        AddTestCase("myUInt:uint = undefined", "no exception thrown", typeError(thisError));
+        Assert.expectEq("myUInt:uint = undefined", "no exception thrown", Utils.typeError(thisError));
 
-    AddTestCase("myUInt:uint = undefined", 0, myUint);
+    Assert.expectEq("myUInt:uint = undefined", 0, myUint);
 }
 
 thisError = "no exception thrown";
@@ -58,15 +59,14 @@ try{
 } catch(e3) {
     thisError = e3.toString();
 } finally {
-    AddTestCase("myboolean:Boolean = undefined", "no exception thrown", typeError(thisError) );
-        AddTestCase("myboolean:Boolean = undefined", false, myboolean);
+    Assert.expectEq("myboolean:Boolean = undefined", "no exception thrown", Utils.typeError(thisError) );
+        Assert.expectEq("myboolean:Boolean = undefined", false, myboolean);
 }
 
 var object:Object = undefined;
-AddTestCase( "var object:Object = null", null, object);
+Assert.expectEq( "var object:Object = null", null, object);
 
 
-test();
 
 
 

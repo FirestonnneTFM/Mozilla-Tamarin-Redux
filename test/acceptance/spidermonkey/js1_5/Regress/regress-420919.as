@@ -2,8 +2,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-startTest();
 
 var gTestfile = 'regress-420919.js';
 //-----------------------------------------------------------------------------
@@ -20,14 +21,13 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   // 1.8 branch reports no properties, trunk reports undefined
   expect = 'TypeError: Error #1010'; // A term is undefined and has no properties.;
-  AddErrorTest(summary, expect, function () {this.u.v = 1;});
+  Assert.expectError(summary, expect, function () {this.u.v = 1;});
 
 
 }
 
-test();

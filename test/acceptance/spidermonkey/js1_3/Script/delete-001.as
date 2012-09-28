@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'delete-001.js';
 
@@ -17,12 +18,10 @@ gTestfile = 'delete-001.js';
    Date:               12 november 1997
 */
 
-var SECTION = "JS1_2";
-var VERSION = "JS1_2";
-var TITLE   = "The variable statement";
+// var SECTION = "JS1_2";
+// var VERSION = "JS1_2";
+// var TITLE   = "The variable statement";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // delete all properties of the global object
 // per ecma, this does not affect variables in the global object declared
@@ -40,11 +39,10 @@ for ( p in this ) {
 
 // not too picky here... just want to make sure we didn't crash or something
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "delete all properties of the global object",
           "PASSED",
           result == "" ? "FAILED" : "PASSED" );
 
 
-test();
 

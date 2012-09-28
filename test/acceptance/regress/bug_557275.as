@@ -1,22 +1,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=557275
 *
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "557275";
-var VERSION = "";
-var TITLE   = "AvmCore::intern truncation";
-var bug = "557275";
+// var SECTION = "557275";
+// var VERSION = "";
+// var TITLE   = "AvmCore::intern truncation";
+// var bug = "557275";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
+import com.adobe.test.Assert;
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array:Array = new Array();
@@ -38,14 +36,14 @@ function getTestCases() {
     status = 'test1';
     expect = 'foo';
     actual = o[8589934560];
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     delete o[u]
 
     status = 'test2';
     expect = undefined;
     actual = o[8589934560];
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

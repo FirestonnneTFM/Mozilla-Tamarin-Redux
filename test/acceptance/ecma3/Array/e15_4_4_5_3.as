@@ -1,18 +1,23 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
+// TODO: REVIEW AS4 CONVERSION ISSUE 
+var TIME_1970    = 0;
+var TIME_2000    = 946684800000;
+var TIME_1900    = -2208988800000;
 
-    var SECTION = "15.4.4.5-3";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Array.prototype.sort(comparefn)";
+   // TODO: REVIEW AS4 CONVERSION ISSUE      
+   var SECTION = "15.4.4.5-3";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Array.prototype.sort(comparefn)";
+
 
     var testcases = new Array();
     getTestCases();
-    test("no actual"); // don't want the actual results printed to output
+   // test("no actual"); // don't want the actual results printed to output
 
 function getTestCases() {
     var array = new Array();
@@ -59,32 +64,32 @@ function getTestCases() {
     stringarr.sort( stringsort );
 
     for ( var i = 0, tc = 0; i < array.length; i++, tc++) {
-        testcases[tc] = new TestCase(
-            SECTION,
+        testcases[tc] = Assert.expectEq(
+    
             "testarr1["+i+"]",
             realarr[i],
             testarr1[i] );
     }
 
     for ( var i=0; i < array.length; i++,  tc++) {
-        testcases[tc] = new TestCase(
-            SECTION,
+        testcases[tc] = Assert.expectEq(
+
             "testarr2["+i+"]",
             realarr[i],
             testarr2[i] );
     }
 
     for ( var i=0; i < array.length; i++,  tc++) {
-        testcases[tc] = new TestCase(
-            SECTION,
+        testcases[tc] = Assert.expectEq(
+   
             "testarr3["+i+"]",
             realarr[i],
             testarr3[i] );
     }
 
     for ( var i=0; i < array.length; i++,  tc++) {
-        testcases[tc] = new TestCase(
-            SECTION,
+        testcases[tc] = Assert.expectEq(
+    
             "testarr4["+i+"]",
             stringarr[i].toString(),
             testarr4[i].toString() );

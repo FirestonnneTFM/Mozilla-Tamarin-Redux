@@ -3,23 +3,22 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.5.1";
-var VERSION = "AS3";
-var TITLE   = "The + operation agumented by float values";
+// var SECTION = "6.5.1";
+// var VERSION = "AS3";
+// var TITLE   = "The + operation agumented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var f1:float = 1.2345678e9;
 var f2:float = 6.543210987;
 f2 *= float(10000); // TODO: use 10000f
 
-AddTestCase("float addition result", float(1.234633216e+09), f1+f2);
-AddTestCase("FloatLiteral addition result", float(1.234633216e+09), 1.2345678e9f+65432.10987f);
-AddTestCase("addition on float & number should yield different results", true, (Number(f1)+Number(f2)) != Number(f1+f2) );
-AddTestCase("additiom of 2 floats returns a float", "float", getQualifiedClassName(f1+f2));
+Assert.expectEq("float addition result", float(1.234633216e+09), f1+f2);
+Assert.expectEq("FloatLiteral addition result", float(1.234633216e+09), 1.2345678e9f+65432.10987f);
+Assert.expectEq("addition on float & number should yield different results", true, (Number(f1)+Number(f2)) != Number(f1+f2) );
+Assert.expectEq("additiom of 2 floats returns a float", "float", getQualifiedClassName(f1+f2));
 
 function check(val1:*, val2:*):*
 {
@@ -35,5 +34,4 @@ AddStrictTestCase("String + float", String("11"), check("1", onef));
 
 
 
-test();
 

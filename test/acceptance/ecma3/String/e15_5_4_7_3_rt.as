@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.5.4.7-3";
-    var VERSION = "ECMA_2";
-    startTest();
-    var TITLE   = "String.protoype.lastIndexOf";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.5.4.7-3";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "String.protoype.lastIndexOf";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 
 function getTestCases() {
@@ -24,12 +23,12 @@ function getTestCases() {
     }catch(e:Error){
         thisError=e.toString();
     }finally{
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 0 )","ReferenceError: Error #1069"
-,referenceError(thisError));
+,Utils.referenceError(thisError));
     }
 
-   /* array[item++] = new TestCase(   SECTION,
+   /* array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 0 )",
                                     -1,
                                     (b = true, b.__proto__.lastIndexOf = String.prototype.lastIndexOf, b.lastIndexOf('r', 0 ) ) );*/
@@ -42,12 +41,12 @@ function getTestCases() {
     }catch(e1:Error){
         thisError=e1.toString();
     }finally{
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 1 )","ReferenceError: Error #1069"
-,referenceError(thisError));
+,Utils.referenceError(thisError));
     }
 
-   /* array[item++] = new TestCase(   SECTION,
+   /* array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 1 )",
                                     1,
                                     (b = true, b.__proto__.lastIndexOf = String.prototype.lastIndexOf, b.lastIndexOf('r', 1 ) ) );*/
@@ -60,12 +59,12 @@ function getTestCases() {
     }catch(e2:Error){
         thisError=e2.toString();
     }finally{
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 2 )","ReferenceError: Error #1069"
-,referenceError(thisError));
+,Utils.referenceError(thisError));
     }
 
-   /* array[item++] = new TestCase(   SECTION,
+   /* array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 2 )",
                                     1,
                                     (b = true, b.__proto__.lastIndexOf = String.prototype.lastIndexOf, b.lastIndexOf('r', 2 ) ) );*/
@@ -78,12 +77,12 @@ function getTestCases() {
     }catch(e10:Error){
         thisError=e10.toString();
     }finally{
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 10 )","ReferenceError: Error #1069"
-,referenceError(thisError));
+,Utils.referenceError(thisError));
     }
 
-  /*array[item++] = new TestCase(   SECTION,
+  /*array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r', 10 )",
                                     1,
                                     (b = true, b.__proto__.lastIndexOf = String.prototype.lastIndexOf, b.lastIndexOf('r', 10 ) ) );*/
@@ -95,12 +94,12 @@ function getTestCases() {
     }catch(e3:Error){
         thisError=e3.toString();
     }finally{
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r')","ReferenceError: Error #1069"
-,referenceError(thisError));
+,Utils.referenceError(thisError));
     }
 
-    /*array[item++] = new TestCase(   SECTION,
+    /*array[item++] = Assert.expectEq(   
                                     "var b = true; b.__proto__.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('r' )",
                                     1,
                                     (b = true, b.__proto__.lastIndexOf = String.prototype.lastIndexOf, b.lastIndexOf('r' ) ) );*/

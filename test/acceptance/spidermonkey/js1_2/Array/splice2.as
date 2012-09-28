@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'splice2.js';
 
@@ -13,14 +14,11 @@ gTestfile = 'splice2.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-var TITLE = 'String:splice 2';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'String:splice 2';
 var BUGNUMBER="123795";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog('Executing script: splice2.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var a = ['a','test string',456,9.34,new String("string object"),[],['h','i','j','k']];
 var b = [1,2,3,4,5,6,7,8,9,0];
@@ -28,7 +26,6 @@ var b = [1,2,3,4,5,6,7,8,9,0];
 exhaustiveSpliceTestWithArgs("exhaustive splice w/2 optional args 1",a);
 exhaustiveSpliceTestWithArgs("exhaustive splice w/2 optional args 2",b);
 
-test();
 
 
 function mySplice(testArray, splicedArray, first, len, elements)
@@ -106,12 +103,11 @@ function exhaustiveSpliceTestWithArgs(testname, testArray)
       "   actual removed: " + String(actualRemoved) + "\n" +
       " expected removed: " + String(expectedRemoved);
     reason = reason + errorMessage;
-    writeHeaderToLog(errorMessage);
     passed = false;
       }
     }
   }
-  var testcase = testcases[index++] = new TestCase(SECTION, testname, true, passed);
+  var testcase = Assert.expectEq( testname, true, passed);
   if (!passed) testcase.reason = reason;
   return testcase;
 }

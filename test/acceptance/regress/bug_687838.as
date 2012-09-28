@@ -1,19 +1,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
 import avmplus.*;
 import avmshell.*;
 import foo.*;
+import com.adobe.test.Assert;
 
-var SECTION = "regress_687838";
-var VERSION = "AS3";
-var TITLE   = "Array prototype lookup";
-var bug = "687838";
+// var SECTION = "regress_687838";
+// var VERSION = "AS3";
+// var TITLE   = "Array prototype lookup";
+// var bug = "687838";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 
 // A+B+C
 // * Array.prototype is modified.
@@ -96,7 +95,7 @@ F       .prototype["n"]  = "named F";
 F       .prototype[1]        = "one F";
 F       .prototype[10]       = "ten F";
 
-const ATC:Function = AddTestCase;
+const ATC:Function = Assert.expectEq;
 
 ATC('Arr .proto start1 array        named a', "named A",              a["n"]);
 ATC('Cls .proto start1 array trans  named b', "named A",              b["n"]);
@@ -242,4 +241,3 @@ ATC('Fcn .proto object             ref 1k f', "thou F",                f[1000]);
 
 
 
-test();

@@ -1,17 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION = "15.5.4.3-3-n";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.prototype.valueOf";
+//     var SECTION = "15.5.4.3-3-n";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.prototype.valueOf";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -20,7 +19,7 @@ function getTestCases() {
     astring=new Number();
     
     var expectedError = 1056;
-    if (as3Enabled) {
+    if (true) {
         expectedError = 1037;
     }
     try{
@@ -28,10 +27,10 @@ function getTestCases() {
     }catch(e:Error){
         thisError=e.toString();
     }finally{
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                 "var valof=String.prototype.valueOf; astring=new Number(); astring.valueOf = valof; astring.valueOf()",
-                REFERENCEERROR+expectedError,
-                referenceError(thisError) )
+                Utils.REFERENCEERROR+expectedError,
+                Utils.referenceError(thisError) )
     }
 
     

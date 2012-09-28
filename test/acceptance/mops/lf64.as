@@ -11,37 +11,37 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION:String = "mops";
-    var VERSION:String = "AS3";
-    var TITLE:String   = "lf64";
+//     var SECTION:String = "mops";
+//     var VERSION:String = "AS3";
+//     var TITLE:String   = "lf64";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("lf64(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("lf64(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ LF64(Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
     // Get a handle to the domainMemory after it is initialized
     var mem:ByteArray = Domain.currentDomain.domainMemory;
 
-    AddErrorTest("lf64(-1)", RANGEERROR+1506, function(){ LF64(-1); });
-    AddErrorTest("lf64(mem.length)", RANGEERROR+1506, function(){ LF64(mem.length); });
-    AddErrorTest("lf64(mem.length-1)", RANGEERROR+1506, function(){ LF64(mem.length-1); });
-    AddErrorTest("lf64(mem.length-2)", RANGEERROR+1506, function(){ LF64(mem.length-2); });
-    AddErrorTest("lf64(mem.length-3)", RANGEERROR+1506, function(){ LF64(mem.length-3); });
-    AddErrorTest("lf64(mem.length-4)", RANGEERROR+1506, function(){ LF64(mem.length-4); });
-    AddErrorTest("lf64(mem.length-5)", RANGEERROR+1506, function(){ LF64(mem.length-5); });
-    AddErrorTest("lf64(mem.length-6)", RANGEERROR+1506, function(){ LF64(mem.length-6); });
-    AddErrorTest("lf64(mem.length-7)", RANGEERROR+1506, function(){ LF64(mem.length-7); });
-    AddTestCase("lf64(mem.length-8)", 0, LF64(mem.length-8));
+    Assert.expectError("lf64(-1)", Utils.RANGEERROR+1506, function(){ LF64(-1); });
+    Assert.expectError("lf64(mem.length)", Utils.RANGEERROR+1506, function(){ LF64(mem.length); });
+    Assert.expectError("lf64(mem.length-1)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-1); });
+    Assert.expectError("lf64(mem.length-2)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-2); });
+    Assert.expectError("lf64(mem.length-3)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-3); });
+    Assert.expectError("lf64(mem.length-4)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-4); });
+    Assert.expectError("lf64(mem.length-5)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-5); });
+    Assert.expectError("lf64(mem.length-6)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-6); });
+    Assert.expectError("lf64(mem.length-7)", Utils.RANGEERROR+1506, function(){ LF64(mem.length-7); });
+    Assert.expectEq("lf64(mem.length-8)", 0, LF64(mem.length-8));
 
     SI32(0x4237D796, 5); // 0x4237D796EFC00000 == 102401241024
     SI32(0xEFC00000, 1); // 0x4237D796EFC00000 == 102401241024
-    AddTestCase("lf64(1) loads do not need to be aligned", 102401241024, LF64(1));
+    Assert.expectEq("lf64(1) loads do not need to be aligned", 102401241024, LF64(1));
 
     testsi8();
     testsi16();
@@ -54,7 +54,6 @@ package {
     testwriteFloat();
     testwriteDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -88,7 +87,7 @@ package {
         SI8(0xD7, 5);
         SI8(0x37, 6);
         SI8(0x42, 7);
-        AddTestCase("lf64 load double written by si8()", 102401241024, LF64(0));
+        Assert.expectEq("lf64 load double written by si8()", 102401241024, LF64(0));
     }
 
     function testsi16():void
@@ -101,7 +100,7 @@ package {
         SI16(0xEFC0, 2);
         SI16(0xD796, 4);
         SI16(0x4237, 6);
-        AddTestCase("lf64 load double written by si16()", 102401241024, LF64(0));
+        Assert.expectEq("lf64 load double written by si16()", 102401241024, LF64(0));
     }
 
     function testsi32():void
@@ -112,7 +111,7 @@ package {
         clearMemory();
         SI32(0xEFC00000, 0);
         SI32(0x4237D796, 4);
-        AddTestCase("lf64 load double written by si32()", 102401241024, LF64(0));
+        Assert.expectEq("lf64 load double written by si32()", 102401241024, LF64(0));
     }
 
     function testsf32():void
@@ -122,14 +121,14 @@ package {
         clearMemory();
         SF32(12.37548828125, 0);
         SF32(12.37548828125, 4);
-        AddTestCase("lf64 load double written by sf32()", 2884608.5099489688873291015625, LF64(0));
+        Assert.expectEq("lf64 load double written by sf32()", 2884608.5099489688873291015625, LF64(0));
     }
 
     function testsf64():void
     {
         clearMemory();
         SF64(102401241024, 0);
-        AddTestCase("lflf load double written by sf64(102401241024)", 102401241024, LF64(0));
+        Assert.expectEq("lflf load double written by sf64(102401241024)", 102401241024, LF64(0));
     }
 
     function testwriteByte():void
@@ -148,7 +147,7 @@ package {
         mem.writeByte(0x37);
         mem.writeByte(0x42);
 
-        AddTestCase("lf64 load double written by writeByte()", 102401241024, LF64(0));
+        Assert.expectEq("lf64 load double written by writeByte()", 102401241024, LF64(0));
     }
 
     function testwriteBoolean():void
@@ -160,7 +159,7 @@ package {
         mem.writeBoolean(false);
         mem.writeBoolean(true);
 
-        AddTestCase("lf32 load float written by writeBoolean()", 2.3510604481259484465715043694E-38, LF32(0));
+        Assert.expectEq("lf32 load float written by writeBoolean()", 2.3510604481259484465715043694E-38, LF32(0));
     }
 
     function testwriteInt():void
@@ -173,7 +172,7 @@ package {
         mem.writeInt(-272629760);  // 0xEFC00000
         mem.writeInt(1110955926);  // 0x4237D796
 
-        AddTestCase("lf64 load double written by writeInt()", 102401241024, LF64(0));
+        Assert.expectEq("lf64 load double written by writeInt()", 102401241024, LF64(0));
     }
 
     function testwriteFloat():void
@@ -182,7 +181,7 @@ package {
         mem.position = 0;
         mem.writeFloat(12.37548828125);
         mem.writeFloat(12.37548828125);
-        AddTestCase("lf64 load double written by writeFloat(12.37548828125)", 2884608.5099489688873291015625, LF64(0));
+        Assert.expectEq("lf64 load double written by writeFloat(12.37548828125)", 2884608.5099489688873291015625, LF64(0));
     }
 
 
@@ -191,7 +190,7 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeDouble(102401241024);
-        AddTestCase("lf64 load double written by writeDouble(102401241024)", 102401241024, LF64(0));
+        Assert.expectEq("lf64 load double written by writeDouble(102401241024)", 102401241024, LF64(0));
 
     }
 }

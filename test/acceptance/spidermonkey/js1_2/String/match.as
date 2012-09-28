@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'match.js';
 
@@ -13,18 +14,14 @@ gTestfile = 'match.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'String:match';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'String:match';
 
-writeHeaderToLog('Executing script: match.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var aString = new String("this is a test string");
 
-testcases[index++] = new TestCase( SECTION, "aString.match(/is.*test/)  ", String(["is is a test"]), String(aString.match(/is.*test/)));
-testcases[index++] = new TestCase( SECTION, "aString.match(/s.*s/)  ", String(["s is a test s"]), String(aString.match(/s.*s/)));
+Assert.expectEq(  "aString.match(/is.*test/)  ", String(["is is a test"]), String(aString.match(/is.*test/)));
+Assert.expectEq(  "aString.match(/s.*s/)  ", String(["s is a test s"]), String(aString.match(/s.*s/)));
 
-test();
 

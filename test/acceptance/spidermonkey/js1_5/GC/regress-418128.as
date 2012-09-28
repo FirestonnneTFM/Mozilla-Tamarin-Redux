@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-418128.js';
 //-----------------------------------------------------------------------------
@@ -20,8 +20,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   var obj = {};
   var id = { toString: function() { return ""+Math.pow(2, 0.1); } }
@@ -37,9 +37,8 @@ function addtestcases()
     return 10;
   }
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
 /*
 Returns an implementation-dependent approximation to the arc tangent of the
@@ -13,17 +14,15 @@ the argument named x be second. The result is expressed in radians and ranges
 from -PI to +PI.
 */
 
-var SECTION = "4.5.19";
-var VERSION = "AS3";
-var TITLE   = "public function atan2(y:float,x:float):float";
+// var SECTION = "4.5.19";
+// var VERSION = "AS3";
+// var TITLE   = "public function atan2(y:float,x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param1:float, param2:float):float { return float.atan2(param1, param2); }
 
-AddErrorTest("float.atan2() with no args", ARGUMENTERROR+1063,  function(){ float.atan2(); });
-AddErrorTest("float.atan2(0) with one args", ARGUMENTERROR+1063,  function(){ float.atan2(0); });
+Assert.expectError("float.atan2() with no args", Utils.ARGUMENTERROR+1063,  function(){ float.atan2(); });
+Assert.expectError("float.atan2(0) with one args", Utils.ARGUMENTERROR+1063,  function(){ float.atan2(0); });
 
 // If either x or y is NaN, the result is NaN.
 AddStrictTestCase("float.atan2(0f, string)", float.NaN, float.atan2(0f, "string"));
@@ -38,5 +37,4 @@ AddStrictTestCase("float.atan2('1', '0')", float.PI/2f, float.atan2('1', '0'));
 // If y>0 and x is -0, the result is an implementation-dependent approximation to +PI/2.
 AddStrictTestCase("float.atan2('1', '-0')", float.PI/2f, float.atan2('1', '-0'));
 
-test();
 

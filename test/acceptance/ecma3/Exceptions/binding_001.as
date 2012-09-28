@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 2001-08-27
  *
@@ -16,18 +17,14 @@
  *
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "binding_001";
-    var VERSION = "";
+//     var SECTION = "binding_001";
+//     var VERSION = "";
     var ERR_REF_YES = 'ReferenceError';
     var ERR_REF_NO = 'did NOT generate a ReferenceError';
-
-    startTest();
     var TITLE   = "Testing binding of function names";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -52,7 +49,7 @@ function getTestCases() {
       status = 'e instanceof ReferenceError';
       actual = e instanceof ReferenceError;
       expect = true;
-      array[item++] = new TestCase(SECTION, status, isReferenceError(expect), isReferenceError(actual));
+      array[item++] = Assert.expectEq( status, isReferenceError(expect), isReferenceError(actual));
     
     
       /*
@@ -66,7 +63,7 @@ function getTestCases() {
     
     
       expect = true;
-      array[item++] = new TestCase(SECTION, status, isReferenceError(expect), isReferenceError(actual));
+      array[item++] = Assert.expectEq( status, isReferenceError(expect), isReferenceError(actual));
     }
     return array;
 }

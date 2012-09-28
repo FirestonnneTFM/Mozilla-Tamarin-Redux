@@ -3,33 +3,32 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 include "numberUtil.as";
 
 
-var SECTION = "15.8.1.7";
-var VERSION = "AS3";
-var TITLE   = "public static const SQRT1_2:Number = 0.7071067811865476;";
+// var SECTION = "15.8.1.7";
+// var VERSION = "AS3";
+// var TITLE   = "public static const SQRT1_2:Number = 0.7071067811865476;";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var num_sqrt1_2:Number = 0.7071067811865476;
 
-AddTestCase("Number.SQRT1_2", num_sqrt1_2, Number.SQRT1_2);
-AddTestCase("typeof Number.SQRT1_2", "Number", getQualifiedClassName(Number.SQRT1_2));
+Assert.expectEq("Number.SQRT1_2", num_sqrt1_2, Number.SQRT1_2);
+Assert.expectEq("typeof Number.SQRT1_2", "Number", getQualifiedClassName(Number.SQRT1_2));
 
-AddTestCase("Number.SQRT1_2 - DontDelete", false, delete(Number.SQRT1_2));
-AddTestCase("Number.SQRT1_2 is still ok", num_sqrt1_2, Number.SQRT1_2);
+Assert.expectEq("Number.SQRT1_2 - DontDelete", false, delete(Number.SQRT1_2));
+Assert.expectEq("Number.SQRT1_2 is still ok", num_sqrt1_2, Number.SQRT1_2);
 
-AddTestCase("Number.SQRT1_2 - DontEnum", '',getNumberProp('SQRT1_2'));
-AddTestCase("Number.SQRT1_2 is no enumberable", false, Number.propertyIsEnumerable('SQRT1_2'));
+Assert.expectEq("Number.SQRT1_2 - DontEnum", '',getNumberProp('SQRT1_2'));
+Assert.expectEq("Number.SQRT1_2 is no enumberable", false, Number.propertyIsEnumerable('SQRT1_2'));
 
-AddErrorTest("Number.SQRT1_2 - ReadOnly", REFERENCEERROR+1074, function(){ Number.SQRT1_2 = 0; });
-AddTestCase("Number.SQRT1_2 is still here", num_sqrt1_2, Number.SQRT1_2);
+Assert.expectError("Number.SQRT1_2 - ReadOnly", Utils.REFERENCEERROR+1074, function(){ Number.SQRT1_2 = 0; });
+Assert.expectEq("Number.SQRT1_2 is still here", num_sqrt1_2, Number.SQRT1_2);
 
 // NOTE The value of Math.SQRT1_2 is approximately the reciprocal of the value of Math.SQRT2.
-AddTestCase("Number.SQRT1_2 is approximately the reciprocal of the value of Number.SQRT2", 1/Number.SQRT2, Number.SQRT1_2);
+Assert.expectEq("Number.SQRT1_2 is approximately the reciprocal of the value of Number.SQRT2", 1/Number.SQRT2, Number.SQRT1_2);
 
-test();
 

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  
 package {
+    
     public var a = "boo";
     //private var b = "hoo"; Changing private variable to default variable since
         var b = "hoo";           //private attribute is allowed only on class property
@@ -30,18 +31,18 @@ package {
     }
 }
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+import com.adobe.test.Assert;
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var helloWorld = "Hello World";
-AddTestCase( "var helloWorld = 'Hello World'", "Hello World", helloWorld );
+Assert.expectEq( "var helloWorld = 'Hello World'", "Hello World", helloWorld );
 
-AddTestCase("Access public variable in package with no name", "boo", a);
+Assert.expectEq("Access public variable in package with no name", "boo", a);
 
 var expected = 'error';
 var actual = 'no error';
@@ -52,10 +53,10 @@ try {
     actual = 'error';
 }
 
-AddTestCase("Access internal variable in package with no name", expected, actual);
+Assert.expectEq("Access internal variable in package with no name", expected, actual);
 
 
-AddTestCase("Access public class in package with no name", "hi", (c1 = new PublicClass(), c1.sayHi()));
+Assert.expectEq("Access public class in package with no name", "hi", (c1 = new PublicClass(), c1.sayHi()));
 
 var expected = 'error';
 var actual = 'no error';
@@ -67,7 +68,7 @@ try {
     actual = 'error';
 }
 
-AddTestCase("Try to access function not declared as public", expected, actual);
+Assert.expectEq("Try to access function not declared as public", expected, actual);
 
 var expected = 'error';
 var actual = 'no error';
@@ -79,7 +80,7 @@ var actual = 'no error';
     actual = 'error';
 }
 
-AddTestCase("Try to access private variable", expected, actual);*/
+Assert.expectEq("Try to access private variable", expected, actual);*/
 
 
 var expected = 'error';
@@ -92,7 +93,6 @@ try {
     actual = 'error';
 }
 
-AddTestCase("Try to access class not declared as public", expected, actual);
+Assert.expectEq("Try to access class not declared as public", expected, actual);
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

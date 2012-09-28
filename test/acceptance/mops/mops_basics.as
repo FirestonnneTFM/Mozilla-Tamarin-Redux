@@ -11,14 +11,13 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+    import com.adobe.test.Assert;
 
 
-    var SECTION:String = "Actionscript";
-    var VERSION:String = "AS3";
-    var TITLE:String   = "Memory Opcodes";
+//     var SECTION:String = "Actionscript";
+//     var VERSION:String = "AS3";
+//     var TITLE:String   = "Memory Opcodes";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var inPlayer:Boolean = false;
 
@@ -56,18 +55,18 @@ package {
     }
 
     var domainClass:Class = getDomainClass();
-    AddTestCase("domainClass != null", true, domainClass != null);
+    Assert.expectEq("domainClass != null", true, domainClass != null);
 
     var byteArrayClass:Class = getByteArrayClass();
-    AddTestCase("byteArrayClass != null", true, byteArrayClass != null);
+    Assert.expectEq("byteArrayClass != null", true, byteArrayClass != null);
 
     var currentDomain:Object = domainClass.currentDomain;
-    AddTestCase("currentDomain != null", true, currentDomain != null);
+    Assert.expectEq("currentDomain != null", true, currentDomain != null);
 
     var minMemSize:uint = domainClass.MIN_DOMAIN_MEMORY_LENGTH;
-    AddTestCase("minMemSize >= 8", true, minMemSize >= 8);
+    Assert.expectEq("minMemSize >= 8", true, minMemSize >= 8);
 
-    AddTestCase("currentDomain.domainMemory == null", true, currentDomain.domainMemory == null);
+    Assert.expectEq("currentDomain.domainMemory == null", true, currentDomain.domainMemory == null);
 
 
     var ba:Object;
@@ -82,7 +81,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Empty byte array ok", false, emptyByteArrayOk);
+    Assert.expectEq("Empty byte array ok", false, emptyByteArrayOk);
 
     var smallByteArrayOk:Boolean = false;
 
@@ -96,7 +95,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Small byte array ok", false, smallByteArrayOk);
+    Assert.expectEq("Small byte array ok", false, smallByteArrayOk);
 
     var wrongObj1Ok:Boolean = false;
 
@@ -107,7 +106,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Wrong obj (Array) ok", false, wrongObj1Ok);
+    Assert.expectEq("Wrong obj (Array) ok", false, wrongObj1Ok);
 
     var wrongObj2Ok:Boolean = false;
 
@@ -118,7 +117,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Wrong obj (Object) ok", false, wrongObj2Ok);
+    Assert.expectEq("Wrong obj (Object) ok", false, wrongObj2Ok);
 
     var wrongObj3Ok:Boolean = false;
 
@@ -129,7 +128,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Wrong obj (Function) ok", false, wrongObj3Ok);
+    Assert.expectEq("Wrong obj (Function) ok", false, wrongObj3Ok);
 
     var wrongObj4Ok:Boolean = false;
 
@@ -144,7 +143,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Wrong obj (user) ok", false, wrongObj4Ok);
+    Assert.expectEq("Wrong obj (user) ok", false, wrongObj4Ok);
 
     var minSizedByteArrayOk:Boolean = false;
 
@@ -158,7 +157,7 @@ package {
     }
     catch(e:*) {}
 
-    AddTestCase("Min sized byte array ok", true, minSizedByteArrayOk);
+    Assert.expectEq("Min sized byte array ok", true, minSizedByteArrayOk);
 
 
     var longTests:Array = [];
@@ -255,13 +254,13 @@ package {
 
 
     longTests.push(function():void {
-            AddTestCase("Read test byte w/ min sized", true, readTestByte(12));
-            AddTestCase("Read test byte w/ sign extend w/ min sized", true, readTestByteSX(-21));
-            AddTestCase("Read test short w/ min sized", true, readTestShort(3456));
-            AddTestCase("Read test short w/ sign extend w/ min sized", true, readTestShortSX(-6543));
-            AddTestCase("Read test int w/ min sized", true, readTestInt(567890));
-            AddTestCase("Read test float w/ min sized", true, readTestFloat(12.34));
-            AddTestCase("Read test double w/ min sized", true, readTestDouble(34.56));
+            Assert.expectEq("Read test byte w/ min sized", true, readTestByte(12));
+            Assert.expectEq("Read test byte w/ sign extend w/ min sized", true, readTestByteSX(-21));
+            Assert.expectEq("Read test short w/ min sized", true, readTestShort(3456));
+            Assert.expectEq("Read test short w/ sign extend w/ min sized", true, readTestShortSX(-6543));
+            Assert.expectEq("Read test int w/ min sized", true, readTestInt(567890));
+            Assert.expectEq("Read test float w/ min sized", true, readTestFloat(12.34));
+            Assert.expectEq("Read test double w/ min sized", true, readTestDouble(34.56));
         });
 
 
@@ -336,11 +335,11 @@ package {
     }
 
     longTests.push(function():void {
-            AddTestCase("Write test byte w/ min sized", true, writeTestByte(12));
-            AddTestCase("Write test short w/ min sized", true, writeTestShort(3456));
-            AddTestCase("Write test int w/ min sized", true, writeTestInt(567890));
-            AddTestCase("Write test float w/ min sized", true, writeTestFloat(12.34));
-            AddTestCase("Write test double w/ min sized", true, writeTestDouble(34.56));
+            Assert.expectEq("Write test byte w/ min sized", true, writeTestByte(12));
+            Assert.expectEq("Write test short w/ min sized", true, writeTestShort(3456));
+            Assert.expectEq("Write test int w/ min sized", true, writeTestInt(567890));
+            Assert.expectEq("Write test float w/ min sized", true, writeTestFloat(12.34));
+            Assert.expectEq("Write test double w/ min sized", true, writeTestDouble(34.56));
         });
 
     function writeBytes(salt:int):void
@@ -381,23 +380,23 @@ package {
 
     longTests.push(function():void {
             writeBytes(12);
-            AddTestCase("Write min / verify min", true, verifyBytes(12));
+            Assert.expectEq("Write min / verify min", true, verifyBytes(12));
         });
 
     longTests.push(function():void {
             ba = currentDomain.domainMemory;
             currentDomain.domainMemory = null;
-            AddTestCase("Write min / verify scratch", false, verifyBytes(12));
+            Assert.expectEq("Write min / verify scratch", false, verifyBytes(12));
         });
 
     longTests.push(function():void {
             writeBytes(34);
-            AddTestCase("Write scratch / verify scratch", true, verifyBytes(34));
+            Assert.expectEq("Write scratch / verify scratch", true, verifyBytes(34));
         });
 
     longTests.push(function():void {
             currentDomain.domainMemory = ba;
-            AddTestCase("Write scratch / verify min", false, verifyBytes(34));
+            Assert.expectEq("Write scratch / verify min", false, verifyBytes(34));
         });
 
 
@@ -507,16 +506,16 @@ package {
     }
 
     longTests.push(function():void {
-            AddTestCase("Range read test byte min", true, rangeReadTestByte());
-            AddTestCase("Range offs read test byte min", true, rangeOffsReadTestByte());
-            AddTestCase("Range read test short min", true, rangeReadTestShort());
-            AddTestCase("Range offs read test short min", true, rangeOffsReadTestShort());
-            AddTestCase("Range read test int min", true, rangeReadTestInt());
-            AddTestCase("Range offs read test int min", true, rangeOffsReadTestInt());
-            AddTestCase("Range read test float min", true, rangeReadTestFloat());
-            AddTestCase("Range offs read test float min", true, rangeOffsReadTestFloat());
-            AddTestCase("Range read test double min", true, rangeReadTestDouble());
-            AddTestCase("Range offs read test double min", true, rangeOffsReadTestDouble());
+            Assert.expectEq("Range read test byte min", true, rangeReadTestByte());
+            Assert.expectEq("Range offs read test byte min", true, rangeOffsReadTestByte());
+            Assert.expectEq("Range read test short min", true, rangeReadTestShort());
+            Assert.expectEq("Range offs read test short min", true, rangeOffsReadTestShort());
+            Assert.expectEq("Range read test int min", true, rangeReadTestInt());
+            Assert.expectEq("Range offs read test int min", true, rangeOffsReadTestInt());
+            Assert.expectEq("Range read test float min", true, rangeReadTestFloat());
+            Assert.expectEq("Range offs read test float min", true, rangeOffsReadTestFloat());
+            Assert.expectEq("Range read test double min", true, rangeReadTestDouble());
+            Assert.expectEq("Range offs read test double min", true, rangeOffsReadTestDouble());
         });
 
 
@@ -531,7 +530,7 @@ package {
     longTests.push(function():void{
             var oldLen:uint = currentDomain.domainMemory.length;
             currentDomain.domainMemory.length = 16384;
-            AddTestCase("Range read test wide", true, rangeReadTestWide());
+            Assert.expectEq("Range read test wide", true, rangeReadTestWide());
             currentDomain.domainMemory.length = oldLen;
         });
 
@@ -562,11 +561,11 @@ package {
     }
 
     longTests.push(function():void {
-            AddTestCase("Range write test byte min", true, rangeWriteTestByte());
-            AddTestCase("Range write test short min", true, rangeWriteTestShort());
-            AddTestCase("Range write test int min", true, rangeWriteTestInt());
-            AddTestCase("Range write test float min", true, rangeWriteTestFloat());
-            AddTestCase("Range write test double min", true, rangeWriteTestDouble());
+            Assert.expectEq("Range write test byte min", true, rangeWriteTestByte());
+            Assert.expectEq("Range write test short min", true, rangeWriteTestShort());
+            Assert.expectEq("Range write test int min", true, rangeWriteTestInt());
+            Assert.expectEq("Range write test float min", true, rangeWriteTestFloat());
+            Assert.expectEq("Range write test double min", true, rangeWriteTestDouble());
         });
 
 
@@ -582,7 +581,7 @@ package {
     longTests.push(function():void {
             var oldLen:uint = currentDomain.domainMemory.length;
             currentDomain.domainMemory.length = 16384;
-            AddTestCase("Range write test wide", true, rangeWriteTestWide());
+            Assert.expectEq("Range write test wide", true, rangeWriteTestWide());
             currentDomain.domainMemory.length = oldLen;
         });
 
@@ -615,7 +614,7 @@ package {
     }
 
     longTests.push(function():void {
-            AddTestCase("Sign extend test", true, sextTest());
+            Assert.expectEq("Sign extend test", true, sextTest());
         });
 
     function readWriteTest(size:int, f:Function):Boolean
@@ -681,22 +680,22 @@ package {
     }
 
     longTests.push(function():void {
-            AddTestCase("Read/write byte min", true, readWriteTestByte(12));
-            AddTestCase("Read/write short min", true, readWriteTestShort(3456));
-            AddTestCase("Read/write int min", true, readWriteTestInt(567890));
-            AddTestCase("Read/write float min", true, readWriteTestFloat(12.34));
-            AddTestCase("Read/write double min", true, readWriteTestDouble(34.56));
+            Assert.expectEq("Read/write byte min", true, readWriteTestByte(12));
+            Assert.expectEq("Read/write short min", true, readWriteTestShort(3456));
+            Assert.expectEq("Read/write int min", true, readWriteTestInt(567890));
+            Assert.expectEq("Read/write float min", true, readWriteTestFloat(12.34));
+            Assert.expectEq("Read/write double min", true, readWriteTestDouble(34.56));
         });
 
     longTests.push(function():void {
             ba = currentDomain.domainMemory;
             currentDomain.domainMemory = null;
 
-            AddTestCase("Read/write byte scratch", true, readWriteTestByte(12));
-            AddTestCase("Read/write short scratch", true, readWriteTestShort(3456));
-            AddTestCase("Read/write int scratch", true, readWriteTestInt(567890));
-            AddTestCase("Read/write float scratch", true, readWriteTestFloat(12.34));
-            AddTestCase("Read/write double scratch", true, readWriteTestDouble(34.56));
+            Assert.expectEq("Read/write byte scratch", true, readWriteTestByte(12));
+            Assert.expectEq("Read/write short scratch", true, readWriteTestShort(3456));
+            Assert.expectEq("Read/write int scratch", true, readWriteTestInt(567890));
+            Assert.expectEq("Read/write float scratch", true, readWriteTestFloat(12.34));
+            Assert.expectEq("Read/write double scratch", true, readWriteTestDouble(34.56));
 
             currentDomain.domainMemory = ba;
         });
@@ -705,7 +704,7 @@ package {
 //
 ////////////////////////////////////////////////////////////////
 
-    longTests.push(test);
+   // longTests.push(test);
     var n:int = 0;
     for(n = 0; n < longTests.length; n++)
         longTests[n]();

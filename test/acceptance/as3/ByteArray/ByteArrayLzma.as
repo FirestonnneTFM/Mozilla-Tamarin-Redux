@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 // General principles for this test suite:
 //
 //  - never write just one, write at least two (to test that position
@@ -20,13 +21,12 @@ import flash.utils.ByteArray;
 import flash.utils.CompressionAlgorithm;
 
 import avmplus.File;
+import com.adobe.test.Assert;
 
-var SECTION = "ByteArrayWithLzmaTemplate";
-var VERSION = "as3";
-startTest();
-var TITLE   = "test ByteArray class with lzma";
+// var SECTION = "ByteArrayWithLzmaTemplate";
+// var VERSION = "as3";
+// var TITLE   = "test ByteArray class with lzma";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 // Utility to make and pad a ByteArray
 function makeByteArray(padding=0) : ByteArray
@@ -44,7 +44,7 @@ function expectRangeError(tag, thunk)
     try                   { thunk(); }
     catch (e: RangeError) { exn_ok = "OK"; }
     catch (e)             { exn_ok = "Wrong type"; }
-    AddTestCase(tag, "OK", exn_ok);
+    Assert.expectEq(tag, "OK", exn_ok);
 }
 
 // Utility to test for EOFError
@@ -54,7 +54,7 @@ function expectEOF(tag, thunk)
     try                 { thunk(); }
     catch (e: EOFError) { exn_ok = "OK"; }
     catch (e)           { exn_ok = "Wrong type"; }
-    AddTestCase(tag, "OK", exn_ok);
+    Assert.expectEq(tag, "OK", exn_ok);
 }
 
 // Utility to test for IOError
@@ -64,7 +64,7 @@ function expectIOError(tag, thunk)
     try                { thunk(); }
     catch (e: IOError) { exn_ok = "OK"; }
     catch (e)          { exn_ok = "Wrong type"; }
-    AddTestCase(tag, "OK", exn_ok);
+    Assert.expectEq(tag, "OK", exn_ok);
 }
 
 function callCompress(byteArray:ByteArray,description:String):void
@@ -81,8 +81,8 @@ function callCompress(byteArray:ByteArray,description:String):void
         error_status = error.message;
     }
     byteArray.position = len;
-    AddTestCase(description+": expecting no exception","no error",error_status);
-    AddTestCase(description+": expecting length no change ",len,byteArray.length);
+    Assert.expectEq(description+": expecting no exception","no error",error_status);
+    Assert.expectEq(description+": expecting length no change ",len,byteArray.length);
 }
 
 function testEmptyByteArrayWithLzma()
@@ -114,7 +114,7 @@ function nullByteArrayWithLzma()
     {
         error_status ='error';
     }
-    AddTestCase("expecting thrown exception","error",error_status);
+    Assert.expectEq("expecting thrown exception","error",error_status);
 
 }
 
@@ -135,7 +135,7 @@ function compressWithZlibUncompressLzma()
         error_status ='error';
     }
 
-    AddTestCase("expecting thrown exception compressWithZlibUncompressLzma", "error", error_status);
+    Assert.expectEq("expecting thrown exception compressWithZlibUncompressLzma", "error", error_status);
 }
 
 compressWithZlibUncompressLzma()
@@ -162,9 +162,9 @@ function uncompressWithoutCompressionLzma()
         error_status ='error';
     }
 
-    AddTestCase("expecting thrown exception uncompressWithZlibUncompressLzma", "error", error_status);
+    Assert.expectEq("expecting thrown exception uncompressWithZlibUncompressLzma", "error", error_status);
 
-    AddTestCase("uncompressWithoutCompressionLzma bytearray length matches before uncompress",
+    Assert.expectEq("uncompressWithoutCompressionLzma bytearray length matches before uncompress",
         uncompressedLengthBefore, byteArray.length);
 }
 
@@ -175,22 +175,22 @@ function testBooleanWithLzma()
     var bytearray:ByteArray=makeByteArray();
     bytearray.writeBoolean(true);
     bytearray.writeBoolean(false);
-    AddTestCase("ByteArray position after writing Booleans",
+    Assert.expectEq("ByteArray position after writing Booleans",
         2,
         bytearray.position);
     callCompress(bytearray,"boolean bytearray");
     bytearray.position=0;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray move position to 0",
         0,
         bytearray.position);
 
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray write/read boolean true",
         true,
         bytearray.readBoolean());
 
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray write/read boolean false",
         false,
         bytearray.readBoolean());
@@ -210,13 +210,13 @@ function testShortWithLzma()
         bytearray.writeShort(-200);
         callCompress(bytearray,"bytearray of short");
         bytearray.position=offset;
-        AddTestCase("ByteArray readShort_1 #1 " + endian,
+        Assert.expectEq("ByteArray readShort_1 #1 " + endian,
             100,
             bytearray.readShort());
-        AddTestCase( "ByteArray readShort_1 #2 " + endian,
+        Assert.expectEq( "ByteArray readShort_1 #2 " + endian,
             -200,
             bytearray.readShort());
-        AddTestCase("ByteArray readShort_1 #3" + endian,
+        Assert.expectEq("ByteArray readShort_1 #3" + endian,
             4+offset,
             bytearray.position);
     }
@@ -232,13 +232,13 @@ function testShortWithLzma()
         callCompress(bytearray,"bytearray of short mixed endianness");
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readShort_2 #1",
+        Assert.expectEq("ByteArray readShort_2 #1",
             int(0x3412),
             bytearray.readShort());
-        AddTestCase("ByteArray readShort_2 #2",
+        Assert.expectEq("ByteArray readShort_2 #2",
             int(0xFFFFDCFE),   // Sign extended
             bytearray.readShort());
-        AddTestCase("ByteArray readShort_2 #3",
+        Assert.expectEq("ByteArray readShort_2 #3",
             4+offset,
             bytearray.position);
     }
@@ -282,13 +282,13 @@ function testUnsignedShortWithLzma()
         bytearray.writeShort(uint(-200) & 65535);
         callCompress(bytearray,"unsigned short");
         bytearray.position=offset;
-        AddTestCase("ByteArray readUShort_1 #1 " + endian,
+        Assert.expectEq("ByteArray readUShort_1 #1 " + endian,
             uint(100),
             bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_1 #2 " + endian,
+        Assert.expectEq("ByteArray readUShort_1 #2 " + endian,
             uint(-200) & 65535,
             bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_1 #3" + endian,
+        Assert.expectEq("ByteArray readUShort_1 #3" + endian,
             4+offset,
             bytearray.position);
     }
@@ -304,13 +304,13 @@ function testUnsignedShortWithLzma()
         callCompress(bytearray,"unsigned short mixed endianness");
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readUShort_2 #1",
+        Assert.expectEq("ByteArray readUShort_2 #1",
             uint(0x3412),
             bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_2 #2",
+        Assert.expectEq("ByteArray readUShort_2 #2",
             uint(0xDCFE),
             bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_2 #3",
+        Assert.expectEq("ByteArray readUShort_2 #3",
             4+offset,
             bytearray.position);
     }
@@ -353,13 +353,13 @@ function testIntWithLzma()
         bytearray.writeInt(-200);
         callCompress(bytearray,"int endianness");
         bytearray.position=offset;
-        AddTestCase("ByteArray readInt_1 #1 " + endian,
+        Assert.expectEq("ByteArray readInt_1 #1 " + endian,
             100,
             bytearray.readInt());
-        AddTestCase( "ByteArray readInt_1 #2 " + endian,
+        Assert.expectEq( "ByteArray readInt_1 #2 " + endian,
             -200,
             bytearray.readInt());
-        AddTestCase("ByteArray readInt_1 #3" + endian,
+        Assert.expectEq("ByteArray readInt_1 #3" + endian,
             8+offset,
             bytearray.position);
     }
@@ -375,13 +375,13 @@ function testIntWithLzma()
         callCompress(bytearray,"int mixed endianness");
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readInt_2 #1",
+        Assert.expectEq("ByteArray readInt_2 #1",
             int(0x78563412),
             bytearray.readInt());
-        AddTestCase("ByteArray readInt_2 #2",
+        Assert.expectEq("ByteArray readInt_2 #2",
             int(0x98BADCFE),
             bytearray.readInt());
-        AddTestCase("ByteArray readInt_2 #3",
+        Assert.expectEq("ByteArray readInt_2 #3",
             8+offset,
             bytearray.position);
     }
@@ -405,17 +405,17 @@ function testFloatWithLzma()
         bytearray.writeFloat(1.25);
         bytearray.writeFloat(12345.5);
         callCompress(bytearray,"float");
-        AddTestCase("ByteArray writeFloat_1 #1 " + endian,
+        Assert.expectEq("ByteArray writeFloat_1 #1 " + endian,
             8+offset,
             bytearray.position);
         bytearray.position=offset;
-        AddTestCase("ByteArray readFloat_1 #1 " + endian,
+        Assert.expectEq("ByteArray readFloat_1 #1 " + endian,
             1.25,
             bytearray.readFloat());
-        AddTestCase("ByteArray readFloat_1 #2 " + endian,
+        Assert.expectEq("ByteArray readFloat_1 #2 " + endian,
             12345.5,
             bytearray.readFloat());
-        AddTestCase("ByteArray readFloat_1 #3" + endian,
+        Assert.expectEq("ByteArray readFloat_1 #3" + endian,
             8+offset,
             bytearray.position);
     }
@@ -442,10 +442,10 @@ function testFloatWithLzma()
         
         temp.position = 0;
         temp.endian = "bigEndian";
-        AddTestCase("ByteArray readFloat_2 #1",
+        Assert.expectEq("ByteArray readFloat_2 #1",
             1.25,
             temp.readFloat());           // read big endian
-        AddTestCase("ByteArray readFloat_2 #2",
+        Assert.expectEq("ByteArray readFloat_2 #2",
             12345.5,
             temp.readFloat());
     }
@@ -471,17 +471,17 @@ function testDoubleWithLzma()
         bytearray.writeDouble(1.25);
         bytearray.writeDouble(12345.5);
         callCompress(bytearray,"double");
-        AddTestCase("ByteArray writeDouble_1 #1 " + endian,
+        Assert.expectEq("ByteArray writeDouble_1 #1 " + endian,
             16+offset,
             bytearray.position);
         bytearray.position=offset;
-        AddTestCase("ByteArray readDouble_1 #1 " + endian,
+        Assert.expectEq("ByteArray readDouble_1 #1 " + endian,
             1.25,
             bytearray.readDouble());
-        AddTestCase("ByteArray readDouble_1 #2 " + endian,
+        Assert.expectEq("ByteArray readDouble_1 #2 " + endian,
             12345.5,
             bytearray.readDouble());
-        AddTestCase("ByteArray readDouble_1 #3" + endian,
+        Assert.expectEq("ByteArray readDouble_1 #3" + endian,
             16+offset,
             bytearray.position);
     }
@@ -508,10 +508,10 @@ function testDoubleWithLzma()
         
         temp.position = 0;
         temp.endian = "bigEndian";
-        AddTestCase("ByteArray readDouble_2 #1",
+        Assert.expectEq("ByteArray readDouble_2 #1",
             1.25,
             temp.readDouble());           // read big endian
-        AddTestCase("ByteArray readDouble_2 #2",
+        Assert.expectEq("ByteArray readDouble_2 #2",
             12345.5,
             temp.readDouble());
     }
@@ -533,17 +533,17 @@ function testByteWithLzma()
     bytearray.writeByte(-257);
     bytearray.writeByte(37);
     callCompress(bytearray,"byte");
-    AddTestCase("testByte: ByteArray position",
+    Assert.expectEq("testByte: ByteArray position",
         2,
         bytearray.position);
-    AddTestCase("testByte: ByteArray length",
+    Assert.expectEq("testByte: ByteArray length",
         2,
         bytearray.length);
     bytearray.position=0;
-    AddTestCase( "ByteArray readByte",
+    Assert.expectEq( "ByteArray readByte",
         -1,
         bytearray.readByte());
-    AddTestCase( "ByteArray readByte",
+    Assert.expectEq( "ByteArray readByte",
         37,
         bytearray.readByte());
     
@@ -563,16 +563,16 @@ function testUtfWithLzma()
     bytearray.position=0;
     bytearray.writeUTF("string");
     callCompress(bytearray,"UTF");
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray position of utf string",
         8,
         bytearray.position);
     bytearray.position=0;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length of utf string",
         8,
         bytearray.length);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray readUTF",
         "string",
         bytearray.readUTF());
@@ -593,10 +593,10 @@ function testUtfWithLzma()
     bytearray.writeByte(115);
     callCompress(bytearray,"bytes");
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTF on contents containing NUL: contents",
+    Assert.expectEq("ByteArray readUTF on contents containing NUL: contents",
         "la",
         bytearray.readUTF());
-    AddTestCase("ByteArray readUTF on contents containing NUL: position",
+    Assert.expectEq("ByteArray readUTF on contents containing NUL: position",
         6,
         bytearray.position);
     
@@ -649,7 +649,7 @@ function testUtfWithLzma()
     bytearray.writeUTFBytes("string");
     callCompress(bytearray,"skip UTF-8 BOM");
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTF skips UTF8 BOM after length bytes but includes it in the length",
+    Assert.expectEq("ByteArray readUTF skips UTF8 BOM after length bytes but includes it in the length",
         "str",
         bytearray.readUTF());
     
@@ -665,11 +665,11 @@ function testUtfBytesWithLzma()
     bytearray.writeUTFBytes("string");
     callCompress(bytearray,"UTF bytes");
     bytearray.position=0;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length of utf bytes string",
         6,
         bytearray.length);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray readUTFBytes",
         "string",
         bytearray.readUTFBytes(6));
@@ -688,10 +688,10 @@ function testUtfBytesWithLzma()
     bytearray.writeByte(115);
     callCompress(bytearray,"bytes contains NULL");
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTFBytes on contents containing NUL: contents",
+    Assert.expectEq("ByteArray readUTFBytes on contents containing NUL: contents",
         "la",
         bytearray.readUTFBytes(4));
-    AddTestCase("ByteArray readUTFBytes on contents containing NUL: position",
+    Assert.expectEq("ByteArray readUTFBytes on contents containing NUL: position",
         4,
         bytearray.position);
     
@@ -717,7 +717,7 @@ function testUtfBytesWithLzma()
     bytearray.writeUTFBytes("string");
     callCompress(bytearray,"bytes contain high value bytes");
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTFBytes skips UTF8 BOM but includes it in the length",
+    Assert.expectEq("ByteArray readUTFBytes skips UTF8 BOM but includes it in the length",
         "str",
         bytearray.readUTFBytes(6));
     
@@ -736,13 +736,13 @@ function testBracketSyntaxWithLzma() {
     callCompress(bytearray,"bracket syntax");
     bytearray.position = 0;
     
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray get [] syntax",
         12,
         bytearray[2]);
     
     bytearray[2]=13;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray set [] syntax",
         13,
         bytearray[2]);   
@@ -784,13 +784,13 @@ function testBOMWithLzma() {
         bytearray_compress[5]==110 &&
         bytearray_compress[6]==33
     );
-    AddTestCase("ByteArray.compress bytearray length is different",
+    Assert.expectEq("ByteArray.compress bytearray length is different",
         origlength==compresslength,false);
-    AddTestCase("ByteArray.compress bytearray contents differ",
+    Assert.expectEq("ByteArray.compress bytearray contents differ",
         compressstate,false);
-    AddTestCase("ByteArray.uncompress bytearray length matches before compress",
+    Assert.expectEq("ByteArray.uncompress bytearray length matches before compress",
         origlength,restoredlength);
-    AddTestCase("ByteArray.uncompress uncompressing compressed string matches original",
+    Assert.expectEq("ByteArray.uncompress uncompressing compressed string matches original",
         restorestate,true);
 }
 
@@ -824,7 +824,7 @@ function testIllFormedLzmaLowSize():void {
             result = "ioerror on wrong size"
         }
 
-        AddTestCase("ByteArray.uncompress ill-formed LZMA size "+i+" byte",
+        Assert.expectEq("ByteArray.uncompress ill-formed LZMA size "+i+" byte",
                     "ioerror on wrong size",result);
     }
 }
@@ -855,7 +855,7 @@ function testIllFormedLzmaHighSize():void {
             result = "memoryerror on huge size"
         }
 
-        AddTestCase("ByteArray.uncompress ill-formed LZMA size "+i+" byte",
+        Assert.expectEq("ByteArray.uncompress ill-formed LZMA size "+i+" byte",
                     "memoryerror on huge size",result);
     }
 }
@@ -908,7 +908,7 @@ function testFuzzedLzma():void {
             errors+=" error fuzzing bit "+i+" ";
         }
     }
-    AddTestCase("ByteArray.uncompress fuzzed LZMA input check for errors",
+    Assert.expectEq("ByteArray.uncompress fuzzed LZMA input check for errors",
                     "",errors);
 }
 
@@ -918,4 +918,3 @@ function testFuzzedLzma():void {
 // comment out test due to bug: https://bugzilla.mozilla.org/show_bug.cgi?id=778727
 // testFuzzedLzma();
 
-test();

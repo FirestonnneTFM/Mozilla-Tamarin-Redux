@@ -11,32 +11,32 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION:String = "mops";
-    var VERSION:String = "AS3";
-    var TITLE:String   = "lf32";
+//     var SECTION:String = "mops";
+//     var VERSION:String = "AS3";
+//     var TITLE:String   = "lf32";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("lf32(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("lf32(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ LF32(Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
     // Get a handle to the domainMemory after it is initialized
     var mem:ByteArray = Domain.currentDomain.domainMemory;
 
-    AddErrorTest("lf32(-1)", RANGEERROR+1506, function(){ LF32(-1); });
-    AddErrorTest("lf32(mem.length)", RANGEERROR+1506, function(){ LF32(mem.length); });
-    AddErrorTest("lf32(mem.length-1)", RANGEERROR+1506, function(){ LF32(mem.length-1); });
-    AddErrorTest("lf32(mem.length-2)", RANGEERROR+1506, function(){ LF32(mem.length-2); });
-    AddErrorTest("lf32(mem.length-3)", RANGEERROR+1506, function(){ LF32(mem.length-3); });
-    AddTestCase("lf32(mem.length-4)", 0, LF32(mem.length-4));
+    Assert.expectError("lf32(-1)", Utils.RANGEERROR+1506, function(){ LF32(-1); });
+    Assert.expectError("lf32(mem.length)", Utils.RANGEERROR+1506, function(){ LF32(mem.length); });
+    Assert.expectError("lf32(mem.length-1)", Utils.RANGEERROR+1506, function(){ LF32(mem.length-1); });
+    Assert.expectError("lf32(mem.length-2)", Utils.RANGEERROR+1506, function(){ LF32(mem.length-2); });
+    Assert.expectError("lf32(mem.length-3)", Utils.RANGEERROR+1506, function(){ LF32(mem.length-3); });
+    Assert.expectEq("lf32(mem.length-4)", 0, LF32(mem.length-4));
 
     SI32(0x41460200, 1); // 0x41460200 == 12.37548828125
-    AddTestCase("lf32(1) loads do not need to be aligned", 12.37548828125, LF32(1));
+    Assert.expectEq("lf32(1) loads do not need to be aligned", 12.37548828125, LF32(1));
 
     testsi8();
     testsi16();
@@ -49,7 +49,6 @@ package {
     testwriteFloat();
     testwriteDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -80,7 +79,7 @@ package {
         SI8(0x02, 1);
         SI8(0x46, 2);
         SI8(0x41, 3);
-        AddTestCase("lf32 load float written by si8()", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load float written by si8()", 12.37548828125, LF32(0));
     }
 
     function testsi16():void
@@ -92,14 +91,14 @@ package {
         clearMemory();
         SI16(0x0200, 0);
         SI16(0x4146, 2);
-        AddTestCase("lf32 load float written by si16()", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load float written by si16()", 12.37548828125, LF32(0));
     }
 
     function testsi32():void
     {
         clearMemory();
         SI32(0x41460200, 0);
-        AddTestCase("lf32 load float written by si32(0x41460200)", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load float written by si32(0x41460200)", 12.37548828125, LF32(0));
     }
 
     function testsf32():void
@@ -121,7 +120,7 @@ package {
         // as an int|Number and not as a float.
         clearMemory();
         SF32(12.37548828125, 0);
-        AddTestCase("lf32 load float written by sf32(12.37548828125)", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load float written by sf32(12.37548828125)", 12.37548828125, LF32(0));
     }
 
     function testsf64():void
@@ -135,8 +134,8 @@ package {
          *****************************************/
         clearMemory();
         SF64(2.8846085099489688873291015625E6, 0);
-        AddTestCase("lf32 load 1st float written by sf64(0x4146020041460200)", 12.37548828125, LF32(4));
-        AddTestCase("lf32 load 2nd float written by sf64(0x4146020041460200)", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load 1st float written by sf64(0x4146020041460200)", 12.37548828125, LF32(4));
+        Assert.expectEq("lf32 load 2nd float written by sf64(0x4146020041460200)", 12.37548828125, LF32(0));
     }
 
     function testwriteByte():void
@@ -148,7 +147,7 @@ package {
         mem.writeByte(0x46);
         mem.writeByte(0x41);
 
-        AddTestCase("lf32 load float written by writeByte()", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load float written by writeByte()", 12.37548828125, LF32(0));
     }
 
     function testwriteBoolean():void
@@ -160,7 +159,7 @@ package {
         mem.writeBoolean(false);
         mem.writeBoolean(true);
 
-        AddTestCase("lf32 load float written by writeBoolean()", 2.3510604481259484465715043694E-38, LF32(0));
+        Assert.expectEq("lf32 load float written by writeBoolean()", 2.3510604481259484465715043694E-38, LF32(0));
     }
 
     function testwriteInt():void
@@ -172,7 +171,7 @@ package {
         mem.position = 0;
         mem.writeInt(1095107072);
 
-        AddTestCase("lf32 load float written by writeInt(2147473647)", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load float written by writeInt(2147473647)", 12.37548828125, LF32(0));
     }
 
     function testwriteFloat():void
@@ -183,7 +182,7 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeFloat(12.375);
-        AddTestCase("lf32 load float written by writeFloat(12.375)", 12.375, LF32(0));
+        Assert.expectEq("lf32 load float written by writeFloat(12.375)", 12.375, LF32(0));
     }
 
 
@@ -199,8 +198,8 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeDouble(2.8846085099489688873291015625E6);
-        AddTestCase("lf32 load 1st float written by writeDouble(2.8846085099489688873291015625E6)", 12.37548828125, LF32(4));
-        AddTestCase("lf32 load 2nd float written by writeDouble(2.8846085099489688873291015625E6)", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load 1st float written by writeDouble(2.8846085099489688873291015625E6)", 12.37548828125, LF32(4));
+        Assert.expectEq("lf32 load 2nd float written by writeDouble(2.8846085099489688873291015625E6)", 12.37548828125, LF32(0));
 
     }
 

@@ -4,15 +4,14 @@
 
 import flash.sampler.*
 import avmplus.*
+import com.adobe.test.Assert;
 
-var SECTION = "Sampling";
-var VERSION = "AS3";
-var TITLE   = "Sampling Basic Usage";
+// var SECTION = "Sampling";
+// var VERSION = "AS3";
+// var TITLE   = "Sampling Basic Usage";
 
 var isdebugger=System.isDebugger();
 
-startTest();
-writeHeaderToLog("Sampling api");
 
 var objs:Array=new Array();
 class simpleobject {
@@ -31,13 +30,13 @@ sampleInternalAllocs(true);
 
 simpleLoop();
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "BeforeStartSampling: test before startSampling sample count 0",
       0,
       getSampleCount()
     );
 } else {
-    AddTestCase(
+    Assert.expectEq(
       "BeforeStartSampling: test before startSampling sample count 0",
       -1,
       getSampleCount()
@@ -54,13 +53,13 @@ var newcount=getNewObjectCount();
 simpleLoop();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "PauseSampling: after pauseSampling verify no more NewObjectSamples",
       newcount,
       getNewObjectCount()
     );
 } else {
-    AddTestCase(
+    Assert.expectEq(
       "PauseSampling: after pauseSampling verify no more samples are counted",
       -1,
       getSampleCount()
@@ -71,19 +70,18 @@ simpleLoop();
 stopSampling();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "StopSampling: after stopSampling samples are reset",
       0,
       getSampleCount()
     );
 } else {
-    AddTestCase(
+    Assert.expectEq(
       "StopSampling: after stopSampling samples are reset",
       -1,
       getSampleCount()
     );
 }
-test();
 
 function getNewObjectCount():int {
     var ct:int=0;

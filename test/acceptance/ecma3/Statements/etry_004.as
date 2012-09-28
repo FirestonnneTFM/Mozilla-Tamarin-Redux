@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "try-004";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The try statement";
+import com.adobe.test.Assert;
+//     var SECTION = "try-004";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The try statement";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -34,8 +32,8 @@ function getTestCases() {
             result = e;
         }
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             value,
             expect,
             result );
@@ -49,8 +47,8 @@ function getTestCases() {
             result = e;
         }
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             value,
             expect,
             result );
@@ -64,8 +62,8 @@ function getTestCases() {
             result = e;
         }
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             value,
             expect,
             result );

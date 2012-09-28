@@ -4,16 +4,16 @@
 
 
 import PublicClass.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
-var TITLE   = "Extend Public Class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
+// var TITLE   = "Extend Public Class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -23,7 +23,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -40,8 +40,8 @@ startTest();                // leave this alone
 var arr = [1,2,3];
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final method from default method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testSubSetArray(arr)", arr, PUBEXTDCLASS.testSubSetArray(arr) );
+Assert.expectEq( "*** Access final method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testSubSetArray(arr)", arr, PUBEXTDCLASS.testSubSetArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -53,8 +53,8 @@ AddTestCase( "PUBEXTDCLASS.testSubSetArray(arr)", arr, PUBEXTDCLASS.testSubSetAr
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final method from public method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", arr, (PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "*** Access final method from public method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", arr, (PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -65,8 +65,8 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", 
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final method from private method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "*** Access final method from private method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -77,8 +77,8 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSub
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final method from final method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testFinSubSetArray(arr)", arr, PUBEXTDCLASS.testFinSubSetArray(arr) );
+Assert.expectEq( "*** Access final method from final method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testFinSubSetArray(arr)", arr, PUBEXTDCLASS.testFinSubSetArray(arr) );
 
 
 
@@ -88,8 +88,8 @@ AddTestCase( "PUBEXTDCLASS.testFinSubSetArray(arr)", arr, PUBEXTDCLASS.testFinSu
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final property from method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testSubSetDPArray(arr)", arr, PUBEXTDCLASS.testSubSetDPArray(arr) );
+Assert.expectEq( "*** Access final property from method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testSubSetDPArray(arr)", arr, PUBEXTDCLASS.testSubSetDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -99,8 +99,8 @@ AddTestCase( "PUBEXTDCLASS.testSubSetDPArray(arr)", arr, PUBEXTDCLASS.testSubSet
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final property from public method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()", arr, (PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "*** Access final property from public method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()", arr, (PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -110,8 +110,8 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray(
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final property from private method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testPrivSubSetDPArray(arr)", arr, PUBEXTDCLASS.testPrivSubSetDPArray(arr) );
+Assert.expectEq( "*** Access final property from private method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testPrivSubSetDPArray(arr)", arr, PUBEXTDCLASS.testPrivSubSetDPArray(arr) );
 
 
 
@@ -121,9 +121,8 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubSetDPArray(arr)", arr, PUBEXTDCLASS.testPr
 // ********************************************
 
 PUBEXTDCLASS = new PubExtPublicClassFin();
-AddTestCase( "*** Access final property from final method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testFinSubSetDPArray(arr)", arr, PUBEXTDCLASS.testFinSubSetDPArray(arr) );
+Assert.expectEq( "*** Access final property from final method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testFinSubSetDPArray(arr)", arr, PUBEXTDCLASS.testFinSubSetDPArray(arr) );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

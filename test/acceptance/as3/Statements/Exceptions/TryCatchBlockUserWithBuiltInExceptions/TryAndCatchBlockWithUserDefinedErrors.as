@@ -58,6 +58,8 @@ package UserDefinedErrorsPackageTryBlockOutside
 package TryCatchBlockUserWithBuiltInExceptions
 {
     import UserDefinedErrorsPackageTryBlockOutside.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
     public class TryAndCatchBlockWithUserDefinedErrors
     {
         var b:Box = new Box();
@@ -111,16 +113,16 @@ package TryCatchBlockUserWithBuiltInExceptions
                      //print(e11.toString());
                      thisError11=e11.toString();
                 }finally{//print("This Error is:"+thisError);
-                     AddTestCase( "Testing try block and multiple catch blocks with       custom error classes", "no error",thisError );
-                     AddTestCase( "Testing catch block with type error",
-                           "no error",typeError(thisError4) );
-                     AddTestCase( "Testing catch block with Argument Error",                                        "no error" ,thisError5);
-                     AddTestCase( "Testing catch block with URIError",
-                           "URIError: Error #1052",uriError(thisError6));
-                     AddTestCase( "Testing catch block with Eval Error",
-                           "no error" ,thisError9);                                       AddTestCase( "Testing catch block with Range Error",
+                     Assert.expectEq( "Testing try block and multiple catch blocks with       custom error classes", "no error",thisError );
+                     Assert.expectEq( "Testing catch block with type error",
+                           "no error",Utils.typeError(thisError4) );
+                     Assert.expectEq( "Testing catch block with Argument Error",                                        "no error" ,thisError5);
+                     Assert.expectEq( "Testing catch block with URIError",
+                           "URIError: Error #1052",Utils.uriError(thisError6));
+                     Assert.expectEq( "Testing catch block with Eval Error",
+                           "no error" ,thisError9);                                       Assert.expectEq( "Testing catch block with Range Error",
                            "no error",thisError10);
-                     AddTestCase( "Testing catch block with Error", "no error"                                          ,thisError11);
+                     Assert.expectEq( "Testing catch block with Error", "no error"                                          ,thisError11);
                  }
           }
      }

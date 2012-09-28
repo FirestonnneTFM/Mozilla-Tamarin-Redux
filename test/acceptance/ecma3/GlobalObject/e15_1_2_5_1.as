@@ -1,24 +1,23 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = "15.1.2.5-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "unescape(string)";
+//     var SECTION = "15.1.2.5-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "unescape(string)";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION, "unescape.length",       1,               unescape.length );
-    //array[item++] = new TestCase( SECTION, "unescape.length = null; unescape.length",   1,      eval("unescape.length=null; unescape.length") );
+    array[item++] = Assert.expectEq(  "unescape.length",       1,               unescape.length );
+    //array[item++] = Assert.expectEq(  "unescape.length = null; unescape.length",   1,      eval("unescape.length=null; unescape.length") );
 
     var thisError:String
     try
@@ -31,44 +30,44 @@ function getTestCases() {
     }
     finally
     {
-        array[item++] = new TestCase(SECTION, "unescape.length = null", "ReferenceError: Error #1074", referenceError(thisError));
+        array[item++] = Assert.expectEq( "unescape.length = null", "ReferenceError: Error #1074", Utils.referenceError(thisError));
     }
-    array[item++] = new TestCase( SECTION, "delete unescape.length",                    false,  delete unescape.length );
-    //array[item++] = new TestCase( SECTION, "delete unescape.length; unescape.length",   1,      eval("delete unescape.length; unescape.length") );
+    array[item++] = Assert.expectEq(  "delete unescape.length",                    false,  delete unescape.length );
+    //array[item++] = Assert.expectEq(  "delete unescape.length; unescape.length",   1,      eval("delete unescape.length; unescape.length") );
     delete unescape.length;
-    array[item++] = new TestCase( SECTION, "delete unescape.length; unescape.length",   1,      unescape.length);
+    array[item++] = Assert.expectEq(  "delete unescape.length; unescape.length",   1,      unescape.length);
 
     var MYPROPS='';
     for ( var p in unescape ) {
         MYPROPS+= p;
     }
 
-    array[item++] = new TestCase( SECTION, "var MYPROPS='', for ( var p in unescape ) { MYPROPS+= p }, MYPROPS",    "", MYPROPS );
+    array[item++] = Assert.expectEq(  "var MYPROPS='', for ( var p in unescape ) { MYPROPS+= p }, MYPROPS",    "", MYPROPS );
 
-    array[item++] = new TestCase( SECTION, "unescape()",              "undefined",    unescape() );
-    array[item++] = new TestCase( SECTION, "unescape('')",            "",             unescape('') );
-    array[item++] = new TestCase( SECTION, "unescape( null )",        "null",         unescape(null) );
-    array[item++] = new TestCase( SECTION, "unescape( void 0 )",      "null",    unescape(void 0) );
-    array[item++] = new TestCase( SECTION, "unescape( true )",        "true",         unescape( true ) );
-    array[item++] = new TestCase( SECTION, "unescape( false )",       "false",        unescape( false ) );
+    array[item++] = Assert.expectEq(  "unescape()",              "undefined",    unescape() );
+    array[item++] = Assert.expectEq(  "unescape('')",            "",             unescape('') );
+    array[item++] = Assert.expectEq(  "unescape( null )",        "null",         unescape(null) );
+    array[item++] = Assert.expectEq(  "unescape( void 0 )",      "null",    unescape(void 0) );
+    array[item++] = Assert.expectEq(  "unescape( true )",        "true",         unescape( true ) );
+    array[item++] = Assert.expectEq(  "unescape( false )",       "false",        unescape( false ) );
 
-    array[item++] = new TestCase( SECTION, "unescape( new Boolean(true) )",   "true", unescape(new Boolean(true)) );
-    array[item++] = new TestCase( SECTION, "unescape( new Boolean(false) )",  "false",    unescape(new Boolean(false)) );
+    array[item++] = Assert.expectEq(  "unescape( new Boolean(true) )",   "true", unescape(new Boolean(true)) );
+    array[item++] = Assert.expectEq(  "unescape( new Boolean(false) )",  "false",    unescape(new Boolean(false)) );
 
-    array[item++] = new TestCase( SECTION, "unescape( Number.NaN  )",                 "NaN",      unescape(Number.NaN) );
-    array[item++] = new TestCase( SECTION, "unescape( -0 )",                          "0",        unescape( -0 ) );
-    array[item++] = new TestCase( SECTION, "unescape( 'Infinity' )",                  "Infinity", unescape( "Infinity" ) );
-    array[item++] = new TestCase( SECTION, "unescape( Number.POSITIVE_INFINITY )",    "Infinity", unescape( Number.POSITIVE_INFINITY ) );
-    array[item++] = new TestCase( SECTION, "unescape( Number.NEGATIVE_INFINITY )",    "-Infinity", unescape( Number.NEGATIVE_INFINITY ) );
+    array[item++] = Assert.expectEq(  "unescape( Number.NaN  )",                 "NaN",      unescape(Number.NaN) );
+    array[item++] = Assert.expectEq(  "unescape( -0 )",                          "0",        unescape( -0 ) );
+    array[item++] = Assert.expectEq(  "unescape( 'Infinity' )",                  "Infinity", unescape( "Infinity" ) );
+    array[item++] = Assert.expectEq(  "unescape( Number.POSITIVE_INFINITY )",    "Infinity", unescape( Number.POSITIVE_INFINITY ) );
+    array[item++] = Assert.expectEq(  "unescape( Number.NEGATIVE_INFINITY )",    "-Infinity", unescape( Number.NEGATIVE_INFINITY ) );
 
     var ASCII_TEST_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@*_+-./";
 
-    array[item++] = new TestCase( SECTION, "unescape( " +ASCII_TEST_STRING+" )",    ASCII_TEST_STRING,  unescape( ASCII_TEST_STRING ) );
+    array[item++] = Assert.expectEq(  "unescape( " +ASCII_TEST_STRING+" )",    ASCII_TEST_STRING,  unescape( ASCII_TEST_STRING ) );
 
     // escaped chars with ascii values less than 256
 
     for ( var CHARCODE = 0; CHARCODE < 256; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "unescape( %"+ ToHexString(CHARCODE)+" )",
                             String.fromCharCode(CHARCODE),
                             unescape( "%" + ToHexString(CHARCODE) )  );
@@ -76,20 +75,20 @@ function getTestCases() {
 
     // unicode chars represented by two hex digits
     for ( var CHARCODE = 0; CHARCODE < 256; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "unescape( %u"+ ToHexString(CHARCODE)+" )",
                             "%u"+ToHexString(CHARCODE),
                             unescape( "%u" + ToHexString(CHARCODE) )  );
     }
 /*
     for ( var CHARCODE = 0; CHARCODE < 256; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "unescape( %u"+ ToUnicodeString(CHARCODE)+" )",
                             String.fromCharCode(CHARCODE),
                             unescape( "%u" + ToUnicodeString(CHARCODE) )  );
     }
     for ( var CHARCODE = 256; CHARCODE < 65536; CHARCODE+= 333 ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "unescape( %u"+ ToUnicodeString(CHARCODE)+" )",
                             String.fromCharCode(CHARCODE),
                             unescape( "%u" + ToUnicodeString(CHARCODE) )  );

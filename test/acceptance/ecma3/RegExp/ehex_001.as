@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "RegExp/hex-001";
-    var VERSION = "ECMA_2";
-    var TITLE   = "RegExp patterns that contain HexicdecimalEscapeSequences";
+import com.adobe.test.Assert;
+//     var SECTION = "RegExp/hex-001";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "RegExp patterns that contain HexicdecimalEscapeSequences";
 
-    startTest();
-    writeHeaderToLog(SECTION + " " + TITLE);
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -33,7 +31,7 @@ function getTestCases() {
         // prevent a runtime error
 
         if ( regexp.exec(pattern) == null || matches_array == null ) {
-            /*array[item++] = new TestCase(SECTION,
+            /*array[item++] = Assert.expectEq(
                 str_regexp + ".exec(" + pattern +")",
                 matches_array,
                 regexp.exec(pattern) );
@@ -41,23 +39,23 @@ function getTestCases() {
             return;
         }
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             str_regexp + ".exec(" + str_pattern +").length",
             length,
             regexp.exec(pattern).length );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             str_regexp + ".exec(" + str_pattern +").index",
             index,
             regexp.exec(pattern).index );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             str_regexp + ".exec(" + str_pattern +").input",
             pattern,
             regexp.exec(pattern).input );
 
         for ( var matches = 0; matches < matches_array.length; matches++ ) {
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                 str_regexp + ".exec(" + str_pattern +")[" + matches +"]",
                 matches_array[matches],
                 regexp.exec(pattern)[matches] );

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-247179.js';
 //-----------------------------------------------------------------------------
@@ -12,17 +12,16 @@ var summary = 'RegExp \\b should not recognize non-ASCII alphanumerics as word c
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 expect = 3;
 actual = "m\ucc44nd".split(/\b/).length;
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 expect = 4;
 actual = "m\ucc44nd".split(/\w/).length;
  
-AddTestCase('RegExp \\w should not recognize non-ASCII alphanumerics as word characters', expect, actual);
+Assert.expectEq('RegExp \\w should not recognize non-ASCII alphanumerics as word characters', expect, actual);
 
-test();

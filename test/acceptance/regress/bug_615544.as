@@ -9,9 +9,10 @@ with interp the value is undefined.
 
 package {
 
-    var SECTION = "Regression Tests";       // provide a document reference (ie, Actionscript section)
-    var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-    var TITLE   = "Bug 615544";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+//     var SECTION = "Regression Tests";       // provide a document reference (ie, Actionscript section)
+//     var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+//     var TITLE   = "Bug 615544";       // Provide ECMA section title or a description
 
     // 1st bug example using with
     var actualValue;
@@ -37,9 +38,7 @@ package {
     o.bar=foo;
 
     var testclass:Bug615544=new Bug615544();
-    startTest();
-    AddTestCase("bug 615544: unset variable in 'with' block  causes 'null/undefined inconsistency'", undefined, actualValue);
-    AddTestCase("bug 615544: unset variable 'null/undefined' causes 'null/undefined inconsistency'", undefined, o.bar);
-    test();
+    Assert.expectEq("bug 615544: unset variable in 'with' block  causes 'null/undefined inconsistency'", undefined, actualValue);
+    Assert.expectEq("bug 615544: unset variable 'null/undefined' causes 'null/undefined inconsistency'", undefined, o.bar);
 
 }

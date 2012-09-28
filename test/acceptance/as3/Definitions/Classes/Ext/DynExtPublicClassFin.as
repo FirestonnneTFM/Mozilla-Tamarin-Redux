@@ -8,16 +8,16 @@
  *  in a file.
  */
 import PublicClass.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";                // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";                 // Version of JavaScript or ECMA
-var TITLE   = "dynamic Class Extends Public Class";     // Provide ECMA section title or a description
+// var SECTION = "Definitions";                // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";                 // Version of JavaScript or ECMA
+// var TITLE   = "dynamic Class Extends Public Class";     // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -27,7 +27,7 @@ startTest();                                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -51,8 +51,8 @@ var arr = new Array(1, 2, 3);
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final method from default method of sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testSubArray(arr)", arr, (DYNEXTDCLASS.testSubArray(arr)) );
+Assert.expectEq( "*** Access final method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testSubArray(arr)", arr, (DYNEXTDCLASS.testSubArray(arr)) );
 
 
 
@@ -63,8 +63,8 @@ AddTestCase( "DYNEXTDCLASS.testSubArray(arr)", arr, (DYNEXTDCLASS.testSubArray(a
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final method from public method of sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()", arr, (DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "*** Access final method from public method of sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()", arr, (DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()) );
 
 
 // ********************************************
@@ -74,8 +74,8 @@ AddTestCase( "DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()", 
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final method from private method of sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testPrivSubArray(arr)", arr, DYNEXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "*** Access final method from private method of sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testPrivSubArray(arr)", arr, DYNEXTDCLASS.testPrivSubArray(arr) );
 
 
 // ********************************************
@@ -85,8 +85,8 @@ AddTestCase( "DYNEXTDCLASS.testPrivSubArray(arr)", arr, DYNEXTDCLASS.testPrivSub
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final method from final method of sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testFinSubArray(arr)", arr, (DYNEXTDCLASS.testFinSubArray(arr)) );
+Assert.expectEq( "*** Access final method from final method of sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testFinSubArray(arr)", arr, (DYNEXTDCLASS.testFinSubArray(arr)) );
 
 
 // ********************************************
@@ -96,8 +96,8 @@ AddTestCase( "DYNEXTDCLASS.testFinSubArray(arr)", arr, (DYNEXTDCLASS.testFinSubA
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final method from public final method of sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArray()", arr, (DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArray()) );
+Assert.expectEq( "*** Access final method from public final method of sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArray()", arr, (DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArray()) );
 
 // ********************************************
 // access final method from a private final
@@ -106,8 +106,8 @@ AddTestCase( "DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArra
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final method from private final method of sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testPrivFinSubArray(arr)", arr, (DYNEXTDCLASS.testPrivFinSubArray(arr)) );
+Assert.expectEq( "*** Access final method from private final method of sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testPrivFinSubArray(arr)", arr, (DYNEXTDCLASS.testPrivFinSubArray(arr)) );
 
 
 
@@ -117,8 +117,8 @@ AddTestCase( "DYNEXTDCLASS.testPrivFinSubArray(arr)", arr, (DYNEXTDCLASS.testPri
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final property from method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testSubDPArray(arr)", arr, (DYNEXTDCLASS.testSubDPArray(arr)) );
+Assert.expectEq( "*** Access final property from method in sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testSubDPArray(arr)", arr, (DYNEXTDCLASS.testSubDPArray(arr)) );
 
 
 // ********************************************
@@ -127,8 +127,8 @@ AddTestCase( "DYNEXTDCLASS.testSubDPArray(arr)", arr, (DYNEXTDCLASS.testSubDPArr
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final property from public method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()", arr, (DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "*** Access final property from public method in sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()", arr, (DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
 
 
 // ********************************************
@@ -137,8 +137,8 @@ AddTestCase( "DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray(
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final property from private method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testPrivSubDPArray(arr)", arr, (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
+Assert.expectEq( "*** Access final property from private method in sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testPrivSubDPArray(arr)", arr, (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
 
 
 
@@ -148,8 +148,8 @@ AddTestCase( "DYNEXTDCLASS.testPrivSubDPArray(arr)", arr, (DYNEXTDCLASS.testPriv
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final property from final method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testFinSubDPArray(arr)", arr, (DYNEXTDCLASS.testFinSubDPArray(arr)) );
+Assert.expectEq( "*** Access final property from final method in sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testFinSubDPArray(arr)", arr, (DYNEXTDCLASS.testFinSubDPArray(arr)) );
 
 // ********************************************
 // access final property from
@@ -157,8 +157,8 @@ AddTestCase( "DYNEXTDCLASS.testFinSubDPArray(arr)", arr, (DYNEXTDCLASS.testFinSu
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final property from virtual method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testVirSubDPArray(arr)", arr, (DYNEXTDCLASS.testVirSubDPArray(arr)) );
+Assert.expectEq( "*** Access final property from virtual method in sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testVirSubDPArray(arr)", arr, (DYNEXTDCLASS.testVirSubDPArray(arr)) );
 
 // ********************************************
 // access final property from
@@ -166,10 +166,9 @@ AddTestCase( "DYNEXTDCLASS.testVirSubDPArray(arr)", arr, (DYNEXTDCLASS.testVirSu
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassFin();
-AddTestCase( "*** Access final property from private virtual method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testPrivVirSubDPArray(arr)", arr, (DYNEXTDCLASS.testVirSubDPArray(arr)) );
+Assert.expectEq( "*** Access final property from private virtual method in sub class ***", 1, 1 );
+Assert.expectEq( "DYNEXTDCLASS.testPrivVirSubDPArray(arr)", arr, (DYNEXTDCLASS.testVirSubDPArray(arr)) );
 
 
-test();             // Leave this function alone.
             // This function is for executing the test case and then
             // displaying the result on to the console or the LOG file.

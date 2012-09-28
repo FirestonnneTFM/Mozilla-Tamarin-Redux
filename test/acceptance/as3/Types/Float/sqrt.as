@@ -8,12 +8,10 @@
 Returns an implementation-dependent approximation to the square root of x.
 */
 
-var SECTION = "4.5.31";
-var VERSION = "AS3";
-var TITLE   = "public function sqrt(x:float):float";
+// var SECTION = "4.5.31";
+// var VERSION = "AS3";
+// var TITLE   = "public function sqrt(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.sqrt(param); }
 
@@ -67,5 +65,4 @@ for( var i:int = 0; i < 20; i++ )
     AddStrictTestCase("float.sqrt("+x+")", float(1.4142135623730951455).toFixed(i),  float.sqrt(x).toFixed(i));
 }
 
-test();
 

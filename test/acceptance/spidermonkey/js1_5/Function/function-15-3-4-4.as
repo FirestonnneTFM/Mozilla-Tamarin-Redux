@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = '15.3.4.4.js';
 //-----------------------------------------------------------------------------
@@ -14,19 +14,19 @@ var expect = '';
 var description = '';
 var GLOBAL = this;
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-printStatus(inSection(1));
+//printStatus(inSection(1));
  
 function func() { return this; }
 
 description = 'top-level function: this == GLOBAL';
 expect = GLOBAL;
 actual = func.call();
-AddTestCase(description, expect, actual);
+Assert.expectEq(description, expect, actual);
 
-printStatus(inSection(2));
+//printStatus(inSection(2));
 
 function getBoundMethod()
 {
@@ -40,7 +40,6 @@ if (typeof it != 'undefined')
   var func = getBoundMethod();
   expect = GLOBAL;
   actual = func.call();
-  AddTestCase(description, expect, actual);
+  Assert.expectEq(description, expect, actual);
 }
 
-test();

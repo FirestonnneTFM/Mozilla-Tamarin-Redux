@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "regexp-enumerate-001";
-    var VERSION = "ECMA_2";
-    var TITLE   = "Regression Test for Enumerating Properties";
+//     var SECTION = "regexp-enumerate-001";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "Regression Test for Enumerating Properties";
     var BUGNUMBER="339403";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -31,7 +29,7 @@ function getTestCases() {
         e[e.length] = { property:p, value:r[p] }; t.addProperty( p, r[p])
     };
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "r = new RegExp(); e = new Array(); "+
         "for ( p in r ) { e[e.length] = { property:p, value:r[p] }; e.length",
         0,
@@ -49,7 +47,7 @@ function getTestCases() {
                 this.name = false ;
            }
 
-           testcases[testcases.length] = new TestCase( SECTION,
+           testcases[testcases.length] = Assert.expectEq( 
                 "Property: " + name +" already enumerated?",
                 false,
                 pass );

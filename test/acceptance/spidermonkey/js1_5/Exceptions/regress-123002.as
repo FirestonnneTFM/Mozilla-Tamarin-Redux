@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -41,15 +41,18 @@ var actualvalues = [];
 var expect= '';
 var expectedvalues = [];
 
+function inSection(x) {
+   return "Section "+x+" of test -";
+}
 
 function fourArgs(a,b,c,d) {}
-AddTestCase('fourArgs length', 4, fourArgs.length);
+Assert.expectEq('fourArgs length', 4, fourArgs.length);
 
 class MyTestClass {
     public function MyTestClass(a,b,c,d) {}
 }
 
-AddTestCase('Class constructor with 4 args - MyTestClass.constructor.length = ', 4, MyTestClass.constructor.length)
+Assert.expectEq('Class constructor with 4 args - MyTestClass.constructor.length = ', 4, MyTestClass.constructor.length)
 /*
  * Are we in Rhino or SpiderMonkey?
  */
@@ -89,13 +92,11 @@ function addThis()
 
 function addtestcases()
 {
-
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+ 
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
@@ -107,4 +108,3 @@ function quoteThis(text)
   return QUOTE + text + QUOTE;
 }
 
-test();

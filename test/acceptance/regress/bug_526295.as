@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=526295
 *
@@ -9,6 +9,8 @@
 //-----------------------------------------------------------------------------
 
 package {
+    import com.adobe.test.Utils;
+    import com.adobe.test.Assert;
     public class BadCode {
         
         public var state:Object;
@@ -44,14 +46,13 @@ package {
         }
     }
     
-    startTest();
     err = "no error";
     var foo:BadCode = new BadCode();
     try {
         foo.goodCode();
     } catch (e) {
-        err = grabError(e, e.toString());
-        AddTestCase("goodCode", "Error", err );
+        err = Utils.grabError(e, e.toString());
+        Assert.expectEq("goodCode", "Error", err );
     }
     
     
@@ -59,10 +60,9 @@ package {
     try {
         foo.badCode();
     } catch (e) {
-        err = grabError(e, e.toString());
-        AddTestCase("badCode", "Error", err );
+        err = Utils.grabError(e, e.toString());
+        Assert.expectEq("badCode", "Error", err );
     }
-    test();
 
 }
 

@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "e11_4_8";
-    var VERSION = "ECMA_1";
-    startTest();
+//     var SECTION = "e11_4_8";
+//     var VERSION = "ECMA_1";
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " Bitwise Not operator");
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -17,13 +15,13 @@ function getTestCases() {
     for ( var i = 0; i < 35; i++ ) {
         var p = Math.pow(2,i);
 
-        array[item++] = new TestCase( SECTION, "~"+p,   Not(p),     ~p );
+        array[item++] = Assert.expectEq(  "~"+p,   Not(p),     ~p );
 
     }
     for ( i = 0; i < 35; i++ ) {
         var p = -Math.pow(2,i);
 
-        array[item++] = new TestCase( SECTION, "~"+p,   Not(p),     ~p );
+        array[item++] = Assert.expectEq(  "~"+p,   Not(p),     ~p );
 
     }
 

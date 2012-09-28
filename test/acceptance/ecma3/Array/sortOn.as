@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          sortOn.as
  *  ECMA Section:       15.4.4.3 Array.sortOn()
@@ -16,19 +17,16 @@
  *  Details:            Added more tests to test sortOn method and added tests to test        *  sortOn method's  changed sorting behavior with Array class constants
  */
 
-var SECTION = "sortOn";
-var TITLE   = "Array.sortOn";
+// var SECTION = "sortOn";
+// var TITLE   = "Array.sortOn";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -76,7 +74,7 @@ function getTestCases() {
     // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < MYARRAY.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR.sortOn(city)",  EXPECT_VAR[MYVAR],  MYARRAY[MYVAR].city );
+        array[item++] = Assert.expectEq(  "MYARR.sortOn(city)",  EXPECT_VAR[MYVAR],  MYARRAY[MYVAR].city );
     }
         var RESULT_ARRAY = new Array();
         for (var SORTVAR = 0; ( SORTVAR < MYARRAY.length ); SORTVAR++)
@@ -92,7 +90,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < MYARRAY.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR.sortOn(name)",  RESULT_ARRAY[MYVAR],  MYARRAY[MYVAR].name );
+        array[item++] = Assert.expectEq(  "MYARR.sortOn(name)",  RESULT_ARRAY[MYVAR],  MYARRAY[MYVAR].name );
     }
 
         for (var SORTVAR = 0; ( SORTVAR < MYARRAY.length ); SORTVAR++)
@@ -108,7 +106,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < MYARRAY.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR.sortOn(zip)",  RESULT_ARRAY[MYVAR],  MYARRAY[MYVAR].zip );
+        array[item++] = Assert.expectEq(  "MYARR.sortOn(zip)",  RESULT_ARRAY[MYVAR],  MYARRAY[MYVAR].zip );
     }
 
         //Using constants to change the sorting behavior
@@ -128,7 +126,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < MYARRAY.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "MYARR.sortOn(zip,Array.NUMERIC)",  RESULT_ARRAY[MYVAR],  MYARRAY[MYVAR].zip );
+        array[item++] = Assert.expectEq(  "MYARR.sortOn(zip,Array.NUMERIC)",  RESULT_ARRAY[MYVAR],  MYARRAY[MYVAR].zip );
     }
 
 
@@ -147,7 +145,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < users.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "users.sortOn(name,Array.CASEINSENSITIVE)",  RESULT_ARRAY[MYVAR],  users[MYVAR].name );
+        array[item++] = Assert.expectEq(  "users.sortOn(name,Array.CASEINSENSITIVE)",  RESULT_ARRAY[MYVAR],  users[MYVAR].name );
     }
         RESULT_ARRAY = EXPECT_VAR.sort(Array.CASEINSENSITIVE|Array.DESCENDING);
         // Sort the array on the name field.
@@ -157,7 +155,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < users.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "users.sortOn(name,Array.CASEINSENSITIVE|Array.DESCENDING)",  RESULT_ARRAY[MYVAR],  users[MYVAR].name );
+        array[item++] = Assert.expectEq(  "users.sortOn(name,Array.CASEINSENSITIVE|Array.DESCENDING)",  RESULT_ARRAY[MYVAR],  users[MYVAR].name );
     }
 
         for (var SORTVAR = 0; ( SORTVAR < users.length ); SORTVAR++)
@@ -173,7 +171,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < users.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "users.sortOn(age)",  RESULT_ARRAY[MYVAR],  users[MYVAR].age );
+        array[item++] = Assert.expectEq(  "users.sortOn(age)",  RESULT_ARRAY[MYVAR],  users[MYVAR].age );
     }
 
         RESULT_ARRAY = EXPECT_VAR.sort(Array.NUMERIC);
@@ -184,7 +182,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < users.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "users.sortOn(age,Array.NUMERIC)",  RESULT_ARRAY[MYVAR],  users[MYVAR].age );
+        array[item++] = Assert.expectEq(  "users.sortOn(age,Array.NUMERIC)",  RESULT_ARRAY[MYVAR],  users[MYVAR].age );
     }
 
         RESULT_ARRAY = EXPECT_VAR.sort(Array.DESCENDING|Array.NUMERIC);
@@ -195,7 +193,7 @@ function getTestCases() {
         // Output the result of the Sort Operation.
     for (var MYVAR = 0; ( MYVAR < users.length ); MYVAR++)
     {
-        array[item++] = new TestCase( SECTION, "users.sortOn(age,Array.DESCENDING|Array.NUMERIC)",  RESULT_ARRAY[MYVAR],  users[MYVAR].age );
+        array[item++] = Assert.expectEq(  "users.sortOn(age,Array.DESCENDING|Array.NUMERIC)",  RESULT_ARRAY[MYVAR],  users[MYVAR].age );
     }
 
 

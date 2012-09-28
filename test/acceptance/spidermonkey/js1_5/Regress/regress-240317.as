@@ -4,7 +4,7 @@
  * http://creativecommons.org/licenses/publicdomain/
  * Contributor: Bob Clary
  */
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-240317.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ var summary = 'Using Reserved identifiers warns';
 var actual = '';
 var expect = 'no error';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function testvar(words)
 {
@@ -36,7 +36,7 @@ function testvar(words)
       actual = 'error';
       status +=  ', ' + e.name + ': ' + e.message + ' ';
     }
-    AddTestCase(status, expect, actual);
+    Assert.expectEq(summary, expect, actual);
 
     actual = '';
     status = summary + ': ' + word;
@@ -50,7 +50,7 @@ function testvar(words)
       actual = 'error';
       status +=  ', ' + e.name + ': ' + e.message + ' ';
     }
-    AddTestCase(status, expect, actual);
+    Assert.expectEq(summary, expect, actual);
 
   }
 }
@@ -69,4 +69,3 @@ testvar(reserved);
  
 
 
-test();

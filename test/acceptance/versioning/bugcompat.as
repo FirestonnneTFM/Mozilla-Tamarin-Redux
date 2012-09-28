@@ -5,13 +5,12 @@
 package {
     import avmplus.Domain
     import avmplus.System
+import com.adobe.test.Assert;
 
-    var SECTION = "BugCompatibility";
-    var VERSION = "BugCompatibility";
-    startTest();
-    var TITLE   = "Bug 535770";
+//     var SECTION = "BugCompatibility";
+//     var VERSION = "BugCompatibility";
+//     var TITLE   = "Bug 535770";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
     var leaf_path:String = System.argv[0];
     var test_path:String = System.argv[1];
@@ -29,25 +28,24 @@ package {
     var result;
 
     result = SWF10_helper.vtest(leaf_path, SWF10_domain, 10);
-    AddTestCase("Test Vector.concat with SWF10 loading SWF10 behavior",
+    Assert.expectEq("Test Vector.concat with SWF10 loading SWF10 behavior",
       "1,4,3,2",
       result.toString());
 
     result = SWF11_helper.vtest(leaf_path, SWF11_domain, 11);
-    AddTestCase("Test Vector.concat with SWF11 loading SWF11 behavior",
+    Assert.expectEq("Test Vector.concat with SWF11 loading SWF11 behavior",
       "1,2,3,4",
       result.toString());
 
     result = SWF10_helper.vtest(leaf_path, SWF10_domain, 11);
-    AddTestCase("Test Vector.concat with SWF10 loading SWF11 behavior",
+    Assert.expectEq("Test Vector.concat with SWF10 loading SWF11 behavior",
       "1,2,3,4",
       result.toString());
 
     result = SWF11_helper.vtest(leaf_path, SWF11_domain, 10);
-    AddTestCase("Test Vector.concat with SWF11 loading SWF10 behavior",
+    Assert.expectEq("Test Vector.concat with SWF11 loading SWF10 behavior",
       "1,4,3,2",
       result.toString());
 
-    test();
 
 }

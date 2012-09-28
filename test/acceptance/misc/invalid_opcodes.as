@@ -4,12 +4,12 @@
 import avmplus.Domain;
 import flash.utils.ByteArray;
 import avmplus.System;
+import com.adobe.test.Assert;
 
-var SECTION = "Misc Tests";
-var VERSION = "";
-var TITLE = "Verify that invalid opcodes are rejected by the verifier";
+// var SECTION = "Misc Tests";
+// var VERSION = "";
+// var TITLE = "Verify that invalid opcodes are rejected by the verifier";
 
-startTest();
 
 var invalidOpcodes:Array = [
     0,
@@ -96,13 +96,12 @@ for (var i = 0; i < invalidOpcodes.length; i++) {
         if (v.toString().length > expected.length) {
             // debugger build, also test the error message
             var opcodeMsg = 'contained illegal opcode '+invalidOpcodes[i].toString();
-            AddTestCase('opcode: '+invalidOpcodes[i]+' check illegal opcode message == actual illegal opcode', true, v.toString().search(opcodeMsg) > 0);
+            Assert.expectEq('opcode: '+invalidOpcodes[i]+' check illegal opcode message == actual illegal opcode', true, v.toString().search(opcodeMsg) > 0);
             print(v.toString())
         }
     } finally {
-        AddTestCase('Testing invalid opcode: '+invalidOpcodes[i], expected, actual);
+        Assert.expectEq('Testing invalid opcode: '+invalidOpcodes[i], expected, actual);
     }
 }
 
-test();
 

@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "12.10-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The with statment";
+//     var SECTION = "12.10-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The with statment";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -25,7 +23,7 @@ function getTestCases() {
     {
         x = this +'';
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                 "with( new Number() ) { this +'' }",
                                 "[object global]",
                                  x);
@@ -33,8 +31,8 @@ function getTestCases() {
     // global object.
 
     var MYOB = new WithObject(true); with (MYOB) { y=parseInt() }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(true); with (MYOB) { parseInt() }",
                         true,
                         y );
@@ -44,31 +42,31 @@ function getTestCases() {
     {
         z = NaN;
     }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(false); with (MYOB) { NaN }",
                         false,
                         z );
 
     var MYOB = new WithObject(NaN);
     with (MYOB) { r = Infinity }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(NaN); with (MYOB) { Infinity }",
                         Number.NaN,
                          r);
 
     var MYOB = new WithObject(false); with (MYOB) { }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(false); with (MYOB) { }; Infinity",
                         Number.POSITIVE_INFINITY,
                         Infinity );
 
 
     var MYOB = new WithObject(0); with (MYOB) { delete Infinity; }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(0); with (MYOB) { delete Infinity; Infinity }",
                         Number.POSITIVE_INFINITY,
                         Infinity );
@@ -77,16 +75,16 @@ function getTestCases() {
     // let us leave the with block via a break.
 
     var MYOB = new WithObject(false); while (true) { with (MYOB) { MYOB = Infinity; break; } }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(false); while (true) { with (MYOB) { Infinity; break; } }",
                         false,
                         MYOB );
     
     var MYOB = new WithObject(true);
     with (MYOB) { MYOB = Infinity;f(); }
-    array[item++] = new TestCase(
-                        SECTION,
+    array[item++] = Assert.expectEq(
+                        
                         "var MYOB = new WithObject(true); with (MYOB) { Infinity }",
                         true,
                          MYOB);

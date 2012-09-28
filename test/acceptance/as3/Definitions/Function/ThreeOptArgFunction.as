@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import ThreeOptArgFunction.*
+import com.adobe.test.Assert;
 
 class ThreeOptArgFunctionClass {
     function returnArguments(s:String = "Str3", b:Boolean = true, n:Number = 30) {
@@ -20,12 +21,45 @@ function returnArgumentsNoPackage(s:String = "Str4", b:Boolean = false, n:Number
 }
 
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  // Version of JavaScript or ECMA
-var TITLE   = "Function Body Parameter/Result Type";       // Provide ECMA section title or a description
+// TODO: Review AS4 Conversion
+//  These classes used to be external, but are now inside classes because of the change from include to import
+
+
+    class TestObjInner{
+        
+      function returnArgumentsInner(s:String = "Str1", b:Boolean = true, n:Number = 10, ... rest) {
+        str = s;
+        bool = b;
+        num = n;
+      }
+        
+    }
+
+     class TestObj extends TestObjInner {
+        
+         function returnArguments() { returnArgumentsInner("Str1", true, 10, 12); }
+        
+    }
+
+        function returnArgumentsInner(s:String = "Str2", b:Boolean = false, n:Number = 20, ... rest) {
+    
+        str = s;
+        bool = b;
+        num = n;
+    }
+    
+    
+     function returnArguments() { returnArgumentsInner("Str2",false,20,true); }
+
+ // END TODO
+
+
+
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";  // Version of JavaScript or ECMA
+// var TITLE   = "Function Body Parameter/Result Type";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 var TESTOBJ = new TestObj();
 var TESTOBJ1 = new ThreeOptArgFunctionClass();
@@ -38,7 +72,7 @@ if(str == "Str1" && bool == true && num == 10)
 else
 { success = false;}
 
-AddTestCase( "TESTOBJ.returnArguments();", true, success );
+Assert.expectEq( "TESTOBJ.returnArguments();", true, success );
 
 
 success = false;
@@ -49,7 +83,7 @@ if(str == "Str2" && bool == false && num == 20)
 else
 { success = false;}
 
-AddTestCase( "returnArguments();", true, success );
+Assert.expectEq( "returnArguments();", true, success );
 
 
 success = false;
@@ -60,7 +94,7 @@ if(str == "Str3" && bool == true && num == 30)
 else
 { success = false;}
 
-AddTestCase( "TESTOBJ1.returnArguments();", true, success );
+Assert.expectEq( "TESTOBJ1.returnArguments();", true, success );
 
 
 success = false;
@@ -71,8 +105,7 @@ if(str == "Str4" && bool == false && num == 40)
 else
 { success = false;}
 
-AddTestCase( "returnArgumentsNoPackage();", true, success );
+Assert.expectEq( "returnArgumentsNoPackage();", true, success );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

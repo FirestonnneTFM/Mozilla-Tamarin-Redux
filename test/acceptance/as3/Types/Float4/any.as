@@ -4,17 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "4.6.4";
-var VERSION = "AS3";
-var TITLE   = "public function get any(): Boolean";
+// var SECTION = "4.6.4";
+// var VERSION = "AS3";
+// var TITLE   = "public function get any(): Boolean";
 
 /*
 Let v be this float4 value. Return true if ToBoolean(v:x) is true or ToBoolean(v:y)
 is true or ToBoolean(v:z) is true or ToBoolean(v:w) is true. Otherwise return false
  */
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt4:float4 = new float4(1f);
 AddStrictTestCase("flt4.any returns a Boolean", "Boolean", getQualifiedClassName(flt4.any));
@@ -44,5 +42,4 @@ for ( x = 0; x <=1; x++ )
     }
 }
 
-test();
 

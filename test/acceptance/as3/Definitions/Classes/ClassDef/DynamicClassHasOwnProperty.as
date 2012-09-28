@@ -5,13 +5,13 @@
  
 
 import DynamicClassHasOwnPropertyPackage.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Call hasOwnProperty() on a property of a dynamic class";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Call hasOwnProperty() on a property of a dynamic class";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -23,8 +23,7 @@ var Obj:DynamicClassHasOwnProperty = new DynamicClassHasOwnProperty();
 //
 // ********************************************
 
-AddTestCase( "Obj.hasOwnProperty(\"bar\")", true, Obj.hasOwnProperty("bar") );
+Assert.expectEq( "Obj.hasOwnProperty(\"bar\")", true, Obj.hasOwnProperty("bar") );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

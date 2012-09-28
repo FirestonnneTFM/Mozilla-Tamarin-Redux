@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 // Bugzilla 698365
 
-var SECTION = "ASC";
-var VERSION = "AS3";
-var TITLE   = "Allow float4 to be compared to Boolean and Number";
+// var SECTION = "ASC";
+// var VERSION = "AS3";
+// var TITLE   = "Allow float4 to be compared to Boolean and Number";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // -- begin test
 
@@ -19,12 +18,11 @@ print(float4(1,1,1,1) == true);   // This caused ASC to crash
 
 // -- end test
 
-AddTestCase("Trivially true", true, true);
+Assert.expectEq("Trivially true", true, true);
 
 // -- same bug, but a run-time failure before, then a compile-time failure (strict mode) later
 
-AddTestCase("Widening comparison", true, float4(1,1,1,1) == 1);
+Assert.expectEq("Widening comparison", true, float4(1,1,1,1) == 1);
 
 // -- end test
 
-test();

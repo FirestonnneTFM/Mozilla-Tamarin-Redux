@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "JSON";
-var VERSION = "AS3";
-var TITLE   = "JSON versioning tests";
+// var SECTION = "JSON";
+// var VERSION = "AS3";
+// var TITLE   = "JSON versioning tests";
 
 // The point of this test is to ensure that old content that
 // defines a JSON class in one file and uses that class in
@@ -18,7 +18,6 @@ var TITLE   = "JSON versioning tests";
 // been compiled with asc and a set of builtins before JSON
 // was added to the builtins.
 
-startTest();
 
 // versioned_defjson_helper.as_ and versioned_useoldjson_helper.as_ were
 // both compiled with builtins _before_ JSON was added.
@@ -35,10 +34,53 @@ import versioned_defjson.samefile_call_encode;
 import versioned_useoldjson.otherfile_call_stringify;
 import versioned_useoldjson.otherfile_call_encode;
 
-startTest();
+import com.adobe.test.Assert;
 
 var callFailException;
 var result;
+
+
+
+
+function removeExceptionDetail(s:String) {
+    var fnd=s.indexOf(" ");
+    if (fnd>-1) {
+        if (s.indexOf(':',fnd)>-1) {
+                s=s.substring(0,s.indexOf(':',fnd));
+        }
+    }
+    return s;
+}
+
+function sortObject(o:Object) {
+    var keys=[];
+    var key;
+    for ( key in o ) {
+        if (o[key]===undefined) {
+           continue;
+        }
+        keys[keys.length]=key;
+    }
+    keys.sort();
+    var ret="{";
+    var value;
+    for (var i in keys) {
+        key=keys[i];
+        value=o[key];
+        if (value is String) {
+            value='"'+value+'"';
+        } else if (value is Array) {
+            value='['+value+']';
+        } else if (value is Object) {
+        }
+        ret += '"'+key+'":'+value+",";
+    }
+    ret=ret.substring(0,ret.length-1);
+    ret+="}";
+    return ret;
+}
+
+
 
 callFailException="no exception thrown";;
 try {
@@ -48,7 +90,7 @@ try {
     callFailException=e.toString();
     callFailException=removeExceptionDetail(callFailException);
 }
-AddTestCase("user-defined JSON in same file not overridden by builtin stringify when < SWF_13.",
+Assert.expectEq("user-defined JSON in same file not overridden by builtin stringify when < SWF_13.",
             "TypeError: Error #1006",
             callFailException);
 
@@ -58,7 +100,7 @@ try {
 } catch (e) {
     result=e.toString();
 }
-AddTestCase("user JSON in same file not overridden by builtin lack of encode when < SWF_13.",
+Assert.expectEq("user JSON in same file not overridden by builtin lack of encode when < SWF_13.",
             "legacyEncodeOutput",
             result);
 
@@ -68,9 +110,9 @@ try {
     otherfile_call_stringify(a);
 } catch (e) {
     callFailException=e.toString();
-    callFailException=removeExceptionDetail(callFailException);
+     callFailException=removeExceptionDetail(callFailException);
 }
-AddTestCase("user-defined JSON in other file not overridden by builtin stringify when < SWF_13.",
+Assert.expectEq("user-defined JSON in other file not overridden by builtin stringify when < SWF_13.",
             "TypeError: Error #1006",
             callFailException);
 
@@ -80,8 +122,7 @@ try {
 } catch (e) {
     result=e.toString();
 }
-AddTestCase("user JSON in other file not overridden by builtin lack of encode when < SWF_13.",
+Assert.expectEq("user JSON in other file not overridden by builtin lack of encode when < SWF_13.",
             "legacyEncodeOutput",
             result);
 
-test();

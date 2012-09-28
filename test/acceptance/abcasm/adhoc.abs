@@ -14,3 +14,5 @@ function script0$init():*
 			0xea 077 /*octal*/, 0xf
   23        returnvalue   	
 }
+
+script_info{init: script0$init}

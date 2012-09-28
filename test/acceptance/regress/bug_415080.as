@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Regression Tests";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "Bug 415080";       // Provide ECMA section title or a description
+// var SECTION = "Regression Tests";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "Bug 415080";       // Provide ECMA section title or a description
 
 
-startTest();                // leave this alone
 
 class Bug415080 {
 
@@ -31,6 +31,5 @@ class Bug415080 {
 var t = new Bug415080();
 
 
-AddTestCase('No verifier error when running _badFunction', true, t._badFunction());
+Assert.expectEq('No verifier error when running _badFunction', true, t._badFunction());
 
-test();

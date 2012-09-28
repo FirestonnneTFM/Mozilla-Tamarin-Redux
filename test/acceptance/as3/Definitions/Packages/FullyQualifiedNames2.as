@@ -55,22 +55,22 @@
 }
 
 import FullyQualifiedNames.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "138845";
 
-startTest();                // leave this alone
 
 
 var a = new FullyQualifiedNames2.A();
 var b = new FullyQualifiedNames2.B();
 var c = new FullyQualifiedNames2.C();
 
-AddTestCase("Function in fully qualified class", "A", a.whoAmI());
-AddTestCase("Interface with fully qualified path", "B", b.whoAmI());
-AddTestCase("Fully qualified reference to variable", "hello", FullyQualifiedNames2.s);
+Assert.expectEq("Function in fully qualified class", "A", a.whoAmI());
+Assert.expectEq("Interface with fully qualified path", "B", b.whoAmI());
+Assert.expectEq("Fully qualified reference to variable", "hello", FullyQualifiedNames2.s);
 
 try {
     p = FullyQualifiedNames2.p;
@@ -78,10 +78,9 @@ try {
 } catch(e) {
     result = "exception";
 }
-AddTestCase("Fully qualified reference to internal variable", "exception", result);
-AddTestCase("Fully qualified reference to function", "You passed 5", FullyQualifiedNames2.publicFunc(5));
-AddTestCase("Namespace variable, fully qualified path", true, c.returnNSVar());
-AddTestCase("Namespace function, fully qualified path", "1,2,3", c.callNSFunc().toString());
+Assert.expectEq("Fully qualified reference to internal variable", "exception", result);
+Assert.expectEq("Fully qualified reference to function", "You passed 5", FullyQualifiedNames2.publicFunc(5));
+Assert.expectEq("Namespace variable, fully qualified path", true, c.returnNSVar());
+Assert.expectEq("Namespace function, fully qualified path", "1,2,3", c.callNSFunc().toString());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

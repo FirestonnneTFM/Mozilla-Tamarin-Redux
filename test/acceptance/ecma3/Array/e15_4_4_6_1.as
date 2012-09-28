@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          e15_4_4_6.as
  *  ECMA Section:       15.4.4.6 Array.prototype.pop()
@@ -27,19 +28,16 @@
  *
  */
 
-var SECTION = "15.4.4.6";
-var TITLE   = "Array.pop";
+// var SECTION = "15.4.4.6";
+// var TITLE   = "Array.pop";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -52,7 +50,7 @@ function getTestCases() {
     MYARR.pop()
 
     // Check if the length of the array is equivalent to 0 or not?
-    array[item++] = new TestCase( SECTION, "MYARR = []; MYARR.pop(); MYARR.length;", 0, MYARR.length );
+    array[item++] = Assert.expectEq(  "MYARR = []; MYARR.pop(); MYARR.length;", 0, MYARR.length );
 
     return ( array );
 

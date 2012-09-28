@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_9.js';
 
@@ -24,12 +25,10 @@ gTestfile = 'proto_9.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_9";
-var VERSION = "JS1_3";
-var TITLE   = "Local versus Inherited Values";
+// var SECTION = "proto_9";
+// var VERSION = "JS1_3";
+// var TITLE   = "Local versus Inherited Values";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Employee ( name, dept ) {
   this.name = name || "";
@@ -49,24 +48,23 @@ Array.prototype.getClass = Object.prototype.toString;
 
 // Pat, the WorkerBee
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.name",
           "",
           pat.name );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.dept",
           "general",
           pat.dept );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.projects.getClass",
           "[object Array]",
           pat.projects.getClass() );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.projects.length",
           0,
           pat.projects.length );
 
-test();

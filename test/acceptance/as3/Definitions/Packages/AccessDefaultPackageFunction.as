@@ -15,15 +15,14 @@ package B
     public var num2 = A();
 }
 
-var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "access default package function in other package";       // Provide ECMA section title or a description
+// var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "access default package function in other package";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
 import A.*;
+import com.adobe.test.Assert;
 
-startTest();
 
-AddTestCase("Using default package function in other package", 3, B.num2);
+Assert.expectEq("Using default package function in other package", 3, B.num2);
 
-test();

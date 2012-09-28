@@ -3,20 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
-function main()
-{
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-	returnvoid
-}
 
 function runTest()
 {
 	getlocal0
 	pushscope 
 
-	.try
+	try
 	{
 		pushnull
 		getproperty PropertyOfNull
@@ -30,7 +23,7 @@ function runTest()
 
 		jump check_nested_try
 	}
-	.catch
+	catch
 	{
 		getlocal0
 		pushscope
@@ -44,14 +37,14 @@ function runTest()
 	check_nested_try:
 
 	//  Test nested try/catch blocks.
-	.try
+	try
 	{
-		.try
+		try
 		{
 			pushstring "threw a string"
 			throw 
 		}
-		.catch Number
+		catch Number
 		{
 			getlocal0
 			pushscope
@@ -68,7 +61,7 @@ function runTest()
 			returnvoid
 		}
 	}
-	.catch String
+	catch String
 	{
 		getlocal0
 		pushscope
@@ -80,3 +73,14 @@ function runTest()
 
 	returnvoid
 }
+
+
+function main()
+{
+	newfunction runTest
+	getlocal0
+	call 0
+	returnvoid
+}
+
+script_info {init: main}

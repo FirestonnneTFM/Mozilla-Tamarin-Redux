@@ -3,15 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
-var TITLE   = "Extend Default Class Implement 2 Default Interfaces";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
+// var TITLE   = "Extend Default Class Implement 2 Default Interfaces";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -21,7 +20,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -30,6 +29,7 @@ startTest();                // leave this alone
 
 import DefaultClass.*;
 
+import com.adobe.test.Assert;
 arr = new Array(1, 2, 3);
 
 var THISTEST = new PubExtDefaultImplDefDefPubStat();
@@ -39,9 +39,9 @@ var THISTEST = new PubExtDefaultImplDefDefPubStat();
 // public method in the sub class
 // *******************************************
 
-AddTestCase( "*** public method implemented interface ***", 1, 1 );
-AddTestCase( "THISTEST.setPubBoolean(false), THISTEST.iGetPubBoolean()", false, (THISTEST.setPubBoolean(false), THISTEST.iGetPubBoolean()) );
-AddTestCase( "THISTEST.setPubBoolean(true), THISTEST.iGetPubBoolean()", true, (THISTEST.setPubBoolean(true), THISTEST.iGetPubBoolean()) );
+Assert.expectEq( "*** public method implemented interface ***", 1, 1 );
+Assert.expectEq( "THISTEST.setPubBoolean(false), THISTEST.iGetPubBoolean()", false, (THISTEST.setPubBoolean(false), THISTEST.iGetPubBoolean()) );
+Assert.expectEq( "THISTEST.setPubBoolean(true), THISTEST.iGetPubBoolean()", true, (THISTEST.setPubBoolean(true), THISTEST.iGetPubBoolean()) );
 
 
 // *******************************************
@@ -49,8 +49,8 @@ AddTestCase( "THISTEST.setPubBoolean(true), THISTEST.iGetPubBoolean()", true, (T
 // public method in the sub class
 // *******************************************
 
-AddTestCase( "*** public method implemented interface 2 ***", 1, 1 );
-AddTestCase( "THISTEST.setPubNumber(14), THISTEST.iGetPubNumber()", 14, (THISTEST.setPubNumber(14), THISTEST.iGetPubNumber()) );
+Assert.expectEq( "*** public method implemented interface 2 ***", 1, 1 );
+Assert.expectEq( "THISTEST.setPubNumber(14), THISTEST.iGetPubNumber()", 14, (THISTEST.setPubNumber(14), THISTEST.iGetPubNumber()) );
 
 
 //*******************************************
@@ -58,8 +58,8 @@ AddTestCase( "THISTEST.setPubNumber(14), THISTEST.iGetPubNumber()", 14, (THISTES
 // class from outside of class
 //*******************************************
 
-AddTestCase( "*** Public Static Methods and Public Static properites ***", 1, 1 );
-//AddTestCase( "THISTEST.setStatArray(arr), THISTEST.statArray", arr,
+Assert.expectEq( "*** Public Static Methods and Public Static properites ***", 1, 1 );
+//Assert.expectEq( "THISTEST.setStatArray(arr), THISTEST.statArray", arr,
 //             (THISTEST.setStatArray(arr), THISTEST.statArray) );
 
 
@@ -70,8 +70,8 @@ AddTestCase( "*** Public Static Methods and Public Static properites ***", 1, 1 
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static method from default method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.subSetArray(arr), EXTDCLASS.subGetArray()", arr, EXTDCLASS.testSubGetSetArray(arr) );
+Assert.expectEq( "*** Access public static method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.subSetArray(arr), EXTDCLASS.subGetArray()", arr, EXTDCLASS.testSubGetSetArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -82,8 +82,8 @@ AddTestCase( "EXTDCLASS.subSetArray(arr), EXTDCLASS.subGetArray()", arr, EXTDCLA
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static method from public method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "*** Access public static method from public method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -94,8 +94,8 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static method from private method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "*** Access public static method from private method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -106,8 +106,8 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static method from final method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, EXTDCLASS.testFinSubArray(arr) );
+Assert.expectEq( "*** Access public static method from final method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testFinSubArray(arr)", arr, EXTDCLASS.testFinSubArray(arr) );
 
 // ********************************************
 // access public static method from a static
@@ -115,8 +115,8 @@ AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, EXTDCLASS.testFinSubArray(ar
 //
 // ********************************************
 
-AddTestCase( "*** Access public static method from static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultImplDefDefPubStat.testStatSubArray(arr)", arr, PubExtDefaultImplDefDefPubStat.testStatSubArray(arr));
+Assert.expectEq( "*** Access public static method from static method of sub class ***", 1, 1 );
+Assert.expectEq( "PubExtDefaultImplDefDefPubStat.testStatSubArray(arr)", arr, PubExtDefaultImplDefDefPubStat.testStatSubArray(arr));
 
 // <TODO>  fill in the rest of the cases here
 
@@ -126,8 +126,8 @@ AddTestCase( "PubExtDefaultImplDefDefPubStat.testStatSubArray(arr)", arr, PubExt
 //
 // ********************************************
 
-AddTestCase( "*** Access public static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultImplDefDefPubStat.pubStatSubSetArray(arr), PubExtDefaultImplDefDefPubStat.pubStatSubGetArray()", arr,
+Assert.expectEq( "*** Access public static method from public static method of sub class ***", 1, 1 );
+Assert.expectEq( "PubExtDefaultImplDefDefPubStat.pubStatSubSetArray(arr), PubExtDefaultImplDefDefPubStat.pubStatSubGetArray()", arr,
              (PubExtDefaultImplDefDefPubStat.pubStatSubSetArray(arr), PubExtDefaultImplDefDefPubStat.pubStatSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
@@ -138,8 +138,8 @@ AddTestCase( "PubExtDefaultImplDefDefPubStat.pubStatSubSetArray(arr), PubExtDefa
 //
 // ********************************************
 
-AddTestCase( "*** Access public static method from private static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultImplDefDefPubStat.testPrivStatSubArray(arr)", arr, PubExtDefaultImplDefDefPubStat.testPrivStatSubArray(arr) );
+Assert.expectEq( "*** Access public static method from private static method of sub class ***", 1, 1 );
+Assert.expectEq( "PubExtDefaultImplDefDefPubStat.testPrivStatSubArray(arr)", arr, PubExtDefaultImplDefDefPubStat.testPrivStatSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -149,8 +149,8 @@ AddTestCase( "PubExtDefaultImplDefDefPubStat.testPrivStatSubArray(arr)", arr, Pu
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static property from default method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.subSetDPArray(arr), EXTDCLASS.subGetDPArray()", arr, EXTDCLASS.testSubGetSetDPArray(arr) );
+Assert.expectEq( "*** Access public static property from default method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.subSetDPArray(arr), EXTDCLASS.subGetDPArray()", arr, EXTDCLASS.testSubGetSetDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -161,8 +161,8 @@ AddTestCase( "EXTDCLASS.subSetDPArray(arr), EXTDCLASS.subGetDPArray()", arr, EXT
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static property from public method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "*** Access public static property from public method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -172,8 +172,8 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static property from private method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.privSubSetDPArray(arr), EXTDCLASS.privSubGetDPArray()", arr, EXTDCLASS.testPrivSubDPArray(arr) );
+Assert.expectEq( "*** Access public static property from private method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.privSubSetDPArray(arr), EXTDCLASS.privSubGetDPArray()", arr, EXTDCLASS.testPrivSubDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -183,24 +183,24 @@ AddTestCase( "EXTDCLASS.privSubSetDPArray(arr), EXTDCLASS.privSubGetDPArray()", 
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultImplDefDefPubStat();
-AddTestCase( "*** Access public static property from final method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.finSubSetDPArray(arr), EXTDCLASS.finSubGetDPArray()", arr, EXTDCLASS.testFinSubDPArray(arr) );
+Assert.expectEq( "*** Access public static property from final method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.finSubSetDPArray(arr), EXTDCLASS.finSubGetDPArray()", arr, EXTDCLASS.testFinSubDPArray(arr) );
 
 // ********************************************
 // access public static property from
 // static method in sub class
 // ********************************************
 
-AddTestCase( "*** Access public static property from static method in sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultImplDefDefPubStat.statSubSetSPArray(arr), PubExtDefaultImplDefDefPubStat.statSubGetSPArray()", arr,PubExtDefaultImplDefDefPubStat.testStatSubSPArray(arr) );
+Assert.expectEq( "*** Access public static property from static method in sub class ***", 1, 1 );
+Assert.expectEq( "PubExtDefaultImplDefDefPubStat.statSubSetSPArray(arr), PubExtDefaultImplDefDefPubStat.statSubGetSPArray()", arr,PubExtDefaultImplDefDefPubStat.testStatSubSPArray(arr) );
 
 // ********************************************
 // access public static property from
 // public static method in sub class
 // ********************************************
 
-AddTestCase( "*** Access public static property from public static method in sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultImplDefDefPubStat.pubStatSubSetSPArray(arr), PubExtDefaultImplDefDefPubStat.pubStatSubGetSPArray()", arr,
+Assert.expectEq( "*** Access public static property from public static method in sub class ***", 1, 1 );
+Assert.expectEq( "PubExtDefaultImplDefDefPubStat.pubStatSubSetSPArray(arr), PubExtDefaultImplDefDefPubStat.pubStatSubGetSPArray()", arr,
              (PubExtDefaultImplDefDefPubStat.pubStatSubSetSPArray(arr), PubExtDefaultImplDefDefPubStat.pubStatSubGetSPArray()) );
 
 // ********************************************
@@ -208,10 +208,9 @@ AddTestCase( "PubExtDefaultImplDefDefPubStat.pubStatSubSetSPArray(arr), PubExtDe
 // private static method in sub class
 // ********************************************
 
-AddTestCase( "*** Access public static property from private static method in sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultImplDefDefPubStat.testPrivStatSubPArray(arr)", arr, PubExtDefaultImplDefDefPubStat.testPrivStatSubPArray(arr));
+Assert.expectEq( "*** Access public static property from private static method in sub class ***", 1, 1 );
+Assert.expectEq( "PubExtDefaultImplDefDefPubStat.testPrivStatSubPArray(arr)", arr, PubExtDefaultImplDefDefPubStat.testPrivStatSubPArray(arr));
 
 // <TODO>  fill in the rest of the cases here
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

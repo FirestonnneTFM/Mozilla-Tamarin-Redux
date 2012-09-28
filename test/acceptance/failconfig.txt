@@ -1,6 +1,6 @@
-#  This Source Code Form is subject to the terms of the Mozilla Public
-#  License, v. 2.0. If a copy of the MPL was not distributed with this
-#  file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ########################################################################################################################
 # DOCUMENTATION:
@@ -255,8 +255,25 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*,, skip, uses eval
 
 as3/sampling/BackwardBranches, sparc-sol.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 
+abcasm/bug_554915a, .*,, skip, (serat) expecting Error #1502 but got VerifyError #1032 https://bugzilla.mozilla.org/show_bug.cgi?id=792540
 abcasm/bug_554915a, x86-mac.*valgrind.*,, skip, valgrind hangs https://bugzilla.mozilla.org/show_bug.cgi?id=590503
 abcasm/bug_554915b, x86-mac.*valgrind.*,, skip, valgrind hangs https://bugzilla.mozilla.org/show_bug.cgi?id=590503
+
+# ABC3 conversion 
+abcasm/nullCheck/CallStatic, .*,, skip, bsahlas http://watsonexp.corp.adobe.com/#bug=3328170
+abcasm/nullCheck/E, .*,, skip, bsahlas http://watsonexp.corp.adobe.com/#bug=3328170
+abcasm/mops, .*,, skip, bsahlas per compiler dev team no longer support for property names beyond simple qnames e.g. {flash.utils}::ByteArray
+abcasm/mops2, .*,, skip, bsahlas  per compiler dev team no longer support for property names beyond simple qnames e.g. {flash.utils}::ByteArray
+abcasm/catch1, .*,, skip, bsahlas NEEDS INVESTIGATION
+abcasm/parseInt, .*,, skip, bsahlas NEEDS INVESTIGATION 
+abcasm/namespaces, .*,, skip, bsahlas Unimplemented opcode pushnamespace 
+abcasm/bug_612641, .*,, skip, bsahlas Unimplemented opcode pushnamespace 
+abcasm/bug_491056, .*,, skip, bsahlas Unimplemented opcode istype
+abcasm/bug_555006a, .*,, skip, bsahlas NEEDS INVESTIGATION: When run this TC throws 'unexpected error message. expected: VerifyError: Error #1024 actual: VerifyError: Error #1047'
+abcasm/bug_678952, .*,, skip, bsahlas per compiler dev team no longer support for property names beyond simple qnames
+abcasm/nullCheck/H, .*,, skip, bsahlas TEST OBSOLETE per spec no longer supporting hasnext, hasnext2 instruction
+abcasm/coverage/H, .*,, skip, bsahlas TEST OBSOLETE per spec no longer supporting hasnext, hasnext2 instruction
+abcasm/syntaxErrors, .*,, skip, bsahlas INVESTIGATE if worth porting test is disordered and incoherent 
 
 # SIGILL issues
 ecma3/Math/e15_8_2_1, x86-mac.*valgrind.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
@@ -404,6 +421,7 @@ regress/security/bug_689243b:Correct exception thrown , (x86|arm)-.*-Dinterp , ,
 ####################
 # Workers
 ####################
+regress/.*243b,(x86-lnx-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|x86-win-tvm-release-Dinterp), , expectedfail, bug 
 regress/.*243a,.*,, skip, bug
 as3/ShellClasses/toplevel:exitcode, arm-lnx,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698855 System.exit(n) always exits 1 linux arm does not support exitcode
 as3/Workers/(ByteArrayWorkersLzma|WorkerDomain|Worker|WorkerErrors|regress/bug774294|regress/bug774302), (android|arm-) ,, skip, ARM platforms not supported https://bugzilla.mozilla.org/show_bug.cgi?id=755345

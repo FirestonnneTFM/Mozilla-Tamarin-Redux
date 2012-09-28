@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *This test arose from Bugzilla bug 58946.
  *The bug was filed when we got the following error (see code below):
@@ -12,15 +13,15 @@
  */
 //-------------------------------------------------------------------------------------------------
 var THE_ERROR = "return_error";
-var SECTION = "exception regression";
-var VERSION = "ECMA_3";
+// var SECTION = "exception regression";
+// var VERSION = "ECMA_3";
 
-startTest();
 
 var stat = "Testing a return statement inside a catch block inside a function";
-printStatus (stat);
+
+    // TODO: REVIEW AS4 CONVERSION ISSUE 
+//printStatus (stat);
 var testcases = getTestCases();
-test();
 
 function getTestCases()
 {
@@ -29,7 +30,7 @@ function getTestCases()
 
     var thisError = throwError();
     
-    array[item++] = new TestCase(SECTION, "throwError()", THE_ERROR, thisError);
+    array[item++] = Assert.expectEq( "throwError()", THE_ERROR, thisError);
     
     return array;
 }

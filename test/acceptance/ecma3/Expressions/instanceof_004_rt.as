@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "instanceof-004_TypeErrors";
-var VERSION = "ECMA_2";
-var TITLE   = "instanceof"
+// var SECTION = "instanceof-004_TypeErrors";
+// var VERSION = "ECMA_2";
+// var TITLE   = "instanceof"
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var testcases = getTestCases();
-test();
 
 function InstanceOf( object_1, object_2, expect, array, item ) {
 
@@ -19,8 +17,8 @@ function InstanceOf( object_1, object_2, expect, array, item ) {
     } catch (e) {
         result = e.toString();
     } finally {
-        array[item] = new TestCase(
-            SECTION,
+        array[item] = Assert.expectEq(
+             
             "(" + object_1 + ") instanceof " + object_2,
             expect,
             result);

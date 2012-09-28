@@ -23,14 +23,13 @@ package {
 
 import avmplus.System;
 import flash.utils.ByteArray;
+import com.adobe.test.Assert;
 
-var SECTION = "Array";
-var VERSION = "AS3";
-startTest();
-var TITLE   = "Array methods that handle/mangle length";
-var bug     = "661330";
+// var SECTION = "Array";
+// var VERSION = "AS3";
+// var TITLE   = "Array methods that handle/mangle length";
+// var bug     = "661330";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 // Array
 var azero;
@@ -210,7 +209,7 @@ function test_arrays(testname, fcn,
     var expected =
         (expected_array_lengths+
          (testing_subclass ? ","+expected_subarray_lengths : ""));
-    AddTestCase(testname, expected, arrays_len());
+    Assert.expectEq(testname, expected, arrays_len());
 }
 
 function test_arraylikes(testname, fcn,
@@ -227,7 +226,7 @@ function test_arraylikes(testname, fcn,
          (testing_vector ? ","+expected_vector_lengths : "")+
          (testing_bytearray ? ","+expected_bytearray_lengths : "")+
          (testing_objwithlength ? ","+expected_objwithlength_lengths : ""));
-    AddTestCase(testname, expected, alikes_len());
+    Assert.expectEq(testname, expected, alikes_len());
 }
 
 
@@ -439,4 +438,3 @@ test_arraylikes("unshift alikes",
                 // See note above.
                 "objects:,5,10,4294967295,4294967293,4294967290")
 
-test();

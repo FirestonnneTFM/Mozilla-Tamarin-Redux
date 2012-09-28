@@ -4,16 +4,16 @@
 
 package DefaultClass{
 import DefaultClass.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Extend Default Class";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Extend Default Class";  // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -23,7 +23,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -44,7 +44,7 @@ var arr = new Array(1,2,3);
 PUBEXTDCLASS = new PubExtDefaultClass();
 
 //We cannot access the default method from outside the class
-//AddTestCase( "PUBEXTDCLASS.setArray(arr), PUBEXTDCLASS.getArray()", arr, (PUBEXTDCLASS.setArray(arr), PUBEXTDCLASS.getArray()) );
+//Assert.expectEq( "PUBEXTDCLASS.setArray(arr), PUBEXTDCLASS.getArray()", arr, (PUBEXTDCLASS.setArray(arr), PUBEXTDCLASS.getArray()) );
 
 
 // ********************************************
@@ -54,8 +54,8 @@ PUBEXTDCLASS = new PubExtDefaultClass();
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default method from default method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.subSetArray(arr), PUBEXTDCLASS.subGetArray()", arr, PUBEXTDCLASS.testSubGetSetArray(arr) );
+Assert.expectEq( "*** Access default method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.subSetArray(arr), PUBEXTDCLASS.subGetArray()", arr, PUBEXTDCLASS.testSubGetSetArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -67,8 +67,8 @@ AddTestCase( "PUBEXTDCLASS.subSetArray(arr), PUBEXTDCLASS.subGetArray()", arr, P
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default method from public method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", arr, (PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "*** Access default method from public method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", arr, (PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -79,8 +79,8 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", 
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default method from private method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "*** Access default method from private method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -91,8 +91,8 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSub
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default method from default method of sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.finSubSetArray(arr), PUBEXTDCLASS.finSubGetArray()", arr, PUBEXTDCLASS.testFinSubArray(arr) );
+Assert.expectEq( "*** Access default method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.finSubSetArray(arr), PUBEXTDCLASS.finSubGetArray()", arr, PUBEXTDCLASS.testFinSubArray(arr) );
 
 // ********************************************
 // access default property from outside
@@ -100,8 +100,8 @@ AddTestCase( "PUBEXTDCLASS.finSubSetArray(arr), PUBEXTDCLASS.finSubGetArray()", 
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default property from outside the class ***", 1, 1 );
-//AddTestCase( "PUBEXTDCLASS.array = arr", arr, (PUBEXTDCLASS.array = arr, PUBEXTDCLASS.array) );
+Assert.expectEq( "*** Access default property from outside the class ***", 1, 1 );
+//Assert.expectEq( "PUBEXTDCLASS.array = arr", arr, (PUBEXTDCLASS.array = arr, PUBEXTDCLASS.array) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -111,8 +111,8 @@ AddTestCase( "*** Access default property from outside the class ***", 1, 1 );
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default property from method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.subSetDPArray(arr), PUBEXTDCLASS.subGetDPArray()", arr, PUBEXTDCLASS.testSubGetSetDPArray(arr) );
+Assert.expectEq( "*** Access default property from method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.subSetDPArray(arr), PUBEXTDCLASS.subGetDPArray()", arr, PUBEXTDCLASS.testSubGetSetDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -122,8 +122,8 @@ AddTestCase( "PUBEXTDCLASS.subSetDPArray(arr), PUBEXTDCLASS.subGetDPArray()", ar
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default property from public method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()", arr, (PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "*** Access default property from public method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()", arr, (PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -133,8 +133,8 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray(
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default property from private method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.privSubSetDPArray(arr), PUBEXTDCLASS.privSubGetDPArray()", arr, PUBEXTDCLASS.testPrivSubDPArray(arr) );
+Assert.expectEq( "*** Access default property from private method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.privSubSetDPArray(arr), PUBEXTDCLASS.privSubGetDPArray()", arr, PUBEXTDCLASS.testPrivSubDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -144,8 +144,8 @@ AddTestCase( "PUBEXTDCLASS.privSubSetDPArray(arr), PUBEXTDCLASS.privSubGetDPArra
 // ********************************************
 
 PUBEXTDCLASS = new PubExtDefaultClass();
-AddTestCase( "*** Access default property from final method in sub class ***", 1, 1 );
-AddTestCase( "PUBEXTDCLASS.finSubSetDPArray(arr), PUBEXTDCLASS.finSubGetDPArray()", arr, PUBEXTDCLASS.testFinSubDPArray(arr) );
+Assert.expectEq( "*** Access default property from final method in sub class ***", 1, 1 );
+Assert.expectEq( "PUBEXTDCLASS.finSubSetDPArray(arr), PUBEXTDCLASS.finSubGetDPArray()", arr, PUBEXTDCLASS.testFinSubDPArray(arr) );
 
 
 // ********************************************
@@ -155,14 +155,13 @@ AddTestCase( "PUBEXTDCLASS.finSubSetDPArray(arr), PUBEXTDCLASS.finSubGetDPArray(
 //Add new property to parent through prototype object, verify child inherits it
 var child = new PubExtDefaultClass();
 DefaultClassInner.prototype.fakeProp = 100;
-AddTestCase("*** Add new property to parent prototype object, verify child class inherits it ***", 100, child.fakeProp);
+Assert.expectEq("*** Add new property to parent prototype object, verify child class inherits it ***", 100, child.fakeProp);
 
 //Try overriding parent property through prototype object, verify child object has correct value
 DefaultClassInner.prototype.pObj = 2;
 child = new PubExtDefaultClass();
-AddTestCase("*** Try overriding parent property through prototype object, verify child object has correct value ***", 1, child.pObj);
+Assert.expectEq("*** Try overriding parent property through prototype object, verify child object has correct value ***", 1, child.pObj);
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 
 }

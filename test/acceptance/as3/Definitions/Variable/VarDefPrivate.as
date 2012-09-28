@@ -2,91 +2,91 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
-var TITLE   = "Private Variable Definition";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
+// var TITLE   = "Private Variable Definition";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 import VarDefPrivate.*;
 
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
  
 var VARDEFEMPTY = new VarDefPrivate();
-AddTestCase( "Private Variable Definition defined inside class", 1, 1);
+Assert.expectEq( "Private Variable Definition defined inside class", 1, 1);
 
-AddTestCase( "var Identifier = <empty>", "id", (VARDEFEMPTY.setid("id"), VARDEFEMPTY.getid()));
-AddTestCase( "var Identifier : TypeExpression = <empty>", true, (VARDEFEMPTY.setidTypeExpr(true),
+Assert.expectEq( "var Identifier = <empty>", "id", (VARDEFEMPTY.setid("id"), VARDEFEMPTY.getid()));
+Assert.expectEq( "var Identifier : TypeExpression = <empty>", true, (VARDEFEMPTY.setidTypeExpr(true),
                                                                  VARDEFEMPTY.getidTypeExpr()));
-AddTestCase( "var Identifier = AssignmentExpression", true, VARDEFEMPTY.getidAssignExpr());
-AddTestCase( "var Identifier : TypeExpression = AssignmentExpression", true, VARDEFEMPTY.getidTypeExprAssignExpr());
-AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (VARDEFEMPTY.setid1(true),
+Assert.expectEq( "var Identifier = AssignmentExpression", true, VARDEFEMPTY.getidAssignExpr());
+Assert.expectEq( "var Identifier : TypeExpression = AssignmentExpression", true, VARDEFEMPTY.getidTypeExprAssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier = <empty> [1]", true, (VARDEFEMPTY.setid1(true),
                                                                          VARDEFEMPTY.getid1()));
-AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (VARDEFEMPTY.setid2(true),
+Assert.expectEq( "var VariableBindingList, Identifier = <empty> [2]", true, (VARDEFEMPTY.setid2(true),
                                                                          VARDEFEMPTY.getid2()));
-AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (VARDEFEMPTY.setid3(true),
+Assert.expectEq( "var VariableBindingList, Identifier = <empty> [3]", true, (VARDEFEMPTY.setid3(true),
                                                                          VARDEFEMPTY.getid3()));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setid1TypeExpr(true),
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setid1TypeExpr(true),
                                                                                           VARDEFEMPTY.getid1TypeExpr()));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setid2TypeExpr(true),
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setid2TypeExpr(true),
                                                                                           VARDEFEMPTY.getid2TypeExpr()));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [3]", true, (VARDEFEMPTY.setid3TypeExpr(true),
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = <empty> [3]", true, (VARDEFEMPTY.setid3TypeExpr(true),
                                                                                           VARDEFEMPTY.getid3TypeExpr()));
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, VARDEFEMPTY.getid1AssignExpr());
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, VARDEFEMPTY.getid2AssignExpr());
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, VARDEFEMPTY.getid3AssignExpr());
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, VARDEFEMPTY.getid1AssignExprB());
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, VARDEFEMPTY.getid2AssignExprB());
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, VARDEFEMPTY.getid3AssignExprB());
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [1]", true, VARDEFEMPTY.getid1TypeExprAssignExpr());
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [2]", false, VARDEFEMPTY.getid2TypeExprAssignExpr());
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [3]", true, VARDEFEMPTY.getid3TypeExprAssignExpr());
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [4]", false, VARDEFEMPTY.getid1TypeExprAssignExprB());
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [5]", false, VARDEFEMPTY.getid2TypeExprAssignExprB());
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [6]", true, VARDEFEMPTY.getid3TypeExprAssignExprB());
-AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setidA(true),
+Assert.expectEq( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, VARDEFEMPTY.getid1AssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, VARDEFEMPTY.getid2AssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, VARDEFEMPTY.getid3AssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, VARDEFEMPTY.getid1AssignExprB());
+Assert.expectEq( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, VARDEFEMPTY.getid2AssignExprB());
+Assert.expectEq( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, VARDEFEMPTY.getid3AssignExprB());
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [1]", true, VARDEFEMPTY.getid1TypeExprAssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [2]", false, VARDEFEMPTY.getid2TypeExprAssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [3]", true, VARDEFEMPTY.getid3TypeExprAssignExpr());
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [4]", false, VARDEFEMPTY.getid1TypeExprAssignExprB());
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [5]", false, VARDEFEMPTY.getid2TypeExprAssignExprB());
+Assert.expectEq( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [6]", true, VARDEFEMPTY.getid3TypeExprAssignExprB());
+Assert.expectEq( "var Identifier, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setidA(true),
                                                                                  VARDEFEMPTY.getidA()));
-AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setidB(true),
+Assert.expectEq( "var Identifier, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setidB(true),
                                                                                  VARDEFEMPTY.getidB()));
-AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [1]", false, VARDEFEMPTY.getidAAssign() )
-AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [2]", true, VARDEFEMPTY.getidBAssign() )
-AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [3]", undefined, VARDEFEMPTY.getidAAssignB() )
-AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [4]", true, VARDEFEMPTY.getidBAssignB() )
+Assert.expectEq( "var Identifier, Identifier : TypeExpression = AssignmentExpression [1]", false, VARDEFEMPTY.getidAAssign() )
+Assert.expectEq( "var Identifier, Identifier : TypeExpression = AssignmentExpression [2]", true, VARDEFEMPTY.getidBAssign() )
+Assert.expectEq( "var Identifier, Identifier : TypeExpression = AssignmentExpression [3]", undefined, VARDEFEMPTY.getidAAssignB() )
+Assert.expectEq( "var Identifier, Identifier : TypeExpression = AssignmentExpression [4]", true, VARDEFEMPTY.getidBAssignB() )
 var arr = new Array(1,2,3);
-AddTestCase( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [1]", arr, (VARDEFEMPTY.setidTypeExprA(arr),
+Assert.expectEq( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [1]", arr, (VARDEFEMPTY.setidTypeExprA(arr),
                                                                                                    VARDEFEMPTY.getidTypeExprA()) );
-AddTestCase( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [2]", false, (VARDEFEMPTY.setidTypeExprB(false),
+Assert.expectEq( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [2]", false, (VARDEFEMPTY.setidTypeExprB(false),
                                                                                                      VARDEFEMPTY.getidTypeExprB()) );
-AddTestCase( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [1]", arr.toString(), VARDEFEMPTY.getidTypeExprAAssign().toString())
-AddTestCase( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [2]", true, VARDEFEMPTY.getidTypeExprBAssign() )
-AddTestCase( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [3]", null, VARDEFEMPTY.getidTypeExprAAssignB())
-AddTestCase( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [4]", true, VARDEFEMPTY.getidTypeExprBAssignB() )
-AddTestCase( "var Identifier, Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [1]", true, (VARDEFEMPTY.setidId(true),
+Assert.expectEq( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [1]", arr.toString(), VARDEFEMPTY.getidTypeExprAAssign().toString())
+Assert.expectEq( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [2]", true, VARDEFEMPTY.getidTypeExprBAssign() )
+Assert.expectEq( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [3]", null, VARDEFEMPTY.getidTypeExprAAssignB())
+Assert.expectEq( "var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [4]", true, VARDEFEMPTY.getidTypeExprBAssignB() )
+Assert.expectEq( "var Identifier, Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [1]", true, (VARDEFEMPTY.setidId(true),
                                                                                                                 VARDEFEMPTY.getidId()) );
-AddTestCase( "var Identifier, Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [2]", arr, (VARDEFEMPTY.setidIdTypeExprA(arr),
+Assert.expectEq( "var Identifier, Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [2]", arr, (VARDEFEMPTY.setidIdTypeExprA(arr),
                                                                                                                VARDEFEMPTY.getidIdTypeExprA()) );
-AddTestCase( "var Identifier, Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [3]", false, (VARDEFEMPTY.setidIdTypeExprB(false),
+Assert.expectEq( "var Identifier, Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty> [3]", false, (VARDEFEMPTY.setidIdTypeExprB(false),
                                                                                                                VARDEFEMPTY.getidIdTypeExprB()) );
-AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [1]", false, VARDEFEMPTY.getidIdAssign());
+Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [1]", false, VARDEFEMPTY.getidIdAssign());
 /*thisError="no error";
 try{
     VARDEFEMPTY.getidIdTypeExprAAssign().toString();
 }catch(e:TypeError){
     thisError=e.toString();
 }finally{
-    AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [2]","TypeError: Error #1055" , typeError(thisError));
+    Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [2]","TypeError: Error #1055" , Utils.typeError(thisError));
 }*/
-AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [2]", arr.toString(), VARDEFEMPTY.getidIdTypeExprAAssign().toString());
-AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [3]", true, VARDEFEMPTY.getidIdTypeExprBAssign());
-AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [4]", undefined, VARDEFEMPTY.getidIdAssignB());
-AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [5]", null, VARDEFEMPTY.getidIdTypeExprAAssignB());
-AddTestCase( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [6]", true, VARDEFEMPTY.getidIdTypeExprBAssignB());
+Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [2]", arr.toString(), VARDEFEMPTY.getidIdTypeExprAAssign().toString());
+Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [3]", true, VARDEFEMPTY.getidIdTypeExprBAssign());
+Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [4]", undefined, VARDEFEMPTY.getidIdAssignB());
+Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [5]", null, VARDEFEMPTY.getidIdTypeExprAAssignB());
+Assert.expectEq( "var Identififer, Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression [6]", true, VARDEFEMPTY.getidIdTypeExprBAssignB());
 
 
 
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

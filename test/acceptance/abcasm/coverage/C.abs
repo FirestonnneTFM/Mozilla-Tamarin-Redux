@@ -2,56 +2,61 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.script_info {
-	traits: {
-		.trait { kind: Trait_Slot name: propertyOne }
-		.trait { kind: Trait_Slot name: propertyTwo }
-	}
-}
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Instructions that start with the letter C" 
-	callpropvoid START 1
-	newfunction .function_id(runTest1)
-	getlocal0
-	call 0
-	newfunction .function_id(runTest2)
-	getlocal0
-	call 0
-	findproperty END
-	callpropvoid END 0
+function noArgs()
+{
 	returnvoid
 }
 
-.method_info { name: runTest1 }
-.method_body_info {
+function oneArg(*)
+{
+	getlocal1
+	findproperty PASS
+	swap
+	callpropvoid PASS 1
 
-	method: .function_id(runTest1)
+	returnvoid
+}
+
+function propertyOneImpl():int
+{
+	pushint 0x104b
+	returnvalue
+}
+
+function propertyTwoImpl():Object
+{
+	pushnull
+	returnvalue
+}
+
+method_info { name: runTest1 }
+method_body_info {
+
+	method: runTest1
 
 	exception: { 
-		.exception { 
+		exception { 
 			from: try_null_callproperty 
 			to: end_try_null_callproperty 
 			target: nullObj 
 		} 
-		.exception { 
+		exception { 
 			from: try_invalidprop_callproperty 
 			to: end_try_invalidprop_callproperty 
 			target: invalidprop_callproperty 
 		} 
-		.exception { 
+		exception { 
 			from: try_invalid_checkfilter
 			to: end_try_invalid_checkfilter
 			target: catch_invalid_checkfilter
 		}
-		.exception { 
+/*		exception { 
 			from: try_invalid_coerce_XML
 			to: end_try_invalid_coerce_XML
 			target: catch_invalid_coerce_XML
 		} 
-		.exception { 
+*/
+		exception { 
 			from: try_invalid_convert_o
 			to: end_try_invalid_convert_o
 			target: catch_invalid_convert_o
@@ -65,7 +70,7 @@ function main() {
 
 		findproperty COMPARE_STRICTEQ
 	pushstring "call noArg twice"
-		newfunction .function_id(noArgs)
+		newfunction noArgs
 		setlocal1
 
 		getlocal1
@@ -83,7 +88,7 @@ function main() {
 
 		/*findproperty COMPARE_STRICTEQ
 	pushstring "call oneArg with string arg"*/
-		newfunction .function_id(oneArg)
+		newfunction oneArg
 		setlocal 1
 		getlocal1
 		getlocal0
@@ -116,10 +121,10 @@ function main() {
 		findproperty COMPARE_STRICTEQ
 	pushstring "setup properties"
 		findproperty propertyOne
-		newfunction .function_id(propertyOneImpl)
+		newfunction propertyOneImpl
 		setproperty  propertyOne
 		findproperty propertyTwo
-		newfunction .function_id(propertyTwoImpl)
+		newfunction propertyTwoImpl
 		setproperty  propertyTwo
 		findproperty PASS
 	swap
@@ -183,6 +188,7 @@ function main() {
 
 	end_invalidprop_callproperty:
 
+/*
 		findproperty COMPARE_STRICTEQ
 	pushstring "callproplex"
 		pushint 0x104b // expected
@@ -197,7 +203,7 @@ function main() {
 		pushstring "Too many args"
 		callproplex propertyTwo 1
 		callpropvoid COMPARE_STRICTEQ 3
-
+*/
 		findproperty COMPARE_STRICTEQ
 	pushstring "callpropvoid"
 		pushint 77 // expected
@@ -244,7 +250,7 @@ function main() {
 		pop			//  lose appeasement
 
 
-
+/*
 	try_invalid_coerce_XML:
 		pushstring "<foo/>"
 		coerce XML
@@ -264,7 +270,7 @@ function main() {
 
 	end_invalid_coerce_XML:
 		pop	//  lose appeasment
-
+*/
 
 		/*findproperty COMPARE_STRICTEQ
 	pushstring "convert_o int"*/
@@ -297,14 +303,16 @@ function main() {
 
 		returnvoid
 	}
-} // .method_body_info
+} // method_body_info
 
 function runTest2()
 {
 		getlocal0
 		pushscope
 
-		findproperty COMPARE_STRICTEQ
+/* coerce_* not supported
+		
+findproperty COMPARE_STRICTEQ
 	pushstring "coerce_i uint to int"
 		pushint 79 // expected
 		pushuint 79
@@ -387,7 +395,7 @@ function runTest2()
 		getlocal0
 		coerce_s
 		callpropvoid COMPARE_STRICTEQ 3
-
+*/
 		/*findproperty COMPARE_STRICTEQ
 	pushstring "constructprop - Object"*/
 
@@ -661,29 +669,26 @@ function runTest2()
 	returnvoid
 }
 
-function noArgs()
-{
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Instructions that start with the letter C" 
+	callpropvoid START 1
+	newfunction runTest1
+	getlocal0
+	call 0
+	newfunction runTest2
+	getlocal0
+	call 0
+	findproperty END
+	callpropvoid END 0
 	returnvoid
 }
-
-function oneArg(*)
-{
-	getlocal1
-	findproperty PASS
-	swap
-	callpropvoid PASS 1
-
-	returnvoid
-}
-
-function propertyOneImpl():int
-{
-	pushint 0x104b
-	returnvalue
-}
-
-function propertyTwoImpl():Object
-{
-	pushnull
-	returnvalue
+script_info {
+init: main
+	traits: {
+		trait { kind: Trait_Slot name: propertyOne }
+		trait { kind: Trait_Slot name: propertyTwo }
+	}
 }

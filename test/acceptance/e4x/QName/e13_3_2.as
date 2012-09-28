@@ -1,8 +1,99 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
 
 START("13.3.2 - QName Constructor");
 
@@ -61,43 +152,43 @@ TEST(28, "http://foobar/::attr1", q.toString());
 TEST(29, "http://foobar/::attr1", q2.toString());
 
 // no value is supplied
-AddTestCase( "ns = new QName()", "", (ns = new QName(), ns.localName) );
+Assert.expectEq( "ns = new QName()", "", (ns = new QName(), ns.localName) );
 
 // one value is supplied
-AddTestCase( "typeof new QName('name')", 'object', typeof new QName('name') );
-AddTestCase( "new QName('name') instanceof QName", true, new QName('name') instanceof QName);
-AddTestCase( "new QName('name') == 'name'", true, new QName('name') == 'name');
-AddTestCase( "ns = new QName('name'), ns.uri == ''", true,
+Assert.expectEq( "typeof new QName('name')", 'object', typeof new QName('name') );
+Assert.expectEq( "new QName('name') instanceof QName", true, new QName('name') instanceof QName);
+Assert.expectEq( "new QName('name') == 'name'", true, new QName('name') == 'name');
+Assert.expectEq( "ns = new QName('name'), ns.uri == ''", true,
     (ns = new QName('name'), ns.uri == '') );
-AddTestCase( "ns = new QName('name'), ns.uri == null", false,
+Assert.expectEq( "ns = new QName('name'), ns.uri == null", false,
     (ns = new QName('name'), ns.uri == null) );
-AddTestCase( "ns = new QName('name'), ns.uri == undefined", false,
+Assert.expectEq( "ns = new QName('name'), ns.uri == undefined", false,
     (ns = new QName('name'), ns.uri == undefined) );
-AddTestCase( "ns = new QName('name'), typeof ns.uri", 'string',
+Assert.expectEq( "ns = new QName('name'), typeof ns.uri", 'string',
     (ns = new QName('name'), typeof ns.uri) );
-AddTestCase( "ns = new QName('name'), ns.localName == 'name'", true,
+Assert.expectEq( "ns = new QName('name'), ns.localName == 'name'", true,
     (ns = new QName('name'), ns.localName == 'name') );
-AddTestCase( "ns = new QName(undefined)", "", (ns = new QName(undefined), ns.localName) );
-AddTestCase( "ns = new QName('')", "", (ns = new QName(""), ns.localName) );
-AddTestCase( "MYOB = new QName('nameofobj'),typeof new QName(MYOB)",
+Assert.expectEq( "ns = new QName(undefined)", "", (ns = new QName(undefined), ns.localName) );
+Assert.expectEq( "ns = new QName('')", "", (ns = new QName(""), ns.localName) );
+Assert.expectEq( "MYOB = new QName('nameofobj'),typeof new QName(MYOB)",
     'object',
     (MYOB = new QName('nameofobj'), typeof new QName(MYOB)) );
 
 
 //two values are supplied
-AddTestCase( "MYOB = new QName(null, 'nameofobj'); MYOB.toString()",
+Assert.expectEq( "MYOB = new QName(null, 'nameofobj'); MYOB.toString()",
             "*::nameofobj",
              (MYOB = new QName(null, 'nameofobj'), MYOB.toString() ));
 
-AddTestCase( "MYOB = new QName(null, 'nameofobj'); MYOB.uri", null,
+Assert.expectEq( "MYOB = new QName(null, 'nameofobj'); MYOB.uri", null,
              (MYOB = new QName(null, 'nameofobj'), MYOB.uri) );
 
-AddTestCase( "MYOB = new QName(null, 'nameofobj'); MYOB.localName", 'nameofobj',
+Assert.expectEq( "MYOB = new QName(null, 'nameofobj'); MYOB.localName", 'nameofobj',
              (MYOB = new QName(null, 'nameofobj'), MYOB.localName) );
-AddTestCase( "MYOB = new QName('namespace', undefined); MYOB.localName", "",
+Assert.expectEq( "MYOB = new QName('namespace', undefined); MYOB.localName", "",
              (MYOB = new QName('namespace', undefined), MYOB.localName) );
 
-AddTestCase( "MYOB = new QName('namespace', ''); MYOB.localName", "",
+Assert.expectEq( "MYOB = new QName('namespace', ''); MYOB.localName", "",
              (MYOB = new QName('namespace', ""), MYOB.localName) );
              
 x1 =
@@ -110,8 +201,8 @@ x1 =
 y = <ns:attr1 xmlns:ns="http://someuri"/>
 q3 = y.name();
 
-AddTestCase("q3 = y.name()", "http://someuri::attr1", q3.toString());
-AddTestCase("x1.bravo.@[q3]", new XML("value3"), x1.bravo.@[q3]);
+Assert.expectEq("q3 = y.name()", "http://someuri::attr1", q3.toString());
+Assert.expectEq("x1.bravo.@[q3]", (new XML("value3")).toString(), x1.bravo.@[q3].toString());
 
 
 END();

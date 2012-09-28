@@ -21,22 +21,21 @@ package P {
 }
 
  
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "use namespace from varying scopes";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "use namespace from varying scopes";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
 
 import P.*;
 
+import com.adobe.test.Assert;
 var c = new C();
-AddTestCase("Namespace variable with namespace returned by a function", "Gerbera Daisy", c.getFlower());
+Assert.expectEq("Namespace variable with namespace returned by a function", "Gerbera Daisy", c.getFlower());
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

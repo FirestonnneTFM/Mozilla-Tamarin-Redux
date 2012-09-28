@@ -3,6 +3,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 /*
 The Number value for e, the base of the natural logarithms, which is approximately
@@ -12,26 +14,23 @@ The Number value for e, the base of the natural logarithms, which is approximate
 
 include "numberUtil.as";
 
-var SECTION = "15.8.1.1";
-var VERSION = "AS3";
-var TITLE   = "public static const E:Number = 2.718281828459045;";
+// var SECTION = "15.8.1.1";
+// var VERSION = "AS3";
+// var TITLE   = "public static const E:Number = 2.718281828459045;";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var num_e:Number = 2.718281828459045;
 
-AddTestCase("Number.E", num_e, Number.E);
-AddTestCase("typeof Number.E", "Number", getQualifiedClassName(Number.E));
+Assert.expectEq("Number.E", num_e, Number.E);
+Assert.expectEq("typeof Number.E", "Number", getQualifiedClassName(Number.E));
 
-AddTestCase("Number.E - DontDelete", false, delete(Number.E));
-AddTestCase("Number.E is still ok", num_e, Number.E);
+Assert.expectEq("Number.E - DontDelete", false, delete(Number.E));
+Assert.expectEq("Number.E is still ok", num_e, Number.E);
 
-AddTestCase("Number.E - DontEnum", '', getNumberProp('E'));
-AddTestCase("Number.E is no enumberable", false, Number.propertyIsEnumerable('E'));
+Assert.expectEq("Number.E - DontEnum", '', getNumberProp('E'));
+Assert.expectEq("Number.E is no enumberable", false, Number.propertyIsEnumerable('E'));
 
-AddErrorTest("Number.E - ReadOnly", REFERENCEERROR+1074, function(){ Number.E = 0; });
-AddTestCase("Number.E is still here", num_e, Number.E);
+Assert.expectError("Number.E - ReadOnly", Utils.REFERENCEERROR+1074, function(){ Number.E = 0; });
+Assert.expectEq("Number.E is still here", num_e, Number.E);
 
-test();
 

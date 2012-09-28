@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-385393-08.js';
 
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Regression test for bug 385393';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 try
 {
@@ -24,5 +24,5 @@ catch(ex)
 {
 }
 
-reportCompare(expect, actual, summary);
-test();
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);

@@ -1,13 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.4.5.2-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Array.length";
+//     var SECTION = "15.4.5.2-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Array.length";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = new Array();
 
@@ -31,7 +30,6 @@
     addCase( a, i, Math.pow(2,12)+i+1, Math.pow(2,12)+i+1, true );
     addCase( a, Math.pow(2,12)+5, 0, 0, true );
 
-    test();
 
 function addCase( object, old_len, set_len, new_len, ... rest) {
     var checkitems;
@@ -41,7 +39,7 @@ function addCase( object, old_len, set_len, new_len, ... rest) {
 
     object.length = set_len;
 
-    testcases[testcases.length] = new TestCase( SECTION,
+    testcases[testcases.length] = Assert.expectEq( 
         "array = new Array("+ old_len+"); array.length = " + set_len +
         "; array.length",
         new_len,
@@ -56,7 +54,7 @@ function addCase( object, old_len, set_len, new_len, ... rest) {
                 passed = false;
             }
         }
-        testcases[testcases.length] = new TestCase( SECTION,
+        testcases[testcases.length] = Assert.expectEq( 
             "verify that array items have been deleted",
             true,
             passed );
@@ -68,7 +66,7 @@ function addCase( object, old_len, set_len, new_len, ... rest) {
                 passed = false;
             }
         }
-        testcases[testcases.length] = new TestCase( SECTION,
+        testcases[testcases.length] = Assert.expectEq( 
             "verify that new items are undefined",
             true,
             passed );

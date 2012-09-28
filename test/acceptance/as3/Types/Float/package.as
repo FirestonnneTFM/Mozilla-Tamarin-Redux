@@ -5,18 +5,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package {
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 include "includes/op_add.as";
 runner();
 
-test();
 
 } // package
 
-var SECTION = "";
-var VERSION = "AS3";
-var TITLE   = "Package level functions";
+// var SECTION = "";
+// var VERSION = "AS3";
+// var TITLE   = "Package level functions";
 var DESC = "Include all of the includes/* float functions at the package level, outside of a class";
 

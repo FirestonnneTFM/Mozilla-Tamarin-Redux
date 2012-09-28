@@ -1,22 +1,21 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "exception-003";
-    var VERSION = "js1_4";
-    var TITLE   = "Tests for Actionscript Standard Exceptions: TargetError";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "exception-003";
+//     var VERSION = "js1_4";
+//     var TITLE   = "Tests for Actionscript Standard Exceptions: TargetError";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
     var expectedError = 1056;
-    if (as3Enabled) {
+    if (true) {       // TODO: REVIEW AS4 CONVERSION ISSUE   
         expectedError = 1037;
     }
 
@@ -36,13 +35,13 @@ function getTestCases() {
             //result = "passed:  threw exception",
             result = e.toString();
         } finally {
-            array[item++] = new TestCase(
-                SECTION,
+            array[item++] = Assert.expectEq(
+              //    SECTION,
                 "string = new String(\"hi\");"+
                 "string.toString = Boolean.prototype.toString" +
                 "string.toString()",
-                REFERENCEERROR+expectedError,
-                referenceError( result ) );
+                Utils.REFERENCEERROR+expectedError,
+                Utils.referenceError( result ) );
         }
     }
     return array;

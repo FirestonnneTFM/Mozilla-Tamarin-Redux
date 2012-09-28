@@ -6,9 +6,9 @@
 
 // (used logicalAssignment.as as template for this code)
 
-var SECTION = "Expressions";
-var VERSION = "AS3";
-var TITLE   = "Index Property Boundary Cases";
+// var SECTION = "Expressions";
+// var VERSION = "AS3";
+// var TITLE   = "Index Property Boundary Cases";
 
 // This code tests that set/get/in/delete all "behave", for a variety
 // of integer indices on a variety of indexable maps.
@@ -22,10 +22,10 @@ var TITLE   = "Index Property Boundary Cases";
 // Indexable maps tested:
 // Object, Array, ByteArray, and Vector
 
-startTest();
 
 import flash.utils.ByteArray;
 
+import com.adobe.test.Assert;
 class MapProps {
     var name                 // string naming type of map being tested
     var numtestbits          // number of distinct bits to flip in tests
@@ -137,18 +137,18 @@ function test_one_index(map, props, idx, idxfamily, absent, newval) {
     if (absent) {
         result = ((idx in map) == false);
         name = props.testname(idxfamily+" idx in map, initially absent", idx);
-        // AddTestCase(name, true, result);
+        // Assert.expectEq(name, true, result);
         success &&= result;
 
         if (props.get_throws_if_absent) {
             name = props.testname(idxfamily+" map[idx] throws if absent", idx);
             result = check_throws(function() { return map[idx] });
-            // AddTestCase(name, true, result);
+            // Assert.expectEq(name, true, result);
             success &&= result;
         } else {
             name = props.testname(idxfamily+" map[idx] default if absent", idx);
             result = (props.defaultval_if_absent == map[idx]);
-            // AddTestCase(name, true, result);
+            // Assert.expectEq(name, true, result);
             success &&= result;
         }
     }
@@ -158,11 +158,11 @@ function test_one_index(map, props, idx, idxfamily, absent, newval) {
 
     name = props.testname(idxfamily+" idx in map after assignment", idx);
     result = idx in map;
-    // AddTestCase(name, true, result);
+    // Assert.expectEq(name, true, result);
     success &&= result;
     name = props.testname(idxfamily+" map[idx] after assignment", idx);
     result = (newval == map[idx]);
-    // AddTestCase(name, true, result);
+    // Assert.expectEq(name, true, result);
     success &&= result;
 
     if (props.supports_delete) {
@@ -171,16 +171,16 @@ function test_one_index(map, props, idx, idxfamily, absent, newval) {
 
         name = props.testname(idxfamily+" idx in map, absent post-delete", idx);
         result = (false == (idx in map));
-        // AddTestCase(name, true, result);
+        // Assert.expectEq(name, true, result);
         if (props.get_throws_if_absent) {
             name = props.testname(idxfamily+" map[idx] throw post delete", idx);
             result = check_throws(function() { return map[idx] });
-            // AddTestCase(name, true, result);
+            // Assert.expectEq(name, true, result);
             success &&= result;
         } else {
             name = props.testname(idxfamily+" map[idx] deflt post delete", idx);
             result = (props.defaultval_if_absent == map[idx]);
-            // AddTestCase(name, true, result);
+            // Assert.expectEq(name, true, result);
             success &&= result;
         }
     }
@@ -209,7 +209,7 @@ function test_onebitset( map, props, absent ) { // aka 0*10*
             (guarded_test_one_index( map, props, idx, "onebitset", absent, 1 )
              && success);
     }
-    AddTestCase(props.name+" onebitset", true, success);
+    Assert.expectEq(props.name+" onebitset", true, success);
 }
 
 function test_onebitoff( map, props, absent ) { // aka 1*01*
@@ -220,7 +220,7 @@ function test_onebitoff( map, props, absent ) { // aka 1*01*
             (guarded_test_one_index( map, props, idx, "onebitoff", absent, 2 )
              && success);
     }
-    AddTestCase(props.name+" onebitoff", true, success);
+    Assert.expectEq(props.name+" onebitoff", true, success);
 }
 
 function test_runzerone( map, props, absent ) { // aka 0*1*
@@ -231,7 +231,7 @@ function test_runzerone( map, props, absent ) { // aka 0*1*
             (guarded_test_one_index( map, props, idx, "runzerone", absent, 3 )
              && success);
     }
-    AddTestCase(props.name+" runzerone", true, success);
+    Assert.expectEq(props.name+" runzerone", true, success);
 }
 
 function test_runonezer( map, props, absent ) { // aka 1*0*
@@ -242,7 +242,7 @@ function test_runonezer( map, props, absent ) { // aka 1*0*
             (guarded_test_one_index( map, props, idx, "runonezer", absent, 4 )
              && success);
     }
-    AddTestCase(props.name+" runonezer", true, success);
+    Assert.expectEq(props.name+" runonezer", true, success);
 }
 
 // Runs each of the above test familys, each family with a fresh map.
@@ -327,4 +327,3 @@ var vecNumMaker = function () { return new Vector.<Number>(vecLen, /*fixed=*/fal
 var vecNum_props = new VectorProps("new Vector.<Number>", vectorBits, 0, vecLen);
 composed_test(vecAnyMaker, vecNum_props);
 
-test();

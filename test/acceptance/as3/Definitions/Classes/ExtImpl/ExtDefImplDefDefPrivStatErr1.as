@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 
 class DefaultClass {
@@ -8,12 +9,11 @@ class DefaultClass {
   }
 }
 
-var SECTION = "RTE";
-var VERSION = "AS3";
-var TITLE = "accessing private static method outside of the class";
+// var SECTION = "RTE";
+// var VERSION = "AS3";
+// var TITLE = "accessing private static method outside of the class";
 var BUGNUMBER = "";
 
-startTest();
 
 var out = new DefaultClass();
 var error = "no error thrown";
@@ -24,8 +24,7 @@ try {
   error = e.toString();
 }
 
-AddTestCase("accessing private static method outside of the class, RTE #1069",
+Assert.expectEq("accessing private static method outside of the class, RTE #1069",
   "ReferenceError: Error #1069",
   error.substr(0,27));
 
-test();

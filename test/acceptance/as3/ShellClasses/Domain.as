@@ -6,6 +6,7 @@ package {
     import avmplus.Domain
     import avmplus.File
     import flash.utils.ByteArray
+import com.adobe.test.Assert;
 
     public class testclass1 {
         var desc="test class";
@@ -28,29 +29,27 @@ package {
     }
 
 
-    var SECTION = "domain";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test the Domain class";
+//     var SECTION = "domain";
+//     var VERSION = "as3";
+//     var TITLE   = "test the Domain class";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
-    AddTestCase("Domain currentDomain static getter is not null",
+    Assert.expectEq("Domain currentDomain static getter is not null",
       true,
       Domain.currentDomain!=null);
 
-    AddTestCase("Domain constructor is not null",
+    Assert.expectEq("Domain constructor is not null",
       true,
       new Domain(Domain.currentDomain)!=null);
 
     var domain=Domain.currentDomain;
     var cl:Class=domain.getClass("testclass1");
-    AddTestCase("Domain getClass returns correct class",
+    Assert.expectEq("Domain getClass returns correct class",
       testclass1,
       cl);
 
     var tc1:testclass1=new cl("test class");
-    AddTestCase("Domain getClass class can be constructed",
+    Assert.expectEq("Domain getClass class can be constructed",
       "test class",
       tc1.toString());
 
@@ -61,7 +60,7 @@ package {
         err1=e.toString();
     }
    
-    AddTestCase("Domain load non existant file",
+    Assert.expectEq("Domain load non existant file",
       "Error: Error #1500",
       err1.substring(0,18));
 
@@ -76,10 +75,9 @@ package {
     domain.load("testclass.abc");
     var cl2=domain.getClass("testutils.testclass2");
     var tc2=new cl2("test class2");
-    AddTestCase("Domain load filename, construct object",
+    Assert.expectEq("Domain load filename, construct object",
       "test class2",
       tc2.toString());
 
-    test();
 
 }

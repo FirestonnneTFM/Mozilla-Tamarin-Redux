@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'toString.js';
 
@@ -13,31 +14,27 @@ gTestfile = 'toString.js';
    Date:         March 13, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'RegExp: toString';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'RegExp: toString';
 
-writeHeaderToLog('Executing script: toString.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var re = new RegExp();
-testcases[index++] = new TestCase ( SECTION, "var re = new RegExp(); re.toString()",
+Assert.expectEq (  "var re = new RegExp(); re.toString()",
            '//', re.toString());
 
 // re = /.+/; re.toString();
 re = /.+/;
-testcases[index++] = new TestCase ( SECTION, "re = /.+/; re.toString()",
+Assert.expectEq (  "re = /.+/; re.toString()",
            '/.+/', re.toString());
 
 // re = /test/gi; re.toString()
 re = /test/gi;
-testcases[index++] = new TestCase ( SECTION, "re = /test/gi; re.toString()",
+Assert.expectEq (  "re = /test/gi; re.toString()",
            '/test/gi', re.toString());
 
 // re = /test2/ig; re.toString()
 re = /test2/ig;
-testcases[index++] = new TestCase ( SECTION, "re = /test2/ig; re.toString()",
+Assert.expectEq (  "re = /test2/ig; re.toString()",
            '/test2/gi', re.toString());
 
-test();

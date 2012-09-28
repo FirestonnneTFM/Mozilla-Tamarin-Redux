@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.3.4";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Properties of the Function Prototype Object";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.3.4";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Properties of the Function Prototype Object";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -17,15 +16,15 @@ function getTestCases() {
     
     var origFunctionToString = Function.prototype.toString;
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
          "var myfunc = Function.prototype; myfunc.toString = Object.prototype.toString; myfunc.toString()",
          true,
          (myfunc = Function.prototype, myfunc.toString = Object.prototype.toString, myfunc.toString()).indexOf("[object Function-")==0
          );
 
-    array[item++] = new TestCase( SECTION,  "Function.prototype.valueOf",       Object.prototype.valueOf,   Function.prototype.valueOf );
+    array[item++] = Assert.expectEq(   "Function.prototype.valueOf",       Object.prototype.valueOf,   Function.prototype.valueOf );
     
-    array[item++] = new TestCase( SECTION,  "Function.prototype()", undefined, Function.prototype() );
+    array[item++] = Assert.expectEq(   "Function.prototype()", undefined, Function.prototype() );
 
     var thisError = "no error";
     try{
@@ -33,7 +32,7 @@ function getTestCases() {
     }catch(e1:Error){
         thisError=e1.toString();
     }finally{
-        array[item++] = new TestCase( SECTION,  "Function.prototype(1,true,false,'string', new Date(),null)","no error",typeError(thisError) );
+        array[item++] = Assert.expectEq(   "Function.prototype(1,true,false,'string', new Date(),null)","no error",Utils.typeError(thisError) );
     }
   
     //restore

@@ -1,18 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = '12.1';
-    var VERSION = 'no version';
-    startTest();
-    var TITLE = 'Statement:block';
+//     var SECTION = '12.1';
+//     var VERSION = 'no version';
+//     var TITLE = 'Statement:block';
 
-    writeHeaderToLog('Executing script: block.as');
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -27,7 +25,7 @@ function getTestCases() {
     
     }
     
-    array[item++] = new TestCase( SECTION, "Block:{t}", 8, t);
+    array[item++] = Assert.expectEq(  "Block:{t}", 8, t);
 
     {
         var k = 100;
@@ -44,10 +42,10 @@ function getTestCases() {
 
     }
 
-    array[item++] = new TestCase( SECTION, "Block in which exception is thrown", "ReferenceError: Error #1065", referenceError(thisError));
+    array[item++] = Assert.expectEq(  "Block in which exception is thrown", "ReferenceError: Error #1065", Utils.referenceError(thisError));
 
-    array[item++] = new TestCase( SECTION, "Block in which exception is thrown",2, t);
-    array[item++] = new TestCase( SECTION, "Block in which exception is thrown",150, k);
+    array[item++] = Assert.expectEq(  "Block in which exception is thrown",2, t);
+    array[item++] = Assert.expectEq(  "Block in which exception is thrown",150, k);
        
     return array;
 }

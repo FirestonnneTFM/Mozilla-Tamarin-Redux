@@ -6,16 +6,44 @@
  *  Test trait definitions, function lookup by name,
  *  explicit function-level metadata
  */
-.script_info
+
+
+method_info
 {
-	init : .function_id(main)
-	//  trait_count accumulated and set by the assembler, 
-	//  can also be specified
-	traits: {
-	.trait{ kind:Trait_Slot name:x slot_id:1 type_name:String}
-	.trait{ kind:Trait_Slot name:foo }
-	.trait{ kind:Trait_Slot name:three slot_id:3 type_name:int}
+	name:foo
+	return_type:int
+	//param_count:2
+	//param_type:{int, int}
+
+}
+
+method_body_info {
+	
+	method: foo
+	
+	 
+		max_stack:4 local_count:3 init_scope_depth:1 max_scope_depth:2
+		 
+	code:
+	{
+		getlocal0
+		pushscope
+
+		findpropstrict COMPARE_STRICTEQ
+		pushstring "Access slot in this"
+		pushstring          "hello, x-land"
+		findpropstrict x
+		getslot             1  //  NOTE: lexical scoping!
+		callproperty COMPARE_STRICTEQ 3
+
+		returnvoid
 	}
+	/*
+	traits : {
+		trait { kind:Trait_Slot name:poot type_name:String slot_id:1}
+	}
+	*/
+	
 }
 
 /*
@@ -37,12 +65,12 @@ function main():*
 	callproperty START 1
 
 	getlocal0
-	newfunction         .function_id(foo)
-	setslot             .slot_id(foo)
+	newfunction         foo
+	setslot             3
 	pushstring          "hello, x-land"
 	getglobalscope
 	swap
-	setslot             .slot_id(x)
+	setslot             1
 
 	findpropstrict PASS
 	pushstring "Binding"
@@ -51,6 +79,8 @@ function main():*
 	findpropstrict END
 	callproperty END 0
 
+/*
+//unimplemented
 	findpropstrict START
 	pushstring "Call bound function"
 	callproperty START 1
@@ -58,42 +88,24 @@ function main():*
 	debugline 9
 	findpropstrict      foo
 	callproperty        foo 0
+	
 	coerce_a
 
 	findpropstrict END
 	callproperty END 0
-
+*/
 	returnvalue
 }
 
 
-.method_info
+script_info
 {
-	return_type:int
-	//param_count:2
-	//param_type:{int, int}
-	name:foo
-}
-
-.method_body_info {
-	max_stack:4 local_count:3 init_scope_depth:1 max_scope_depth:2 
-	method: .function_id(foo)
-	code:
-	{
-		getlocal0
-		pushscope
-
-		findpropstrict COMPARE_STRICTEQ
-		pushstring "Access slot in this"
-		pushstring          "hello, x-land"
-		findpropstrict x
-		getslot             .slot_id(x)  //  NOTE: lexical scoping!
-		callproperty COMPARE_STRICTEQ 3
-
-		returnvoid
-	}
-	traits : {
-		.trait { kind:Trait_Slot name:poot type_name:String slot_id:1}
+	init : main
+	//  trait_count accumulated and set by the assembler, 
+	//  can also be specified
+	traits: {
+	trait{ kind:Trait_Slot name:x slot_id:1 type_name:String}
+	trait{ kind:Trait_Slot name:foo slot_id:2}
+	trait{ kind:Trait_Slot name:three slot_id:3 type_name:int}
 	}
 }
-

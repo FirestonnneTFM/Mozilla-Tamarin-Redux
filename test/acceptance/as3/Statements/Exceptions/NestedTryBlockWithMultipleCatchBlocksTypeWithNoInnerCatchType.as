@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions"; // provide a document reference (ie, ECMA section)
-var VERSION = "AS3"; // Version of JavaScript or ECMA
-var TITLE = "Testing try block with multiple catch blocks, the first catch block catching the type error"; // Provide ECMA section title or a description
+// var SECTION = "Definitions"; // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3"; // Version of JavaScript or ECMA
+// var TITLE = "Testing try block with multiple catch blocks, the first catch block catching the type error"; // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest(); // leave this alone
 
 thisError = "no error";
 thisError1 = "no error";
@@ -48,13 +48,12 @@ try {
     } catch(eo7: Error) {
         thisError1 = "This is outer Error:" + eo7.toString();
     } finally {
-        AddTestCase("Testing Nested try block with multiple catch block inside the first catch block of the outer try block", "This is outer finally:This is outer reference error:ReferenceError", "This is outer finally:" + thisError1 + "");
+        Assert.expectEq("Testing Nested try block with multiple catch block inside the first catch block of the outer try block", "This is outer finally:This is outer reference error:ReferenceError", "This is outer finally:" + thisError1 + "");
         
     }
 } catch (typeError:TypeError) {
     // catch the inner typeerror instead of letting it go uncaught
-    AddTestCase("Inner TypeError thrown gets caught", "TypeError", typeError.toString());
+    Assert.expectEq("Inner TypeError thrown gets caught", "TypeError", typeError.toString());
 }
 
-test();       // leave this alone.  this executes the test cases and
 // displays results.

@@ -3,14 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import voidEvaluation.*
+import com.adobe.test.Assert;
 
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  // Version of JavaScript or ECMA
-var TITLE   = "Function Return Type";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";  // Version of JavaScript or ECMA
+// var TITLE   = "Function Return Type";       // Provide ECMA section title or a description
 var BUGNUMBER = "108487";
 
-startTest();                // leave this alone
 
 var TESTOBJ = new TestObj();
 
@@ -22,11 +22,10 @@ try {
     result = e1.toString();
 }
 
-AddTestCase("Assign function that returns void", "no exception",  result);
+Assert.expectEq("Assign function that returns void", "no exception",  result);
 
-AddTestCase("Test for g being called", "hello from g", TESTOBJ.varG);
+Assert.expectEq("Test for g being called", "hello from g", TESTOBJ.varG);
 
-AddTestCase("Test for f being called", "hello from f", TESTOBJ.varF);
+Assert.expectEq("Test for f being called", "hello from f", TESTOBJ.varF);
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

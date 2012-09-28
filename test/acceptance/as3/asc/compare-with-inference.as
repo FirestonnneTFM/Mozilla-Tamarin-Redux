@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 // Bugzilla 708300
 
-var SECTION = "ASC";
-var VERSION = "AS3";
-var TITLE   = "Strict: Type inference feeds into comparison";
+// var SECTION = "ASC";
+// var VERSION = "AS3";
+// var TITLE   = "Strict: Type inference feeds into comparison";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // -- begin test
 
@@ -37,6 +36,5 @@ function f()
 
 // -- end test
 
-AddTestCase("Trivially true", true, true);
+Assert.expectEq("Trivially true", true, true);
 
-test();

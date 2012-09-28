@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 // Bugzilla 705830
 
-var SECTION = "ASC";
-var VERSION = "AS3";
-var TITLE   = "Strict: Computed type of typeof";
+// var SECTION = "ASC";
+// var VERSION = "AS3";
+// var TITLE   = "Strict: Computed type of typeof";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // -- begin test
 
@@ -23,6 +22,5 @@ var x:String = typeof(foo);
 
 // -- end test
 
-AddTestCase("Trivially true", true, true);
+Assert.expectEq("Trivially true", true, true);
 
-test();

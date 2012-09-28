@@ -1,8 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
+import com.adobe.test.Assert;
 
 namespace ns = "some_ns"
 
@@ -32,11 +33,9 @@ results.push({expected: false, actual: System.isGlobal("some_string")});
 results.push({expected: false, actual: System.isGlobal({object_literal: 0})});
 results.push({expected: false, actual: System.isGlobal([1,2,3])});
 
-startTest();
 for (var i in results)
 {
     var o = results[i]
-    AddTestCase("test_"+i, o.expected, o.actual);
+    Assert.expectEq("test_"+i, o.expected, o.actual);
 }
-test();
 

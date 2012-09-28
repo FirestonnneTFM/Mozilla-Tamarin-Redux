@@ -6,22 +6,16 @@
   *  Testcase uses desuguared script and function declarations, 
   *  finds, sets, and reads a slot on the global object.
   */
-.script_info 
-{
-	init : .function_id(init_method) 
-	traits : {
-		.trait { kind : Trait_Slot name:zuul slot_id:1 type_name:String }
-	}
-}
 
-.method_info {
+
+method_info {
 	name:init_method
 	return_type:int
 	param_type:{}
 }
 
-.method_body_info {
-	method: .function_id(init_method)
+method_body_info {
+	method: init_method
     local_count:0
 	max_stack:4
 	init_scope_depth:0
@@ -49,5 +43,13 @@
 		callproperty END 0
 		
 		returnvalue
+	}
+}
+
+script_info 
+{
+	init : init_method 
+	traits : {
+		trait { kind : Trait_Slot name:zuul slot_id:1 type_name:String }
 	}
 }

@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "";
-var VERSION = "AS3";
-var TITLE   = "bz bug 708996";
+// var SECTION = "";
+// var VERSION = "AS3";
+// var TITLE   = "bz bug 708996";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 class Float4Matrix
 {
@@ -46,4 +44,3 @@ AddStrictTestCase("fm4.row1", float4(0,3,0,0), f4m.row1);
 AddStrictTestCase("fm4.row2", float4(0,0,0.4000000059604645,0), f4m.row2);
 AddStrictTestCase("fm4.row3", float4(0,0,0,1), f4m.row3);
 
-test();

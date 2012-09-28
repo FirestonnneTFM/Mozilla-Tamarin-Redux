@@ -3,17 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import OneOptArgFunction.*
+import com.adobe.test.Assert;
 
 function returnStringNoPackage(s:String = "outside package and outside class",... rest):String { return s; }
 function returnBooleanNoPackage(b:Boolean = true,... rest):Boolean { return b; }
 function returnNumberNoPackage(n:Number = 10,... rest):Number { return n; }
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  // Version of JavaScript or ECMA
-var TITLE   = "Function Body Parameter/Result Type";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";  // Version of JavaScript or ECMA
+// var TITLE   = "Function Body Parameter/Result Type";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 var TESTOBJ = new TestObj();
 var TESTOBJ1 = new OneOptArgFunctionClass();
@@ -22,46 +22,45 @@ var b:Boolean = new Boolean(true);
 
 //Optional String argument
 // inside class inside package
-AddTestCase( "TESTOBJ.returnString()", "inside class inside package", TESTOBJ.returnString() );
+Assert.expectEq( "TESTOBJ.returnString()", "inside class inside package", TESTOBJ.returnString() );
 
 // inside package outside of class
-AddTestCase( "returnString()", "inside package outside of class", returnString() );
+Assert.expectEq( "returnString()", "inside package outside of class", returnString() );
 
 // outside package inside class
-AddTestCase( "TESTOBJ1.returnString()", "outside package inside class", TESTOBJ1.returnString() );
+Assert.expectEq( "TESTOBJ1.returnString()", "outside package inside class", TESTOBJ1.returnString() );
 
 // outside package and outside class
-AddTestCase( "returnStringNoPackage()", "outside package and outside class", returnStringNoPackage("outside package and outside class",true) );
+Assert.expectEq( "returnStringNoPackage()", "outside package and outside class", returnStringNoPackage("outside package and outside class",true) );
 
 
 
 //Optional Boolean argument
 // inside class inside package
-AddTestCase( "TESTOBJ.returnBoolean()", true, TESTOBJ.returnBoolean() );
+Assert.expectEq( "TESTOBJ.returnBoolean()", true, TESTOBJ.returnBoolean() );
 
 // inside package outside of class
-AddTestCase( "returnBoolean()", true, returnBoolean() );
+Assert.expectEq( "returnBoolean()", true, returnBoolean() );
 
 // outside package inside class
-AddTestCase( "TESTOBJ1.returnBoolean()", true, TESTOBJ1.returnBoolean() );
+Assert.expectEq( "TESTOBJ1.returnBoolean()", true, TESTOBJ1.returnBoolean() );
 
 // outside package and outside class
-AddTestCase( "returnBooleanNoPackage()", true, returnBooleanNoPackage() );
+Assert.expectEq( "returnBooleanNoPackage()", true, returnBooleanNoPackage() );
 
 
 //Optional Number argument
 // inside class inside package
-AddTestCase( "TESTOBJ.returnNumber()", 10, TESTOBJ.returnNumber() );
+Assert.expectEq( "TESTOBJ.returnNumber()", 10, TESTOBJ.returnNumber() );
 
 // inside package outside of class
-AddTestCase( "returnNumber()", 12, returnNumber() );
+Assert.expectEq( "returnNumber()", 12, returnNumber() );
 
 // outside package inside class
-AddTestCase( "TESTOBJ1.returnNumber()", 9, TESTOBJ1.returnNumber(9,10) );
+Assert.expectEq( "TESTOBJ1.returnNumber()", 9, TESTOBJ1.returnNumber(9,10) );
 
 // outside package and outside class
-AddTestCase( "returnNumberNoPackage()", 11, returnNumberNoPackage(11,"Hello") );
+Assert.expectEq( "returnNumberNoPackage()", 11, returnNumberNoPackage(11,"Hello") );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-259935.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'document.all can be easily detected';
 var actual = '';
 var expect = 'not detected';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 if (typeof document == 'undefined')
 {
@@ -32,7 +32,7 @@ if (f.ie) {
   actual = 'not detected';
 }
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 f = {ie: document.all};
 
@@ -42,6 +42,5 @@ if (f.ie) {
   actual = 'not detected';
 }
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

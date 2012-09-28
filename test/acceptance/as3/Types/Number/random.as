@@ -12,29 +12,28 @@ function takes no arguments.
 */
 
 import avmplus.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "15.8.2.14";
-var VERSION = "AS3";
-var TITLE   = "public native static function random ():Number;";
-
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
+// var SECTION = "15.8.2.14";
+// var VERSION = "AS3";
+// var TITLE   = "public native static function random ():Number;";
 
 
-AddTestCase("Number.random() returns a Number", "Number", getQualifiedClassName(Number.random()));
-AddTestCase("Number.random() length is 0", 0, Number.random.length);
-AddErrorTest("Number.random() with args", ARGUMENTERROR+1063,  function(){ Number.random(12); });
+
+Assert.expectEq("Number.random() returns a Number", "Number", getQualifiedClassName(Number.random()));
+Assert.expectEq("Number.random() length is 0", 0, Number.random.length);
+Assert.expectError("Number.random() with args", Utils.ARGUMENTERROR+1063,  function(){ Number.random(12); });
 
 var myRandom:Number;
 for (var x:int = 0; x < 1000; x++)
 {
     myRandom = Number.random();
     if ( myRandom < 0)
-        AddTestCase("Number.random() illegal value returned", "<0", myRandom);
+        Assert.expectEq("Number.random() illegal value returned", "<0", myRandom);
     if ( myRandom > 1)
-        AddTestCase("Number.random() illegal value returned", ">1", myRandom);
+        Assert.expectEq("Number.random() illegal value returned", ">1", myRandom);
 }
 
 
-test();
 

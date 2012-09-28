@@ -11,18 +11,18 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION:String = "mops";
-    var VERSION:String = "AS3";
-    var TITLE:String  = "li8";
-
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
+//     var SECTION:String = "mops";
+//     var VERSION:String = "AS3";
+//     var TITLE:String  = "li8";
 
 
-    AddErrorTest("li8(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+
+    Assert.expectError("li8(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ LI8(Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
 
@@ -30,9 +30,9 @@ package {
     // Get a handle to the domainMemory after it is initialized
     var mem:ByteArray = Domain.currentDomain.domainMemory;
 
-    AddErrorTest("li8(-1)", RANGEERROR+1506, function(){ LI8(-1); });
-    AddErrorTest("li8(mem.length)", RANGEERROR+1506, function(){ LI8(mem.length); });
-    AddTestCase("li8(mem.length-1)", 0, LI8(mem.length-1));
+    Assert.expectError("li8(-1)", Utils.RANGEERROR+1506, function(){ LI8(-1); });
+    Assert.expectError("li8(mem.length)", Utils.RANGEERROR+1506, function(){ LI8(mem.length); });
+    Assert.expectEq("li8(mem.length-1)", 0, LI8(mem.length-1));
 
     testsi8();
     testsi16();
@@ -45,7 +45,6 @@ package {
     testwriteFloat();
     testwriteDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -70,26 +69,26 @@ package {
         clearMemory();
         SI8(0x7F, 0);
         SI8(0x80, 1);
-        AddTestCase("li8 load byte written by si8(0x7F)", 0x7F, LI8(0));
-        AddTestCase("li8 load byte written by si8(0x80)", 0x80, LI8(1));
+        Assert.expectEq("li8 load byte written by si8(0x7F)", 0x7F, LI8(0));
+        Assert.expectEq("li8 load byte written by si8(0x80)", 0x80, LI8(1));
     }
 
     function testsi16():void
     {
         clearMemory();
         SI16(0x80DE, 0);
-        AddTestCase("li8 load 1st byte written by si16(0x80DE)", 0x80, LI8(1));
-        AddTestCase("li8 load 2nd byte written by si16(0x80De)", 0xDE, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by si16(0x80DE)", 0x80, LI8(1));
+        Assert.expectEq("li8 load 2nd byte written by si16(0x80De)", 0xDE, LI8(0));
     }
 
     function testsi32():void
     {
         clearMemory();
         SI32(0x80DE32F1, 0);
-        AddTestCase("li8 load 1st byte written by si32(0x80DE32F1)", 0x80, LI8(3));
-        AddTestCase("li8 load 2nd byte written by si32(0x80DE32F1)", 0xDE, LI8(2));
-        AddTestCase("li8 load 3rd byte written by si32(0x80DE32F1)", 0x32, LI8(1));
-        AddTestCase("li8 load 4th byte written by si32(0x80DE32F1)", 0xF1, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by si32(0x80DE32F1)", 0x80, LI8(3));
+        Assert.expectEq("li8 load 2nd byte written by si32(0x80DE32F1)", 0xDE, LI8(2));
+        Assert.expectEq("li8 load 3rd byte written by si32(0x80DE32F1)", 0x32, LI8(1));
+        Assert.expectEq("li8 load 4th byte written by si32(0x80DE32F1)", 0xF1, LI8(0));
     }
 
     function testsf32():void
@@ -109,10 +108,10 @@ package {
          *****************************************/
         clearMemory();
         SF32(12.375, 0);
-        AddTestCase("li8 load 1st byte written by sf32(12.375)", 0x41, LI8(3));
-        AddTestCase("li8 load 2nd byte written by sf32(12.375)", 0x46, LI8(2));
-        AddTestCase("li8 load 3rd byte written by sf32(12.375)", 0x00, LI8(1));
-        AddTestCase("li8 load 4th byte written by sf32(12.375)", 0x00, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by sf32(12.375)", 0x41, LI8(3));
+        Assert.expectEq("li8 load 2nd byte written by sf32(12.375)", 0x46, LI8(2));
+        Assert.expectEq("li8 load 3rd byte written by sf32(12.375)", 0x00, LI8(1));
+        Assert.expectEq("li8 load 4th byte written by sf32(12.375)", 0x00, LI8(0));
     }
 
     function testsf64():void
@@ -129,14 +128,14 @@ package {
          *****************************************/
         clearMemory();
         SF64(1.0241024102410242048E19, 0);
-        AddTestCase("li8 load 1st byte written by sf64(10241024102410241024)", 0x43, LI8(7));
-        AddTestCase("li8 load 2nd byte written by sf64(10241024102410241024)", 0xE1, LI8(6));
-        AddTestCase("li8 load 3rd byte written by sf64(10241024102410241024)", 0xC3, LI8(5));
-        AddTestCase("li8 load 4th byte written by sf64(10241024102410241024)", 0xED, LI8(4));
-        AddTestCase("li8 load 5th byte written by sf64(10241024102410241024)", 0xA5, LI8(3));
-        AddTestCase("li8 load 6th byte written by sf64(10241024102410241024)", 0x2E, LI8(2));
-        AddTestCase("li8 load 7th byte written by sf64(10241024102410241024)", 0x0C, LI8(1));
-        AddTestCase("li8 load 8th byte written by sf64(10241024102410241024)", 0x09, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by sf64(10241024102410241024)", 0x43, LI8(7));
+        Assert.expectEq("li8 load 2nd byte written by sf64(10241024102410241024)", 0xE1, LI8(6));
+        Assert.expectEq("li8 load 3rd byte written by sf64(10241024102410241024)", 0xC3, LI8(5));
+        Assert.expectEq("li8 load 4th byte written by sf64(10241024102410241024)", 0xED, LI8(4));
+        Assert.expectEq("li8 load 5th byte written by sf64(10241024102410241024)", 0xA5, LI8(3));
+        Assert.expectEq("li8 load 6th byte written by sf64(10241024102410241024)", 0x2E, LI8(2));
+        Assert.expectEq("li8 load 7th byte written by sf64(10241024102410241024)", 0x0C, LI8(1));
+        Assert.expectEq("li8 load 8th byte written by sf64(10241024102410241024)", 0x09, LI8(0));
     }
 
     function testwriteByte():void
@@ -148,10 +147,10 @@ package {
         mem.writeByte(128);
         mem.writeByte(255);
 
-        AddTestCase("li8 load byte written by writeByte(0)", 0, LI8(0));
-        AddTestCase("li8 load byte written by writeByte(127)", 127, LI8(1));
-        AddTestCase("li8 load byte written by writeByte(128)", 128, LI8(2));
-        AddTestCase("li8 load byte written by writeByte(255)", 255, LI8(3));
+        Assert.expectEq("li8 load byte written by writeByte(0)", 0, LI8(0));
+        Assert.expectEq("li8 load byte written by writeByte(127)", 127, LI8(1));
+        Assert.expectEq("li8 load byte written by writeByte(128)", 128, LI8(2));
+        Assert.expectEq("li8 load byte written by writeByte(255)", 255, LI8(3));
     }
 
     function testwriteBoolean():void
@@ -161,8 +160,8 @@ package {
         mem.writeBoolean(true);
         mem.writeBoolean(false);
 
-        AddTestCase("li8 load byte written by writeBoolean(true)", 1, LI8(0));
-        AddTestCase("li8 load byte written by writeBoolean(false)", 0, LI8(1));
+        Assert.expectEq("li8 load byte written by writeBoolean(true)", 1, LI8(0));
+        Assert.expectEq("li8 load byte written by writeBoolean(false)", 0, LI8(1));
     }
 
     function testwriteInt():void
@@ -178,10 +177,10 @@ package {
         mem.position = 0;
         mem.writeInt(2147473647);
 
-        AddTestCase("li8 load 1st byte written by writeInt(2147473647)", 0x7F, LI8(3));
-        AddTestCase("li8 load 2nd byte written by writeInt(2147473647)", 0xFF, LI8(2));
-        AddTestCase("li8 load 3rd byte written by writeInt(2147473647)", 0xD8, LI8(1));
-        AddTestCase("li8 load 4th byte written by writeInt(2147473647)", 0xEF, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by writeInt(2147473647)", 0x7F, LI8(3));
+        Assert.expectEq("li8 load 2nd byte written by writeInt(2147473647)", 0xFF, LI8(2));
+        Assert.expectEq("li8 load 3rd byte written by writeInt(2147473647)", 0xD8, LI8(1));
+        Assert.expectEq("li8 load 4th byte written by writeInt(2147473647)", 0xEF, LI8(0));
     }
 
     function testwriteFloat():void
@@ -202,10 +201,10 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeFloat(12.375);
-        AddTestCase("li8 load 1st byte written by writeFloat(12.375)", 0x41, LI8(3));
-        AddTestCase("li8 load 2nd byte written by writeFloat(12.375)", 0x46, LI8(2));
-        AddTestCase("li8 load 3rd byte written by writeFloat(12.375)", 0x00, LI8(1));
-        AddTestCase("li8 load 4th byte written by writeFloat(12.375)", 0x00, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by writeFloat(12.375)", 0x41, LI8(3));
+        Assert.expectEq("li8 load 2nd byte written by writeFloat(12.375)", 0x46, LI8(2));
+        Assert.expectEq("li8 load 3rd byte written by writeFloat(12.375)", 0x00, LI8(1));
+        Assert.expectEq("li8 load 4th byte written by writeFloat(12.375)", 0x00, LI8(0));
     }
 
 
@@ -224,14 +223,14 @@ package {
         clearMemory();
         mem.position = 0;
         mem.writeDouble(1.0241024102410242048E19);
-        AddTestCase("li8 load 1st byte written by writeDouble(1.0241024102410242048E19)", 0x43, LI8(7));
-        AddTestCase("li8 load 2nd byte written by writeDouble(1.0241024102410242048E19)", 0xE1, LI8(6));
-        AddTestCase("li8 load 3rd byte written by writeDouble(1.0241024102410242048E19)", 0xC3, LI8(5));
-        AddTestCase("li8 load 4th byte written by writeDouble(1.0241024102410242048E19)", 0xED, LI8(4));
-        AddTestCase("li8 load 5th byte written by writeDouble(1.0241024102410242048E19)", 0xA5, LI8(3));
-        AddTestCase("li8 load 6th byte written by writeDouble(1.0241024102410242048E19)", 0x2E, LI8(2));
-        AddTestCase("li8 load 7th byte written by writeDouble(1.0241024102410242048E19)", 0x0C, LI8(1));
-        AddTestCase("li8 load 8th byte written by writeDouble(1.0241024102410242048E19)", 0x09, LI8(0));
+        Assert.expectEq("li8 load 1st byte written by writeDouble(1.0241024102410242048E19)", 0x43, LI8(7));
+        Assert.expectEq("li8 load 2nd byte written by writeDouble(1.0241024102410242048E19)", 0xE1, LI8(6));
+        Assert.expectEq("li8 load 3rd byte written by writeDouble(1.0241024102410242048E19)", 0xC3, LI8(5));
+        Assert.expectEq("li8 load 4th byte written by writeDouble(1.0241024102410242048E19)", 0xED, LI8(4));
+        Assert.expectEq("li8 load 5th byte written by writeDouble(1.0241024102410242048E19)", 0xA5, LI8(3));
+        Assert.expectEq("li8 load 6th byte written by writeDouble(1.0241024102410242048E19)", 0x2E, LI8(2));
+        Assert.expectEq("li8 load 7th byte written by writeDouble(1.0241024102410242048E19)", 0x0C, LI8(1));
+        Assert.expectEq("li8 load 8th byte written by writeDouble(1.0241024102410242048E19)", 0x09, LI8(0));
 
     }
 

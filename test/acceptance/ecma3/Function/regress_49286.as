@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 2001-07-10
  *
@@ -13,22 +14,19 @@
  * 4) We should catch the error!
  */
 //-------------------------------------------------------------------------------------------------
-    var SECTION = "regress_49286";
-    var VERSION = "";
+//     var SECTION = "regress_49286";
+//     var VERSION = "";
     var cnErrorCaught = 'Error caught';
     var cnErrorNotCaught = 'Error NOT caught';
     var cnGoodSyntax = '1==2';
     var cnBadSyntax = '1=2';
 
-    startTest();
 
-    var TITLE   = "Invoking try...catch through Function.call";
-    var bug = 49286;
+//     var TITLE   = "Invoking try...catch through Function.call";
+//     var bug = 49286;
 
-    writeHeaderToLog( SECTION + " " + TITLE);
 
     var testcases = getTestCases();
-    test();
     
 
 function getTestCases() {
@@ -50,13 +48,13 @@ function getTestCases() {
     actual = f.call(obj);
     expect = cnErrorCaught;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     status = 'Section B of test: indirect call of f';
     actual = g.call(obj);
     expect = cnErrorCaught;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     return array;
 }

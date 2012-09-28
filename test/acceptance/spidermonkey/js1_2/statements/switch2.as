@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'switch2.js';
 
@@ -15,14 +16,11 @@ gTestfile = 'switch2.js';
    Date:         July 31, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-var TITLE   = 'statements: switch';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE   = 'statements: switch';
 var BUGNUMBER="323626";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog("Executing script: switch2.js");
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // test defaults not at the end; regression test for a bug that
 // nearly made it into 4.06
@@ -39,19 +37,19 @@ function f0(i) {
   }
   return "";
 }
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f0("a"), "ab*");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f0("b"), "ab*");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f0("*"), "ab*");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f0("c"), "c");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f0("d"), "d");
 
 function f1(i) {
@@ -68,19 +66,19 @@ function f1(i) {
   return "";
 }
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f1("a"), "ab*");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f1("b"), "ab*");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f1("*"), "ab*");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f1("c"), "c");
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f1("d"), "d");
 
 // Switch on integer; will use TABLESWITCH opcode in C engine
@@ -96,23 +94,23 @@ function f2(i) {
   return 3;
 }
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f2(0), 1);
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f2(1), 1);
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f2(2), 2);
 
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          f2(3), 3);
 
 // empty switch: make sure expression is evaluated
 var se = 0;
 switch (se = 1) {
 }
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          se, 1);
 
 // only default
@@ -121,7 +119,7 @@ switch (se) {
 default:
   se = 1;
 }
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          se, 1);
 
 // in loop, break should only break out of switch
@@ -134,7 +132,7 @@ for (var i=0; i < 2; i++) {
   }
   se = 1;
 }
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          se, 1);
 
 // test "fall through"
@@ -148,11 +146,10 @@ case 1:
   se++;
   break;
 }
-testcases[index++] = new TestCase(SECTION, 'switch statement',
+Assert.expectEq( 'switch statement',
          se, 2);
 print("hi");
 
-test();
 
 // Needed: tests for evaluation time of case expressions.
 // This issue was under debate at ECMA, so postponing for now.

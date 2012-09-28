@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.4.8-3";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.prototype.split";
+//     var SECTION = "15.5.4.8-3";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.prototype.split";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -21,70 +19,70 @@ function getTestCases() {
 
     // this.toString is the empty string.
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); s.split().length",
                                     1,
                                     (s = new String(), s.split().length ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); s.split()[0]",
                                     "",
                                     (s = new String(), s.split()[0] ) );
 
     // this.toString() is the empty string, separator is specified.
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); s.split('').length",
                                     1,
                                     (s = new String(), s.split('').length ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(); s.split(' ').length",
                                     1,
                                     (s = new String(), s.split(' ').length ) );
 
     // this to string is " "
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(' '); s.split().length",
                                     1,
                                     (s = new String(' '), s.split().length ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(' '); s.split()[0]",
                                     " ",
                                     (s = new String(' '), s.split()[0] ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(' '); s.split('').length",
                                     1,
                                     (s = new String(' '), s.split('').length ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(' '); s.split('')[0]",
                                     " ",
                                     (s = new String(' '), s.split('')[0] ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(' '); s.split(' ').length",
                                     2,
                                     (s = new String(' '), s.split(' ').length ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var s = new String(' '); s.split(' ')[0]",
                                     "",
                                     (s = new String(' '), s.split(' ')[0] ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "\"\".split(\"\").length",
                                     1,
                                     ("".split("")).length );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "\"\".split(\"x\").length",
                                     1,
                                     ("".split("x")).length );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "\"\".split(\"x\")[0]",
                                     "",
                                     ("".split("x"))[0] );

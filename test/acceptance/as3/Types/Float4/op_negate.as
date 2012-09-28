@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "5.1.3";
-var VERSION = "AS3";
-var TITLE   = "The negate operatror -";
+// var SECTION = "5.1.3";
+// var VERSION = "AS3";
+// var TITLE   = "The negate operatror -";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt4:float4 = new float4(1f);
 flt4 = -flt4;
@@ -41,8 +40,7 @@ AddStrictTestCase("unary minus on float4(-0f).z sign check", float.POSITIVE_INFI
 AddStrictTestCase("unary minus on float4(-0f).w sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/flt4.w);
 
 var u = -flt4;
-AddTestCase("returns a float4", "float4", typeof(u));
+Assert.expectEq("returns a float4", "float4", typeof(u));
 
 
-test();
 

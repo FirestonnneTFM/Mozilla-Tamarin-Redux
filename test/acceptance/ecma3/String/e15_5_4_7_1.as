@@ -1,18 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.5.4.7-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.protoype.lastIndexOf";
+import com.adobe.test.Assert;
+//     var SECTION = "15.5.4.7-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.protoype.lastIndexOf";
 
     var TEST_STRING = new String( " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" );
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
-    writeLineToLog( "TEST_STRING = new String(\" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\")" );
+//     writeLineToLog( "TEST_STRING = new String(\" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\")" );
 
     var testcases = getTestCases();
-    test();
 
 
 function getTestCases() {
@@ -20,28 +18,28 @@ function getTestCases() {
     var j = 0;
 
     for ( k = 0, i = 0x0021; i < 0x007e; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
                                  "String.lastIndexOf(" +String.fromCharCode(i)+ ", 0)",
                                  -1,
                                  TEST_STRING.lastIndexOf( String.fromCharCode(i), 0 ) );
     }
 
     for ( k = 0, i = 0x0020; i < 0x007e; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
                                  "String.lastIndexOf("+String.fromCharCode(i)+ ", "+ k +")",
                                  k,
                                  TEST_STRING.lastIndexOf( String.fromCharCode(i), k ) );
     }
 
     for ( k = 0, i = 0x0020; i < 0x007e; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
                                  "String.lastIndexOf("+String.fromCharCode(i)+ ", "+k+1+")",
                                  k,
                                  TEST_STRING.lastIndexOf( String.fromCharCode(i), k+1 ) );
     }
 
     for ( k = 9, i = 0x0021; i < 0x007d; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
 
                                  "String.lastIndexOf("+(String.fromCharCode(i) +
                                                     String.fromCharCode(i+1)+
@@ -55,7 +53,7 @@ function getTestCases() {
     }
 
     for ( k = 0, i = 0x0020; i < 0x007d; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
                                  "String.lastIndexOf("+(String.fromCharCode(i) +
                                                     String.fromCharCode(i+1)+
                                                     String.fromCharCode(i+2)) +", "+ k +")",
@@ -66,7 +64,7 @@ function getTestCases() {
                                                        k ) );
     }
     for ( k = 0, i = 0x0020; i < 0x007d; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
                                  "String.lastIndexOf("+(String.fromCharCode(i) +
                                                     String.fromCharCode(i+1)+
                                                     String.fromCharCode(i+2)) +", "+ k+1 +")",
@@ -77,7 +75,7 @@ function getTestCases() {
                                                        k+1 ) );
     }
     for ( k = 0, i = 0x0020; i < 0x007d; i++, j++, k++ ) {
-        array[j] = new TestCase( SECTION,
+        array[j] = Assert.expectEq( 
                                  "String.lastIndexOf("+
                                             (String.fromCharCode(i) +
                                             String.fromCharCode(i+1)+
@@ -90,9 +88,9 @@ function getTestCases() {
                                                        k-1 ) );
     }
 
-    array[j++] = new TestCase( SECTION,  "String.lastIndexOf(" +TEST_STRING + ", 0 )", 0, TEST_STRING.lastIndexOf( TEST_STRING, 0 ) );
-//    array[j++] = new TestCase( SECTION,  "String.lastIndexOf(" +TEST_STRING + ", 1 )", 0, TEST_STRING.lastIndexOf( TEST_STRING, 1 ));
-    array[j++] = new TestCase( SECTION,  "String.lastIndexOf(" +TEST_STRING + ")", 0, TEST_STRING.lastIndexOf( TEST_STRING ));
+    array[j++] = Assert.expectEq(   "String.lastIndexOf(" +TEST_STRING + ", 0 )", 0, TEST_STRING.lastIndexOf( TEST_STRING, 0 ) );
+//    array[j++] = Assert.expectEq(   "String.lastIndexOf(" +TEST_STRING + ", 1 )", 0, TEST_STRING.lastIndexOf( TEST_STRING, 1 ));
+    array[j++] = Assert.expectEq(   "String.lastIndexOf(" +TEST_STRING + ")", 0, TEST_STRING.lastIndexOf( TEST_STRING ));
 
     return array;
 }

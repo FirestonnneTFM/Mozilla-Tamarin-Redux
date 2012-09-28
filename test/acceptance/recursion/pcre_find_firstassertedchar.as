@@ -2,16 +2,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 //-----------------------------------------------------------------------------
 
-var SECTION = "pcre_is_startline";
-var VERSION = "";
-var TITLE   = "Shouldn't crash on regexps with many nested parentheses";
+// var SECTION = "pcre_is_startline";
+// var VERSION = "";
+// var TITLE   = "Shouldn't crash on regexps with many nested parentheses";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases()
 {
@@ -60,15 +58,15 @@ function getTestCases()
 
         if (doBackRefs) {
         var res = strAlt1.search(re);
-        array[item++] = new TestCase(SECTION, "strAlt1.search(re)", -1, res);
+        array[item++] = Assert.expectEq( "strAlt1.search(re)", -1, res);
         } else {
         var res = strAlt1.search(re);
-        array[item++] = new TestCase(SECTION, "strAlt1.search(re)", 0, res);
+        array[item++] = Assert.expectEq( "strAlt1.search(re)", 0, res);
         }
     }
     catch (e: Error) {
         if (e.message.match("#1023"))
-        array[item++] = new TestCase(SECTION, "strAlt1.search(re)", 0, 0);
+        array[item++] = Assert.expectEq( "strAlt1.search(re)", 0, 0);
         else
         throw(e);
     }

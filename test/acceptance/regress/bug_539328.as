@@ -10,8 +10,8 @@ package {
     }
 }
 import avmplus.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 const x = 20/2;
 
@@ -26,6 +26,5 @@ var expected:XML = <type name="IBar" base="Class" isDynamic="true" isFinal="true
 
 
 
-AddTestCase("Bug 539328: describeType() omits interface methods", expected, describeType(IBar, FLASH10_FLAGS));
+Assert.expectEq("Bug 539328: describeType() omits interface methods", expected.toString(), describeType(IBar, FLASH10_FLAGS).toString());
 
-test();

@@ -8,12 +8,10 @@
 Returns the absolute value of x; the result has the same magnitude as x but has positive sign.
 */
 
-var SECTION = "4.5.15";
-var VERSION = "AS3";
-var TITLE   = "public function abs(x:float):float";
+// var SECTION = "4.5.15";
+// var VERSION = "AS3";
+// var TITLE   = "public function abs(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.abs(param); }
 
@@ -60,5 +58,4 @@ AddStrictTestCase("float.abs(-float.MAX_VALUE) check()", float.MAX_VALUE, check(
 AddStrictTestCase("float.abs(float.MIN_VALUE) check()", float.MIN_VALUE, check(float.MIN_VALUE));
 AddStrictTestCase("float.abs(float.MAX_VALUE) check()", float.MAX_VALUE, check(float.MAX_VALUE));
 
-test();
 

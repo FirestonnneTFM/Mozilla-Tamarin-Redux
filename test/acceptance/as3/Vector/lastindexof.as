@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /**
    File Name:    lastindexof.es
    Description:  lastindexOf(object,value,from=...)
@@ -11,27 +12,25 @@
    *
    */
 
-var SECTION = ""
-var VERSION = "ECMA_1";
+// var SECTION = ""
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( SECTION + " Vector.lastIndexOf()");
 
 /*
 var v1=new Vector.<int>();
-AddTestCase(    "lastIndexOf empty vector",
+Assert.expectEq(    "lastIndexOf empty vector",
         -1,
         v1.lastIndexOf(0));
 var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
-AddTestCase(    "lastIndexOf object not found",
+Assert.expectEq(    "lastIndexOf object not found",
         -1,
         v1.lastIndexOf(10));
 */
 var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
-AddTestCase(    "lastIndexOf single match found",
+Assert.expectEq(    "lastIndexOf single match found",
         4,
         v1.lastIndexOf(4));
 
@@ -39,7 +38,7 @@ var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 for (var i=0;i<10;i++) v1[i+10]=i;
 for (var i=0;i<10;i++) v1[i+20]=i;
-AddTestCase(    "lastIndexOf first match found",
+Assert.expectEq(    "lastIndexOf first match found",
         24,
         v1.lastIndexOf(4));
 
@@ -47,7 +46,7 @@ var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 for (var i=0;i<10;i++) v1[i+10]=i;
 for (var i=0;i<10;i++) v1[i+20]=i;
-AddTestCase(    "lastIndexOf first match found setting start parameter",
+Assert.expectEq(    "lastIndexOf first match found setting start parameter",
         14,
         v1.lastIndexOf(4,20));
 
@@ -55,7 +54,7 @@ var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 for (var i=0;i<10;i++) v1[i+10]=i;
 for (var i=0;i<10;i++) v1[i+20]=i;
-AddTestCase(    "lastIndexOf start parameter greater than vector length",
+Assert.expectEq(    "lastIndexOf start parameter greater than vector length",
         24,
         v1.lastIndexOf(4,100));
 
@@ -63,9 +62,8 @@ var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 for (var i=0;i<10;i++) v1[i+10]=i;
 for (var i=0;i<10;i++) v1[i+20]=i;
-AddTestCase(    "lastIndexOf start parameter negative",
+Assert.expectEq(    "lastIndexOf start parameter negative",
         14,
         v1.lastIndexOf(4,-10));
 
-test();
 

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-309242.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'E4X should be on by default while preserving comment hack';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /*
     E4X should be available regardless of script type
@@ -26,7 +26,7 @@ actual = false;
 // the next line will be ignored when e4x is not requested
 <!-- comment -->; actual = true;
 
-AddTestCase(summary + ': &lt;!-- is comment to end of line', expect, actual);
+Assert.expectEq(summary + ': &lt;!-- is comment to end of line', expect, actual);
 
 expect = true;
 actual = true;
@@ -35,7 +35,7 @@ actual = true;
  actual = false;
 // -->
 
-AddTestCase(summary + ': comment hack works inside script', expect, actual);
+Assert.expectEq(summary + ': comment hack works inside script', expect, actual);
 
 // E4X is available always
 
@@ -44,6 +44,5 @@ var x = <foo/>;
 expect = 'element';
 actual = x.nodeKind();
 
-AddTestCase(summary + ': E4X is available', expect, actual);
+Assert.expectEq(summary + ': E4X is available', expect, actual);
 
-test();

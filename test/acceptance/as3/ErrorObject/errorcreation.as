@@ -5,16 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import flash.utils.Dictionary;
+import com.adobe.test.Assert;
 
-var SECTION = "";
-var VERSION = "";
-startTest();
-var TITLE = "Tests based on code coverage";
+// var SECTION = "";
+// var VERSION = "";
+// var TITLE = "Tests based on code coverage";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     
@@ -28,7 +26,7 @@ function getTestCases() {
         // Caught the error
         caughtError=true;
     } finally {
-        array[item++] = new TestCase(SECTION, "DefinitionError", true, caughtError );
+        array[item++] = Assert.expectEq( "DefinitionError", true, caughtError );
     }
 
 
@@ -39,7 +37,7 @@ function getTestCases() {
         // Caught the error
         caughtError=true;
     } finally {
-        array[item++] = new TestCase(SECTION, "SecurityError", true, caughtError );
+        array[item++] = Assert.expectEq( "SecurityError", true, caughtError );
     }
 
     caughtError:boolean = false;
@@ -49,7 +47,7 @@ function getTestCases() {
         // Caught the error
         caughtError=true;
     } finally {
-        array[item++] = new TestCase(SECTION, "UninitializedError", true, caughtError );
+        array[item++] = Assert.expectEq( "UninitializedError", true, caughtError );
     }
 
     return ( array );

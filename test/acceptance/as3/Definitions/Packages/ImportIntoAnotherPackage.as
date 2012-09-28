@@ -67,27 +67,26 @@ package ImportIntoAnotherPackage {
 
 
 import ImportIntoAnotherPackage.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var a = new newA();
 var b = new newB();
 var c = new newC();
 
-AddTestCase("Class imported into another package", "A", a.whoAmI());
-AddTestCase("Class implemented interface imported into another package", "B", b.whoAmI());
-AddTestCase("Variable imported into another package", "hello", newS);
+Assert.expectEq("Class imported into another package", "A", a.whoAmI());
+Assert.expectEq("Class implemented interface imported into another package", "B", b.whoAmI());
+Assert.expectEq("Variable imported into another package", "hello", newS);
 
 
-AddTestCase("Fully qualified reference to function", "You passed 5", newFunc());
-AddTestCase("Namespace variable, ns imported into another package", true, c.returnNSVar());
-AddTestCase("Namespace function, ns imported into antoher package", "1,2,3", c.callNSFunc().toString());
+Assert.expectEq("Fully qualified reference to function", "You passed 5", newFunc());
+Assert.expectEq("Namespace variable, ns imported into another package", true, c.returnNSVar());
+Assert.expectEq("Namespace function, ns imported into antoher package", "1,2,3", c.callNSFunc().toString());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

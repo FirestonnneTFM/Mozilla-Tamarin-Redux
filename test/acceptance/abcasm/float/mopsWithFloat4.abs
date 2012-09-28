@@ -4,33 +4,7 @@
 
 //  Test indirect memory access instructions.
 
-.script_info {
-	init: .function_id(main)
-}
 
-function main()
-{
-	getlocal0
-	pushscope
-
-	findpropstrict START
-	pushstring "Create ByteArray"
-	callpropvoid START 1
-
-	newfunction .function_id(initMemory)
-	getlocal0
-	call 0
-
-	findpropstrict END
-	callpropvoid END 0
-	
-
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-
-	returnvoid
-}
 
 /*
  *  Test the MOPS instructions.
@@ -276,4 +250,32 @@ InitLoop: label
 
 	
 	returnvoid
+}
+
+function main()
+{
+	getlocal0
+	pushscope
+
+	findpropstrict START
+	pushstring "Create ByteArray"
+	callpropvoid START 1
+
+	newfunction initMemory
+	getlocal0
+	call 0
+
+	findpropstrict END
+	callpropvoid END 0
+	
+
+	newfunction runTest
+	getlocal0
+	call 0
+
+	returnvoid
+}
+
+script_info {
+	init: main
 }

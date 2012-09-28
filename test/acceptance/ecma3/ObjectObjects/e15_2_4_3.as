@@ -1,15 +1,44 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.2.4.3";
-    var VERSION = "ECMA_4";
-    startTest();
-    var TITLE   = "Object.prototype.valueOf()";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.2.4.3";
+//     var VERSION = "ECMA_4";
+//     var TITLE   = "Object.prototype.valueOf()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
+
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+ // Adding this function getJSClass directly to file rather than in Utils
+
+ function getJSClass(obj)
+{
+  if (isObject(obj))
+    return findClass(findType(obj));
+  return cnNoObject;
+}
+function isObject(obj)
+{
+  return obj instanceof Object;
+}
+
+function findType(obj)
+{
+  var cnObjectToString = Object.prototype.toString;
+  return cnObjectToString.apply(obj);
+}
+// given '[object Number]',  return 'Number'
+function findClass(sType)
+{
+  var re =  /^\[.*\s+(\w+)\s*\]$/;
+  var a = sType.match(re);
+
+  if (a && a[1])
+    return a[1];
+  return cnNoClass;
+}
 
 function getTestCases() {
     var array = new Array();
@@ -36,9 +65,9 @@ function getTestCases() {
     //String.prototype.valueOf=Object.prototype.valueOf;
     var mystring = new String();
 
-    array[item++] = new TestCase( SECTION,  "Object.prototype.valueOf.length",      0,      Object.prototype.valueOf.length );
+    array[item++] = Assert.expectEq(   "Object.prototype.valueOf.length",      0,      Object.prototype.valueOf.length );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                  "myarray = new Array(); myarray.valueOf = Object.prototype.valueOf; myarray.valueOf()",
                                  myarray,
                                  myarray.valueOf() );
@@ -54,25 +83,25 @@ function getTestCases() {
     }finally{//print(thisError);
         
         var expectedError = 1056;
-        if (as3Enabled) {
+        if (true) {     // TODO: REVIEW AS4 CONVERSION ISSUE 
             expectedError = 1037;
         }
         
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                                  "myboolean = new Boolean(); myboolean.valueOf = Object.prototype.valueOf; myboolean.valueOf()",
-                                 REFERENCEERROR+expectedError,
-                                 referenceError(thisError) );
+                                 Utils.REFERENCEERROR+expectedError,
+                                 Utils.referenceError(thisError) );
      }
-    /*array[item++] = new TestCase( SECTION,
+    /*array[item++] = Assert.expectEq( 
                                  "myboolean = new Boolean(); myboolean.valueOf = Object.prototype.valueOf; myboolean.valueOf()",
                                  myboolean,
                                  myboolean.valueOf() );*/
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                  "myfunction = function() {}; myfunction.valueOf = Object.prototype.valueOf; myfunction.valueOf()",
                                  myfunction,
                                  myfunction.valueOf() );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                  "myobject = new Object(); myobject.valueOf = Object.prototype.valueOf; myobject.valueOf()",
                                  myobject,
                                  myobject.valueOf() );
@@ -83,11 +112,11 @@ function getTestCases() {
     }catch(e1:Error){
        thisError=e1.toString();
     }finally{//print(thisError);
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
         "mymath = Math; mymath.valueOf = Object.prototype.valueOf;mymath.valueOf()",
-        REFERENCEERROR+expectedError,referenceError(thisError) );
+        Utils.REFERENCEERROR+expectedError,Utils.referenceError(thisError) );
      }
-   /* array[item++] = new TestCase( SECTION,
+   /* array[item++] = Assert.expectEq( 
                                  "mymath = Math; mymath.valueOf = Object.prototype.valueOf; mymath.valueOf()",
                                  mymath,
                                  mymath.valueOf() );*/
@@ -97,12 +126,12 @@ function getTestCases() {
     }catch(e2:ReferenceError){
        thisError=e2.toString();
     }finally{//print(thisError);
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
         "mynumber = new Number(); mynumber.valueOf = Object.prototype.valueOf; mynumber.valueOf()",
-        REFERENCEERROR+expectedError,referenceError(thisError) );
+        Utils.REFERENCEERROR+expectedError,Utils.referenceError(thisError) );
      }
 
-    /*array[item++] = new TestCase( SECTION,
+    /*array[item++] = Assert.expectEq( 
                                  "mynumber = new Number(); mynumber.valueOf = Object.prototype.valueOf; mynumber.valueOf()",
                                  mynumber,
                                  mynumber.valueOf() );*/
@@ -113,11 +142,11 @@ function getTestCases() {
     }catch(e3:Error){
        thisError=e3.toString();
     }finally{//print(thisError);
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
         "mystring = new String(); mystring.valueOf = Object.prototype.valueOf; mystring.valueOf()",
-        REFERENCEERROR+expectedError,referenceError(thisError) );
+        Utils.REFERENCEERROR+expectedError,Utils.referenceError(thisError) );
      }
-   /* array[item++] = new TestCase( SECTION,
+   /* array[item++] = Assert.expectEq( 
                                  "mystring = new String(); mystring.valueOf = Object.prototype.valueOf; mystring.valueOf()",
                                  mystring,
                                  mystring.valueOf() );*/
@@ -128,11 +157,11 @@ function getTestCases() {
     }catch(e4:Error){
        thisError=e4.toString();
     }finally{//print(thisError);
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
         "mydate = new Date(); mydate.valueOf = Object.prototype.valueOf; mydate.valueOf()",
-        REFERENCEERROR+expectedError,referenceError(thisError) );
+        Utils.REFERENCEERROR+expectedError,Utils.referenceError(thisError) );
      }
-    /*array[item++] = new TestCase( SECTION,
+    /*array[item++] = Assert.expectEq( 
                                  "mydate = new Date(); mydate.valueOf = Object.prototype.valueOf; mydate.valueOf()",
                                  mydate,
                                  mydate.valueOf());*/

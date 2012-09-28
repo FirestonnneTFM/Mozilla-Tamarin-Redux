@@ -11,18 +11,18 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION = "mops";
-    var VERSION = "AS3";
-    var TITLE   = "sf64";
+//     var SECTION = "mops";
+//     var VERSION = "AS3";
+//     var TITLE   = "sf64";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     // 0x4146020041460200 == 2.8846085099489688873291015625E6
-    AddErrorTest("sf64(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("sf64(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ SF64(2.8846085099489688873291015625E6, Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
@@ -31,17 +31,17 @@ package {
 
     // Test the memory boundaries
     clearMemory();
-    AddErrorTest("sf64(0x4146020041460200, -1)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, -1); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-1)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-1); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-2)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-2); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-3)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-3); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-4)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-4); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-5)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-5); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-6)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-6); });
-    AddErrorTest("sf64(0x4146020041460200, mem.length-7)", RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-7); });
+    Assert.expectError("sf64(0x4146020041460200, -1)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, -1); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-1)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-1); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-2)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-2); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-3)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-3); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-4)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-4); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-5)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-5); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-6)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-6); });
+    Assert.expectError("sf64(0x4146020041460200, mem.length-7)", Utils.RANGEERROR+1506, function(){ SF64(2.8846085099489688873291015625E6, mem.length-7); });
 
-    AddTestCase("sf64(0x4146020041460200, mem.length-8)", undefined, SF64(0x4146020041460200, mem.length-8));
+    Assert.expectEq("sf64(0x4146020041460200, mem.length-8)", undefined, SF64(0x4146020041460200, mem.length-8));
 
     testli8();
     testli16();
@@ -55,7 +55,6 @@ package {
     testreadFloat();
     testreadDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -80,14 +79,14 @@ package {
         clearMemory();
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
-        AddTestCase("li8 load 1st byte written by sf64()", uint(0x00), LI8(0));
-        AddTestCase("li8 load 2nd byte written by sf64()", uint(0x02), LI8(1));
-        AddTestCase("li8 load 3rd byte written by sf64()", uint(0x46), LI8(2));
-        AddTestCase("li8 load 4th byte written by sf64()", uint(0x41), LI8(3));
-        AddTestCase("li8 load 5th byte written by sf64()", uint(0x00), LI8(4));
-        AddTestCase("li8 load 6th byte written by sf64()", uint(0x02), LI8(5));
-        AddTestCase("li8 load 7th byte written by sf64()", uint(0x46), LI8(6));
-        AddTestCase("li8 load 8th byte written by sf64()", uint(0x41), LI8(7));
+        Assert.expectEq("li8 load 1st byte written by sf64()", uint(0x00), LI8(0));
+        Assert.expectEq("li8 load 2nd byte written by sf64()", uint(0x02), LI8(1));
+        Assert.expectEq("li8 load 3rd byte written by sf64()", uint(0x46), LI8(2));
+        Assert.expectEq("li8 load 4th byte written by sf64()", uint(0x41), LI8(3));
+        Assert.expectEq("li8 load 5th byte written by sf64()", uint(0x00), LI8(4));
+        Assert.expectEq("li8 load 6th byte written by sf64()", uint(0x02), LI8(5));
+        Assert.expectEq("li8 load 7th byte written by sf64()", uint(0x46), LI8(6));
+        Assert.expectEq("li8 load 8th byte written by sf64()", uint(0x41), LI8(7));
     }
 
     function testli16():void
@@ -95,10 +94,10 @@ package {
         clearMemory();
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
-        AddTestCase("li16 load bytes written by sf64()", 0x0200, LI16(0));
-        AddTestCase("li16 load bytes written by sf64()", 0x4146, LI16(2));
-        AddTestCase("li16 load bytes written by sf64()", 0x0200, LI16(4));
-        AddTestCase("li16 load bytes written by sf64()", 0x4146, LI16(6));
+        Assert.expectEq("li16 load bytes written by sf64()", 0x0200, LI16(0));
+        Assert.expectEq("li16 load bytes written by sf64()", 0x4146, LI16(2));
+        Assert.expectEq("li16 load bytes written by sf64()", 0x0200, LI16(4));
+        Assert.expectEq("li16 load bytes written by sf64()", 0x4146, LI16(6));
     }
 
     function testli32():void
@@ -106,8 +105,8 @@ package {
         clearMemory();
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
-        AddTestCase("li32 load bytes written by sf64()", int(0x41460200), LI32(0));
-        AddTestCase("li32 load bytes written by sf64()", int(0x41460200), LI32(4));
+        Assert.expectEq("li32 load bytes written by sf64()", int(0x41460200), LI32(0));
+        Assert.expectEq("li32 load bytes written by sf64()", int(0x41460200), LI32(4));
     }
 
     function testlf32():void
@@ -115,8 +114,8 @@ package {
         clearMemory();
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
-        AddTestCase("lf32 load bytes written by sf64()", 12.37548828125, LF32(0));
-        AddTestCase("lf32 load bytes written by sf64()", 12.37548828125, LF32(4));
+        Assert.expectEq("lf32 load bytes written by sf64()", 12.37548828125, LF32(0));
+        Assert.expectEq("lf32 load bytes written by sf64()", 12.37548828125, LF32(4));
     }
 
     function testlf64():void
@@ -124,7 +123,7 @@ package {
         clearMemory();
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
-        AddTestCase("lf64 load bytes written by sf64()", 2.8846085099489688873291015625E6, LF64(0));
+        Assert.expectEq("lf64 load bytes written by sf64()", 2.8846085099489688873291015625E6, LF64(0));
     }
 
     function testreadByte():void
@@ -133,14 +132,14 @@ package {
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
         mem.position = 0;
-        AddTestCase("readByte() load 1st byte written by sf64()", 0x00, mem.readByte());
-        AddTestCase("readByte() load 2nd byte written by sf64()", 0x02, mem.readByte());
-        AddTestCase("readByte() load 3rd byte written by sf64()", 0x46, mem.readByte());
-        AddTestCase("readByte() load 4th byte written by sf64()", 0x41, mem.readByte());
-        AddTestCase("readByte() load 5th byte written by sf64()", 0x00, mem.readByte());
-        AddTestCase("readByte() load 6th byte written by sf64()", 0x02, mem.readByte());
-        AddTestCase("readByte() load 7th byte written by sf64()", 0x46, mem.readByte());
-        AddTestCase("readByte() load 8th byte written by sf64()", 0x41, mem.readByte());
+        Assert.expectEq("readByte() load 1st byte written by sf64()", 0x00, mem.readByte());
+        Assert.expectEq("readByte() load 2nd byte written by sf64()", 0x02, mem.readByte());
+        Assert.expectEq("readByte() load 3rd byte written by sf64()", 0x46, mem.readByte());
+        Assert.expectEq("readByte() load 4th byte written by sf64()", 0x41, mem.readByte());
+        Assert.expectEq("readByte() load 5th byte written by sf64()", 0x00, mem.readByte());
+        Assert.expectEq("readByte() load 6th byte written by sf64()", 0x02, mem.readByte());
+        Assert.expectEq("readByte() load 7th byte written by sf64()", 0x46, mem.readByte());
+        Assert.expectEq("readByte() load 8th byte written by sf64()", 0x41, mem.readByte());
     }
 
     function testreadUnsignedByte():void
@@ -149,14 +148,14 @@ package {
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
         mem.position = 0;
-        AddTestCase("readUnsignedByte() load 1st byte written by sf64()", 0x00, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 2nd byte written by sf64()", 0x02, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 3rd byte written by sf64()", 0x46, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 4th byte written by sf64()", 0x41, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 5th byte written by sf64()", 0x00, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 6th byte written by sf64()", 0x02, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 7th byte written by sf64()", 0x46, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load 8th byte written by sf64()", 0x41, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 1st byte written by sf64()", 0x00, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 2nd byte written by sf64()", 0x02, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 3rd byte written by sf64()", 0x46, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 4th byte written by sf64()", 0x41, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 5th byte written by sf64()", 0x00, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 6th byte written by sf64()", 0x02, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 7th byte written by sf64()", 0x46, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load 8th byte written by sf64()", 0x41, mem.readUnsignedByte());
     }
 
     function testreadInt():void
@@ -165,8 +164,8 @@ package {
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
         mem.position = 0;
-        AddTestCase("readInt() load bytes written by sf64()", int(0x41460200), mem.readInt());
-        AddTestCase("readInt() load bytes written by sf64()", int(0x41460200), mem.readInt());
+        Assert.expectEq("readInt() load bytes written by sf64()", int(0x41460200), mem.readInt());
+        Assert.expectEq("readInt() load bytes written by sf64()", int(0x41460200), mem.readInt());
     }
 
     function testreadUnsignedInt():void
@@ -175,8 +174,8 @@ package {
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
         mem.position = 0;
-        AddTestCase("readUnsignedInt() load bytes written by sf64()", uint(0x41460200), mem.readUnsignedInt());
-        AddTestCase("readUnsignedInt() load bytes written by sf64()", uint(0x41460200), mem.readUnsignedInt());
+        Assert.expectEq("readUnsignedInt() load bytes written by sf64()", uint(0x41460200), mem.readUnsignedInt());
+        Assert.expectEq("readUnsignedInt() load bytes written by sf64()", uint(0x41460200), mem.readUnsignedInt());
     }
 
     function testreadFloat():void
@@ -185,8 +184,8 @@ package {
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
         mem.position = 0;
-        AddTestCase("readFloat() load bytes written by sf64()", 12.37548828125, mem.readFloat());
-        AddTestCase("readFloat() load bytes written by sf64()", 12.37548828125, mem.readFloat());
+        Assert.expectEq("readFloat() load bytes written by sf64()", 12.37548828125, mem.readFloat());
+        Assert.expectEq("readFloat() load bytes written by sf64()", 12.37548828125, mem.readFloat());
     }
 
     function testreadDouble():void
@@ -195,7 +194,7 @@ package {
         // 0x4146020041460200 == 2.8846085099489688873291015625E6
         SF64(2.8846085099489688873291015625E6, 0);
         mem.position = 0;
-        AddTestCase("readDouble() load bytes written by sf64()", 2.8846085099489688873291015625E6, mem.readDouble());
+        Assert.expectEq("readDouble() load bytes written by sf64()", 2.8846085099489688873291015625E6, mem.readDouble());
     }
 
 }

@@ -1,17 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-    var VERSION = 'no version';
-    startTest();
-    var TITLE = 'String:slice';
+//     var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+//     var VERSION = 'no version';
+//     var TITLE = 'String:slice';
 
-    writeHeaderToLog('Executing script: slice.js');
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -66,12 +63,11 @@ function getTestCases() {
                         "               a: " + String(a) + "\n" +
                         "   actual result: " + String(b) + "\n" +
                         " expected result: " + String(c) + "\n";
-                    writeHeaderToLog(errorMessage);
                     reason = reason + errorMessage;
                     passed = false;
                 }
             }
-        var testCase = new TestCase(SECTION, testname, true, passed);
+        var testCase = Assert.expectEq( testname, true, passed);
         if (passed == false)
             testCase.reason = reason;
         return testCase;

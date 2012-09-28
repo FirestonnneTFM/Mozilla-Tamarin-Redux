@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'regexparg-1.js';
 
@@ -17,12 +18,10 @@ gTestfile = 'regexparg-1.js';
    Date:               15 June 1998
 */
 
-var SECTION = "JS_1.2";
-var VERSION = "JS_1.2";
-startTest();  var testscases=[]; var index=0;
-var TITLE   = "The variable statement";
+// var SECTION = "JS_1.2";
+// var VERSION = "JS_1.2";
+// var TITLE   = "The variable statement";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 print("Note: Bug 61911 changed the behavior of typeof regexp in Gecko 1.9.");
 print("Prior to Gecko 1.9, typeof regexp returned 'function'.");
@@ -32,41 +31,40 @@ function f(x) {return x;}
 
 x = f(/abc/);
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "function f(x) {return x;}; f()",
           void 0,
           f() );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "f(\"hi\")",
           "hi",
           f("hi") );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "new f(/abc/) +''",
           "/abc/",
           new f(/abc/) +"" );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "f(/abc/)+'')",
           "/abc/",
           f(/abc/) +'');
        
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "typeof f(/abc/)",
           "object",
           typeof f(/abc/) );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "typeof new f(/abc/)",
           "object",
           typeof new f(/abc/) );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "x = new f(/abc/); x(\"hi\")",
           null,
           x("hi") );
 
 
 // js> x()
-test();

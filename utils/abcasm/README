@@ -1,7 +1,7 @@
-/* -*- Mode: text; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
 abcasm is an ABC assembler.
 
 Usage: see abcasm.sh
@@ -10,23 +10,11 @@ Syntax: the assembler language is based on abcdump's output format.
 
 Hacking:
 
-1. Rebuilding the parser requires antlr-3.0.1 and antlr-2.7.7, 
-(ANTLR to be upgraded to version 3.1). 
+1. The new  ABCasm4 (ABC Assembler) can be built from here: //depot/skunkworks/tharwood/aetapps/ABCasm4/ and is dependent on the 
 
-2. $ASC must point to asc.jar.
+2. Add the paths to the classes and libs locations in a build.properties file, e.g.
+    abct.lib.dir=/Users/bsahlas/depot/flashide/trunk/compiler/com.adobe.flash.compiler/generated/dist/sdk/lib
+    compiler.classpath=/Users/bsahlas/depot/flashide/trunk/compiler/com.adobe.flash.compiler/generated/intermediates/classes
+    abct.home=/Users/bsahlas/depot/flashide/trunk/compiler/com.adobe.flash.compiler
+3. build it "ant"
 
-3. Put the paths to the ANTLR jarfiles in a build.properties file, e.g.
-
-# ANTLR grammar regeneration support
-# Note both ANTLR3 and ANTLR 2.7.7 are required, and both are provided
-# by the 3.0.1 distribution.
-lib.dir=C:/work/antlr-3.0.1
-
-4. ant
-
-Hacking with Eclipse:
-
-1. make abcasm be the root of your eclipse project
-2. add asc.jar, antlr-3.0.1.jar, and antlr-2.7.7.jar as external libraries
-3. build with ant, first, to get gensrc/*.java
-4. now you should be able to edit/save/test in eclipse

@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * Date:    20 Feb 2002
 * SUMMARY: Testing the comparison |undefined === null|
@@ -9,16 +9,14 @@
 *
 */
 //-----------------------------------------------------------------------------
-    var SECTION = "e11_9_6_1";
-    var VERSION = "";
-    var TITLE = "Testing the comparison |undefined === null|"
-    var bug = 126722;
-    startTest();
+//     var SECTION = "e11_9_6_1";
+//     var VERSION = "";
+//     var TITLE = "Testing the comparison |undefined === null|"
+//     var bug = 126722;
 
+import com.adobe.test.Assert;
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " " + TITLE);
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -34,17 +32,17 @@ function getTestCases() {
     var expectedvalues = [];
 
 
-    status = inSection(1);
+    //status = inSection(1);
     if (undefined === null)
         actual = true;
     else
         actual = false;
     expect = false;
     //addThis();
-    array[item++] = new TestCase(SECTION, status + ": if(undefined === null)", expect, actual);
+    array[item++] = Assert.expectEq( status + ": if(undefined === null)", expect, actual);
 
 
-    status = inSection(2);
+    //status = inSection(2);
     switch(true)
     {
       case (undefined === null) :
@@ -56,11 +54,11 @@ function getTestCases() {
     }
     expect = false;
     //addThis();
-    array[item++] = new TestCase(SECTION, status + ": case(undefined === null)", expect, actual);
+    array[item++] = Assert.expectEq( status + ": case(undefined === null)", expect, actual);
 
 
 
-    status = inSection(3);
+    // status = inSection(3);
     function f3(x)
     {
       var res = false;
@@ -81,11 +79,11 @@ function getTestCases() {
     actual = f3(undefined);
     expect = false;
     //addThis();
-    array[item++] = new TestCase(SECTION, status + ": f3(x); undefined === null", expect, actual);
+    array[item++] = Assert.expectEq( status + ": f3(x); undefined === null", expect, actual);
 
 
 
-    status = inSection(4);
+    // status = inSection(4);
     function f4(arr)
     {
       var elt = '';
@@ -113,10 +111,10 @@ function getTestCases() {
     actual = f4(arr);
     expect = false;
     //addThis();
-    array[item++] = new TestCase(SECTION, status + ": f4(array); undefined === null", expect, actual);
+    array[item++] = Assert.expectEq( status + ": f4(array); undefined === null", expect, actual);
 
 
-    status = inSection(5);
+    // status = inSection(5);
     function f5(arr)
     {
       var len = arr.length;
@@ -139,11 +137,11 @@ function getTestCases() {
     actual = f5(arrUndef);
     expect = 5;
     //addThis();
-    array[item++] = new TestCase(SECTION, status + ": f5(array); undefined === null", expect, actual);
+    array[item++] = Assert.expectEq( status + ": f5(array); undefined === null", expect, actual);
 
 
 
-    status = inSection(6);
+    // status = inSection(6);
     function f6(arr)
     {
       var len = arr.length;
@@ -160,7 +158,7 @@ function getTestCases() {
     actual = f6(arrUndef);
     expect = 0;
     //addThis();
-    array[item++] = new TestCase(SECTION, status + ": f6(array); undefined === null", expect, actual);
+    array[item++] = Assert.expectEq( status + ": f6(array); undefined === null", expect, actual);
     
 
     return (array);

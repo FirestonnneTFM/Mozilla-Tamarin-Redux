@@ -4,9 +4,53 @@
 
 //  Test indirect memory access instructions.
 
-.script_info {
-	init: .function_id(main)
+/*
+ *  Initialize the memory buffer: create a ByteArray and
+ *  write 4K of zeroes into it.
+ */
+function initMemory():void
+{
+	getlocal0     	
+	pushscope     	
+
+	debugfile     	"initMemory"
+	debugline     	1
+
+	findpropstrict	{flash.utils}::ByteArray
+	constructprop 	{flash.utils}::ByteArray (0)
+	setlocal2
+
+	//  Init the loop counter.
+	pushbyte      	0
+	setlocal3
+	
+InitLoop: label         	
+
+	getlocal2
+	pushbyte      	0
+	callpropvoid  	writeByte (1)
+
+	inclocal_i	3   	
+
+	getlocal3
+	pushshort     	4096
+	iflt          	InitLoop
+	
+	//  The ByteArray is initialized, set the domain property and exit.
+	findpropstrict	{avmplus}::Domain
+	getproperty   	{avmplus}::Domain
+	getproperty   	currentDomain
+	getlocal       	2
+	setproperty   	domainMemory
+
+	findpropstrict PASS
+	pushstring "create ByteArray"
+	callpropvoid PASS 1
+
+	
+	returnvoid
 }
+
 
 function main()
 {
@@ -17,7 +61,7 @@ function main()
 	pushstring "Create ByteArray"
 	callpropvoid START 1
 
-	newfunction .function_id(initMemory)
+	newfunction initMemory
 	getlocal0
 	call 0
 
@@ -25,7 +69,7 @@ function main()
 	callpropvoid END 0
 	
 
-	newfunction .function_id(runTest)
+	newfunction runTest
 	getlocal0
 	call 0
 
@@ -151,50 +195,8 @@ function runTest():void
 
 	returnvoid
 }
-
-/*
- *  Initialize the memory buffer: create a ByteArray and
- *  write 4K of zeroes into it.
- */
-function initMemory():void
-{
-	getlocal0     	
-	pushscope     	
-
-	debugfile     	"initMemory"
-	debugline     	1
-
-	findpropstrict	{flash.utils}::ByteArray
-	constructprop 	{flash.utils}::ByteArray (0)
-	setlocal2
-
-	//  Init the loop counter.
-	pushbyte      	0
-	setlocal3
-	
-InitLoop: label         	
-
-	getlocal2
-	pushbyte      	0
-	callpropvoid  	writeByte (1)
-
-	inclocal_i	3   	
-
-	getlocal3
-	pushshort     	4096
-	iflt          	InitLoop
-	
-	//  The ByteArray is initialized, set the domain property and exit.
-	findpropstrict	{avmplus}::Domain
-	getproperty   	{avmplus}::Domain
-	getproperty   	currentDomain
-	getlocal       	2
-	setproperty   	domainMemory
-
-	findpropstrict PASS
-	pushstring "create ByteArray"
-	callpropvoid PASS 1
-
-	
-	returnvoid
+script_info {
+	init: main
 }
+
+

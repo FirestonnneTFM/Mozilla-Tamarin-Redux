@@ -1,24 +1,41 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.8.2.14";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Math.random()";
+//     var SECTION = "15.8.2.14";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Math.random()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test0();
+    // test0();
+
+// TODO: REVIEW AS4 CONVERSION ISSUE
+function getTestCases() {
+    var item;
+
+    for ( item = 0; item < 100; item++ ) {
+        var ranNum = Math.random();
+        if (ranNum >= 0 && ranNum < 1) {
+            Assert.expectEq( "Math.random() value " + ranNum,  true, true );
+        } else {
+            Assert.expectEq( "Math.random() value " + ranNum,  true, false );
+        }
+    }
+
+    return;
+}
 
 
+
+/* 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
     for ( item = 0; item < 100; item++ ) {
-        array[item] = new TestCase( SECTION,  "Math.random()",    "pass",  null );
+          array[item] = Assert.expectEq(   "Math.random()",    "pass",  null );
     }
 
     return ( array );
@@ -50,3 +67,5 @@ function test0() {
     stopTest();
     return ( testcases );
 }
+*/
+

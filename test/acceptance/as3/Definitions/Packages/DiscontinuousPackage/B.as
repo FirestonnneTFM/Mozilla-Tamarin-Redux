@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package DiscontinuousPackage {
 
-    public class B implements IClickable {
+    public class B implements IClickableInterface {
         public function whoAmI():String {
             return "B";
         }

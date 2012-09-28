@@ -1,15 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "global-001";
-    var VERSION = "ECMA_1";
-    var TITLE   = "The Global Object";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
+ // TODO: REVIEW AS4 CONVERSION ISSUE 
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "global-001";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The Global Object";
+
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -27,10 +28,10 @@ function getTestCases() {
         exception = e.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        // SECTION,
         "result = new this()" +
-        " (threw " + typeError(exception) +")",
+        " (threw " + Utils.typeError(exception) +")",
         expect,
         result );
         

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_4.js';
 
@@ -27,12 +28,10 @@ gTestfile = 'proto_4.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_3";
-var VERSION = "JS1_3";
-var TITLE   = "Adding properties to the prototype";
+// var SECTION = "proto_3";
+// var VERSION = "JS1_3";
+// var TITLE   = "Adding properties to the prototype";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Employee () {
   this.name = "";
@@ -78,49 +77,48 @@ Engineer.prototype.specialty = "code";
 var chris = new Engineer();
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jim = new Employee(); jim.specialty",
           "none",
           jim.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "terry = new Engineer(); terry.specialty",
           "code",
           terry.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "sean = new SalesPerson(); sean.specialty",
           "none",
           sean.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "wally = new Manager(); wally.specialty",
           "none",
           wally.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "furry = new Manager(); furry.specialty",
           "none",
           furry.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat = new Employee(); pat.specialty",
           "none",
           pat.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "leslie = new Engineer(); leslie.specialty",
           "code",
           leslie.specialty );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "bubbles = new SalesPerson(); bubbles.specialty",
           "none",
           bubbles.specialty );
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "chris = new Employee(); chris.specialty",
           "code",
           chris.specialty );
-test();
