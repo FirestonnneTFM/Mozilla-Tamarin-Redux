@@ -59,11 +59,15 @@ do
     #
     # remove old abc and shells from the device
     #
-    echo "cleanup up $SSH_SHELL_REMOTE_DIR directory on remote machine..."
+    echo "cleanup $SSH_SHELL_REMOTE_DIR directory on remote machine..."
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR; rm -r ./*"
 
-    echo "cleanup up $SSH_SHELL_REMOTE_BASEDIR/builds directory on remote machine..."
+    echo "cleanup $SSH_SHELL_REMOTE_BASEDIR/builds directory on remote machine..."
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_BASEDIR/builds; rm -r ./*"
+
+    echo "cleanup $SSH_SHELL_REMOTE_BASEDIR/acceptance-test-abcs.* on remote machine..."
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_BASEDIR; rm -f acceptance-tests-abcs.*" 
+
     echo "========================================="
     echo ""
 
