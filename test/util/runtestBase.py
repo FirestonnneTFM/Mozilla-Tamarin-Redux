@@ -1036,6 +1036,9 @@ class RuntestBase(object):
             self.copyfile_retry(abc, extraoutabc)
             copiedExtraAbcs.append(output+"/"+extraoutname+".abc")
 
+        for harness_abc in self.harness_abcs:
+            copiedExtraAbcs.append(output+"/"+harness_abc)
+
         cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(copiedExtraAbcs), outabc)
         self.verbose_print(cmd)
 
@@ -1533,6 +1536,11 @@ class RuntestBase(object):
             # Make sure that the aot output directory exists before we spawn threads to compile
             if not os.path.exists(self.aotout):
                 os.mkdir(self.aotout)
+
+            # Move the harness files into the AOT compilation directory
+            for harness_abc in self.harness_abcs:
+                self.copyfile_retry(harness_abc, self.aotout+"/"+harness_abc)
+
             # We use the test config file to mark abc files that fail to AOT compile,
             # so we need to take account of that here before we try to compile them.
             self.settings, self.directives = self.parseTestConfig(self.testconfig)
