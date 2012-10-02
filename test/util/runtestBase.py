@@ -70,6 +70,7 @@ class RuntestBase(object):
     addtoconfig = ''
     asc = ''
     ascargs = ''
+    ash = ''
     # list of args to remove defined using -no-argname format in --ascargs
     asc_negative_args = []
     atsDir = 'ATS_SWFS'
@@ -206,6 +207,7 @@ class RuntestBase(object):
         print(' -v --verbose       enable additional output')
         print(' -E --avm           avmplus command to use')
         print(' -a --asc           compiler to use')
+        print('    --ash           interactive compiler to use')
         print(' -g --globalabc     DEPRECATED but still works - use builtin.abc (used to be location of global.abc)')
         print(' -b --builtinabc    location of builtin.abc')
         print(' -s --shellabc      location of shell_toplevel.abc')
@@ -248,7 +250,7 @@ class RuntestBase(object):
         '''set the valid command line options.
             When subclassing, call this method first, then append options to each list'''
         self.options = 'vE:a:g:b:s:x:htfc:dql:'
-        self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
+        self.longOptions = ['verbose','avm=','asc=','ash=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','cleanexit','quiet','notimecheck',
@@ -274,6 +276,8 @@ class RuntestBase(object):
                 self.avm = v
             elif o in ('-a', '--asc'):
                 self.asc = v
+            elif o in ('--ash'):
+                self.ash = v
             elif o in ('-b', '--builtinabc', '-g', '--globalabc'):
                 self.builtinabc = v
             elif o in ('-s', '--shellabc', '--toplevelabc'):
@@ -560,6 +564,8 @@ class RuntestBase(object):
     def setEnvironVars(self):
         if 'ASC' in environ:
             self.asc = environ['ASC'].strip()
+        if 'ASH' in environ:
+            self.ash = environ['ASH'].strip()
         if 'ASCARGS' in environ:
             self.ascargs = environ['ASCARGS'].strip()
         if 'AVM' in environ:
@@ -1232,7 +1238,11 @@ class RuntestBase(object):
                     self.compile_aot(testdir+".abc")
 
         else:  #pexpect available
-            child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
+            if isfile(self.ash):
+                child = pexpect.spawn('"%s" %s -jar %s ' % (self.java, self.javaargs, self.ash))
+            else:
+                child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
+                
             child.logfile = None
             if self.verbose:
                 child.logfile = sys.stdout
