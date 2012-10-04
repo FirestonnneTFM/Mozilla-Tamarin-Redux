@@ -21,6 +21,6 @@
     // verify state == RUNNING
     %%verify state==3
 
-    %%verify main->targetCore() == core
+    %%verify main->getAvmCore() == core
     %%verify main->isParentOf(main) == false
 

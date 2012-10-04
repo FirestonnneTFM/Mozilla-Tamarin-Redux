@@ -126,7 +126,11 @@ void CodeAllocDriver::makeCodeList(uint32_t index, CodeAlloc& alloc, CodeList*& 
 
 void CodeAllocDriver::run(uint32_t iterations)
 {
-    CodeAlloc alloc;
+    nanojit::Config config;
+    // Enable page protection flag checking during test code
+    config.check_page_flags = true;
+
+    CodeAlloc alloc(&config);
 
     CodeList** codelists = mmfx_new_array(CodeList*, n_active);
 
