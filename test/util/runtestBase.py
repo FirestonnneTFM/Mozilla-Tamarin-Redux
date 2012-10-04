@@ -1096,6 +1096,21 @@ class RuntestBase(object):
         # If we get this far, we will silently fail to copy the file. This will
         # allow the ADT call to produce its failure of not being able to open the abc file.
 
+    # fixAbcCommand
+    # cmd: a string of compiler arguments
+    # return: a string or compiler arguments with all files ended with .abc_ replaced with .abc
+    def fixAbcCommand(self,cmd):
+        newcmd=[]
+        for token in cmd.split():
+            if token.endswith('.abc_') and os.path.exists(os.getcwd()+'/'+token): # if token is a .abc_ file
+                tokenWithout_=token[:-1]
+                if not os.path.exists(os.getcwd()+'/'+tokenWithout_):
+                    shutil.copy(os.getcwd()+'/'+token,os.getcwd()+'/'+tokenWithout_)
+                newcmd.append(tokenWithout_)
+            else: # otherwise retain compiler parameters
+                newcmd.append(token)
+        return string.join(newcmd) # convert from array of string back to string
+
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
@@ -1150,7 +1165,8 @@ class RuntestBase(object):
             cmd += ' -import %s' % builtinabc
             for arg in ascArgList:
                 cmd += ' %s' % arg
-            
+
+            cmd=self.fixAbcCommand(cmd)            
             # look for a subdirectory of the same name as the .as file
             # if it exists, import all of the files within that dir when
             # compiling the test
@@ -1332,7 +1348,9 @@ class RuntestBase(object):
                                 create_ats_swfversion_copy(test)
                                 as_file = test + '.swfversion'
                                 for swfversion in self.swfversions:
-                                    new_cmd = cmd + ' -swf 200,200,version=%s' % swfversion
+                                    new_cmd = cmd + ' -swf 200,200,version=%s %s' % (swfversion,test)
+                                    new_cmd=self.fixAbcCommand(new_cmd)
+
                                     self.debug_print('%s %s.swfversion' % (new_cmd,test))
                                     child.sendline('%s %s.swfversion' % (new_cmd,test))
                                     child.expect("\(ash\)")
@@ -1349,12 +1367,14 @@ class RuntestBase(object):
                                     pass
                             else:
                                 cmd += " -swf 200,200 %s" % test
+                                cmd=self.fixAbcCommand(cmd)
                                 self.debug_print(cmd)
                                 child.sendline(cmd)
                                 child.expect("\(ash\)")
                                 moveAtsSwf(dir,file, self.atsDir)
                         else:
                             cmd += " %s" % test
+                            cmd=self.fixAbcCommand(cmd)
                             child.sendline(cmd)
                             child.expect("\(ash\)")
 
