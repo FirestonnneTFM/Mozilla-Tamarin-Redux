@@ -1,10 +1,11 @@
+// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_avmplus_vector_accessors.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_603411.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_fixedmalloc_findbeginning.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_nanojit_codealloc.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st, ST_workers_Buffer.st, ST_workers_NoSyncSingleItemBuffer.st, ST_workers_Promise.st
 // Generated from ST_avmplus_basics.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -46,14 +47,14 @@ case 7: test7(); return;
 void ST_avmplus_basics::test0() {
 
 // Does right shift of unsigned quantities work?
-// line 47 "ST_avmplus_basics.st"
+// line 14 "ST_avmplus_basics.st"
 verifyPass((int)(~0U >> 1) > 0, "(int)(~0U >> 1) > 0", __FILE__, __LINE__);
 
 }
 void ST_avmplus_basics::test1() {
 
 // Does right shift of signed quantities work?
-// line 52 "ST_avmplus_basics.st"
+// line 19 "ST_avmplus_basics.st"
 verifyPass((-1 >> 1) == -1, "(-1 >> 1) == -1", __FILE__, __LINE__);
 
 // verify that the "latin1" literal string calls work properly for hi-bit latin1 chars
@@ -61,35 +62,35 @@ verifyPass((-1 >> 1) == -1, "(-1 >> 1) == -1", __FILE__, __LINE__);
 void ST_avmplus_basics::test2() {
     Stringp s = core->newConstantStringLatin1("ev\xADident");
     bool equals = s->equalsLatin1("ev\xADident");
-// line 58 "ST_avmplus_basics.st"
+// line 25 "ST_avmplus_basics.st"
 verifyPass(equals == true, "equals == true", __FILE__, __LINE__);
 
 }
 void ST_avmplus_basics::test3() {
     Stringp s = core->newConstantStringLatin1("ev\xADident");
     bool found = s->containsLatin1("\xAD");
-// line 63 "ST_avmplus_basics.st"
+// line 30 "ST_avmplus_basics.st"
 verifyPass(found == true, "found == true", __FILE__, __LINE__);
 
 }
 void ST_avmplus_basics::test4() {
     Stringp s = core->newConstantStringLatin1("ev\xADident");
     int index = s->indexOfLatin1("\xAD");
-// line 68 "ST_avmplus_basics.st"
+// line 35 "ST_avmplus_basics.st"
 verifyPass(index == 2, "index == 2", __FILE__, __LINE__);
 
 }
 void ST_avmplus_basics::test5() {
     Stringp s = core->newConstantStringLatin1("ev\xADident");
     bool matches1 = s->matchesLatin1("\xADi", 2, 2);
-// line 73 "ST_avmplus_basics.st"
+// line 40 "ST_avmplus_basics.st"
 verifyPass(matches1 == true, "matches1 == true", __FILE__, __LINE__);
 
 }
 void ST_avmplus_basics::test6() {
     Stringp s = core->newConstantStringLatin1("ev\xADident");
     bool matches2 = s->matchesLatin1_caseless("\xADIDENT", 2, 2);
-// line 78 "ST_avmplus_basics.st"
+// line 45 "ST_avmplus_basics.st"
 verifyPass(matches2 == true, "matches2 == true", __FILE__, __LINE__);
 
 
@@ -114,7 +115,7 @@ while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
     break;
     }
 }
-// line 101 "ST_avmplus_basics.st"
+// line 68 "ST_avmplus_basics.st"
 verifyPass(pass == true, "pass == true", __FILE__, __LINE__);
 
     // FIXME: this needs a "register this object with the GC" mechanism; this abuse of the GCRoot mechanism
@@ -144,9 +145,10 @@ void create_avmplus_basics(AvmCore* core) { new ST_avmplus_basics(core); }
 // Generated from ST_avmplus_builtins.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -191,7 +193,7 @@ void ST_avmplus_builtins::test0() {
     printf("fhtagn sum: %d\n", sum);
 
 // Retain at least 250, but it would be unreasonable to retain more than 300
-// line 64 "ST_avmplus_builtins.st"
+// line 31 "ST_avmplus_builtins.st"
 verifyPass(sum >= 250 && sum <= 300, "sum >= 250 && sum <= 300", __FILE__, __LINE__);
 
 }
@@ -204,9 +206,9 @@ void create_avmplus_builtins(AvmCore* core) { new ST_avmplus_builtins(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -266,19 +268,19 @@ void ST_avmplus_peephole::test0() {
      uintptr_t* code;
 uint32_t len = (uint32_t)t->epilogue(&code);
 
-// line 76 "ST_avmplus_peephole.st"
+// line 43 "ST_avmplus_peephole.st"
 verifyPass(len == 6, "len == 6", __FILE__, __LINE__);
-// line 77 "ST_avmplus_peephole.st"
+// line 44 "ST_avmplus_peephole.st"
 verifyPass(code[0] == NEW_OPCODE(WOP_get2locals), "code[0] == NEW_OPCODE(WOP_get2locals)", __FILE__, __LINE__);
-// line 78 "ST_avmplus_peephole.st"
+// line 45 "ST_avmplus_peephole.st"
 verifyPass(code[1] == ((4 << 16) | 5), "code[1] == ((4 << 16) | 5)", __FILE__, __LINE__);
-// line 79 "ST_avmplus_peephole.st"
+// line 46 "ST_avmplus_peephole.st"
 verifyPass(code[2] == NEW_OPCODE(WOP_getlocal), "code[2] == NEW_OPCODE(WOP_getlocal)", __FILE__, __LINE__);
-// line 80 "ST_avmplus_peephole.st"
+// line 47 "ST_avmplus_peephole.st"
 verifyPass(code[3] == 65536, "code[3] == 65536", __FILE__, __LINE__);
-// line 81 "ST_avmplus_peephole.st"
+// line 48 "ST_avmplus_peephole.st"
 verifyPass(code[4] == NEW_OPCODE(WOP_get2locals), "code[4] == NEW_OPCODE(WOP_get2locals)", __FILE__, __LINE__);
-// line 82 "ST_avmplus_peephole.st"
+// line 49 "ST_avmplus_peephole.st"
 verifyPass(code[5] == ((6 << 16) | 7), "code[5] == ((6 << 16) | 7)", __FILE__, __LINE__);
 
     delete t;
@@ -295,9 +297,9 @@ void create_avmplus_peephole(AvmCore* core) { new ST_avmplus_peephole(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 609145 - VectorObject needs fast inline getter/setters
 // Make sure the APIs, which are used by the Flash Player and AIR only, do not disappear.
@@ -354,7 +356,7 @@ case 4: test4(); return;
 }
 void ST_avmplus_vector_accessors::test0() {
 
-// line 69 "ST_avmplus_vector_accessors.st"
+// line 36 "ST_avmplus_vector_accessors.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -371,19 +373,19 @@ dl.add(13);
 DataListAccessor<int> dla(&dl);
 int* xs = dla.addr();
 
-// line 84 "ST_avmplus_vector_accessors.st"
+// line 51 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[0] == 1, "xs[0] == 1", __FILE__, __LINE__);
-// line 85 "ST_avmplus_vector_accessors.st"
+// line 52 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[1] == 1, "xs[1] == 1", __FILE__, __LINE__);
-// line 86 "ST_avmplus_vector_accessors.st"
+// line 53 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[2] == 2, "xs[2] == 2", __FILE__, __LINE__);
-// line 87 "ST_avmplus_vector_accessors.st"
+// line 54 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[3] == 3, "xs[3] == 3", __FILE__, __LINE__);
-// line 88 "ST_avmplus_vector_accessors.st"
+// line 55 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[4] == 5, "xs[4] == 5", __FILE__, __LINE__);
-// line 89 "ST_avmplus_vector_accessors.st"
+// line 56 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[5] == 8, "xs[5] == 8", __FILE__, __LINE__);
-// line 90 "ST_avmplus_vector_accessors.st"
+// line 57 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[6] == 13, "xs[6] == 13", __FILE__, __LINE__);
 
 }
@@ -401,16 +403,16 @@ dl4.add(x2);
 DataListAccessor<float4_t,16> dla4(&dl4);
 float4_t* x4s = dla4.addr();
 
-// line 106 "ST_avmplus_vector_accessors.st"
+// line 73 "ST_avmplus_vector_accessors.st"
 verifyPass(f4_eq_i(x4s[0], x0) == 1, "f4_eq_i(x4s[0], x0) == 1", __FILE__, __LINE__);
-// line 107 "ST_avmplus_vector_accessors.st"
+// line 74 "ST_avmplus_vector_accessors.st"
 verifyPass(f4_eq_i(x4s[1], x1) == 1, "f4_eq_i(x4s[1], x1) == 1", __FILE__, __LINE__);
-// line 108 "ST_avmplus_vector_accessors.st"
+// line 75 "ST_avmplus_vector_accessors.st"
 verifyPass(f4_eq_i(x4s[2], x2) == 1, "f4_eq_i(x4s[2], x2) == 1", __FILE__, __LINE__);
 
 #else
 
-// line 112 "ST_avmplus_vector_accessors.st"
+// line 79 "ST_avmplus_vector_accessors.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 #endif
@@ -435,24 +437,24 @@ vec->_setNativeUintProperty(6, 13);
 IntVectorAccessor va(vec);
 int* xs = va.addr();
 
-// line 135 "ST_avmplus_vector_accessors.st"
+// line 102 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[0] == 1, "xs[0] == 1", __FILE__, __LINE__);
-// line 136 "ST_avmplus_vector_accessors.st"
+// line 103 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[1] == 1, "xs[1] == 1", __FILE__, __LINE__);
-// line 137 "ST_avmplus_vector_accessors.st"
+// line 104 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[2] == 2, "xs[2] == 2", __FILE__, __LINE__);
-// line 138 "ST_avmplus_vector_accessors.st"
+// line 105 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[3] == 3, "xs[3] == 3", __FILE__, __LINE__);
-// line 139 "ST_avmplus_vector_accessors.st"
+// line 106 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[4] == 5, "xs[4] == 5", __FILE__, __LINE__);
-// line 140 "ST_avmplus_vector_accessors.st"
+// line 107 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[5] == 8, "xs[5] == 8", __FILE__, __LINE__);
-// line 141 "ST_avmplus_vector_accessors.st"
+// line 108 "ST_avmplus_vector_accessors.st"
 verifyPass(xs[6] == 13, "xs[6] == 13", __FILE__, __LINE__);
 
 #else
 
-// line 145 "ST_avmplus_vector_accessors.st"
+// line 112 "ST_avmplus_vector_accessors.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 #endif // AVMSHELL_BUILD
@@ -477,16 +479,16 @@ vec->_setNativeUintProperty(2, x2);
 Float4VectorAccessor va(vec);
 float4_t* x4s = va.addr();
 
-// line 168 "ST_avmplus_vector_accessors.st"
+// line 135 "ST_avmplus_vector_accessors.st"
 verifyPass(f4_eq_i(x4s[0], x0) == 1, "f4_eq_i(x4s[0], x0) == 1", __FILE__, __LINE__);
-// line 169 "ST_avmplus_vector_accessors.st"
+// line 136 "ST_avmplus_vector_accessors.st"
 verifyPass(f4_eq_i(x4s[1], x1) == 1, "f4_eq_i(x4s[1], x1) == 1", __FILE__, __LINE__);
-// line 170 "ST_avmplus_vector_accessors.st"
+// line 137 "ST_avmplus_vector_accessors.st"
 verifyPass(f4_eq_i(x4s[2], x2) == 1, "f4_eq_i(x4s[2], x2) == 1", __FILE__, __LINE__);
 
 #else
 
-// line 174 "ST_avmplus_vector_accessors.st"
+// line 141 "ST_avmplus_vector_accessors.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 #endif // AVMSHELL_BUILD
@@ -501,9 +503,9 @@ void create_avmplus_vector_accessors(AvmCore* core) { new ST_avmplus_vector_acce
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 543560 - here we risk deleting an object that is still on the mark stack because
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
@@ -654,7 +656,7 @@ void ST_mmgc_bugzilla_543560::test0() {
     delete theRoot;
 
     // Will crash if it fails so the %%verify is just token
-// line 168 "ST_mmgc_543560.st"
+// line 135 "ST_mmgc_543560.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -669,9 +671,9 @@ void create_mmgc_bugzilla_543560(AvmCore* core) { new ST_mmgc_bugzilla_543560(co
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 565631 - We occasionally interleave invoking finalizers
 // and clearing mark bits in GCAlloc::Finalize; so a finalizer can
@@ -781,7 +783,7 @@ void ST_mmgc_bugzilla_575631::test0() {
     }
 
     // not assert failing within get() is passing the test.
-// line 132 "ST_mmgc_575631.st"
+// line 99 "ST_mmgc_575631.st"
 verifyPass(1, "1", __FILE__, __LINE__);
           ; // (make my auto-indenter happy)
 
@@ -795,7 +797,7 @@ verifyPass(1, "1", __FILE__, __LINE__);
         // if something went wrong above and some Snoopy's are still alive,
         // we'll get burned during their destructors.  Make sure that
         // does not happen.
-// line 145 "ST_mmgc_575631.st"
+// line 112 "ST_mmgc_575631.st"
 verifyPass((Snoopy::alive_count == 0), "(Snoopy::alive_count == 0)", __FILE__, __LINE__);
               ;
     }
@@ -811,9 +813,9 @@ void create_mmgc_bugzilla_575631(AvmCore* core) { new ST_mmgc_bugzilla_575631(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 580603 - adversarial mmgc: dispersive w.r.t. address space
 // Bugzilla 445780 - Page map needs to be sparse
@@ -1068,7 +1070,7 @@ void ST_mmgc_bugzilla_580603::test0() {
 
     // print_minmax();
 
-// line 275 "ST_mmgc_580603.st"
+// line 242 "ST_mmgc_580603.st"
 verifyPass(1, "1", __FILE__, __LINE__);
 }
 
@@ -1087,7 +1089,7 @@ void ST_mmgc_bugzilla_580603::test1() {
 
     // print_minmax();
 
-// line 292 "ST_mmgc_580603.st"
+// line 259 "ST_mmgc_580603.st"
 verifyPass(1, "1", __FILE__, __LINE__);
 }
 
@@ -1101,9 +1103,11 @@ void create_mmgc_bugzilla_580603(AvmCore* core) { new ST_mmgc_bugzilla_580603(co
 // Generated from ST_mmgc_603411.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+// Bug 603411 - SECURITY: AvmCore dtor needs to clear CallStackNode chain
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -1226,7 +1230,7 @@ void ST_mmgc_bugzilla_603411::test0() {
     testClass = new MyTestClass(testCore);
     testClass->testAvmCoreDelete();
 
-// line 141 "ST_mmgc_603411.st"
+// line 108 "ST_mmgc_603411.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -1240,9 +1244,9 @@ void create_mmgc_bugzilla_603411(AvmCore* core) { new ST_mmgc_bugzilla_603411(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 637993: rehashing a GCHashtable in the midst of iteration
 // is unsound; here we check that we are guarding against it.
@@ -1304,7 +1308,7 @@ void ST_mmgc_bugzilla_637993::test0() {
     }
     m_table.clear();
     delete elems;
-// line 74 "ST_mmgc_637993.st"
+// line 41 "ST_mmgc_637993.st"
 verifyPass(true, "true", __FILE__, __LINE__);
          ;
 
@@ -1320,7 +1324,7 @@ void ST_mmgc_bugzilla_637993::test1() {
     }
     m_table.clear();
     delete elems;
-// line 88 "ST_mmgc_637993.st"
+// line 55 "ST_mmgc_637993.st"
 verifyPass(false, "false", __FILE__, __LINE__);
          ;
 
@@ -1339,7 +1343,7 @@ void ST_mmgc_bugzilla_637993::test2() {
     add_second_half(); // rule satisfied; (Iterator is out of scope).
     m_table.clear();
     delete elems;
-// line 105 "ST_mmgc_637993.st"
+// line 72 "ST_mmgc_637993.st"
 verifyPass(true, "true", __FILE__, __LINE__);
          ;
 
@@ -1358,7 +1362,7 @@ void ST_mmgc_bugzilla_637993::test3() {
     m_table.clear();
     delete elems;
     // we should never get here, the assertion should happen up above.
-// line 122 "ST_mmgc_637993.st"
+// line 89 "ST_mmgc_637993.st"
 verifyPass(false, "false", __FILE__, __LINE__);
           ;
 
@@ -1379,7 +1383,7 @@ void ST_mmgc_bugzilla_637993::test4() {
     m_table.clear();
     delete elems;
     // we should never get here, the assertion should happen up above.
-// line 141 "ST_mmgc_637993.st"
+// line 108 "ST_mmgc_637993.st"
 verifyPass(false, "false", __FILE__, __LINE__);
           ;
 
@@ -1393,9 +1397,9 @@ void create_mmgc_bugzilla_637993(AvmCore* core) { new ST_mmgc_bugzilla_637993(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -1573,7 +1577,7 @@ GCObjectLock* LockerAndUnlocker::lock2[numlocked];
 int LockerAndUnlocker::counter = 0;
 
 void ST_mmgc_basics::test0() {
-// line 161 "ST_mmgc_basics.st"
+// line 128 "ST_mmgc_basics.st"
 verifyPass(gc != NULL, "gc != NULL", __FILE__, __LINE__);
 
 }
@@ -1581,10 +1585,10 @@ void ST_mmgc_basics::test1() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-// line 167 "ST_mmgc_basics.st"
+// line 134 "ST_mmgc_basics.st"
 verifyPass(mygcobject!=NULL, "mygcobject!=NULL", __FILE__, __LINE__);
     mygcobject->i=10;
-// line 169 "ST_mmgc_basics.st"
+// line 136 "ST_mmgc_basics.st"
 verifyPass(mygcobject->i==10, "mygcobject->i==10", __FILE__, __LINE__);
 
 }
@@ -1594,7 +1598,7 @@ void ST_mmgc_basics::test2() {
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 //    AvmLog("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
-// line 177 "ST_mmgc_basics.st"
+// line 144 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize(), "gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize()", __FILE__, __LINE__);
     delete mygcobject;
 
@@ -1604,47 +1608,47 @@ void ST_mmgc_basics::test3() {
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-// line 185 "ST_mmgc_basics.st"
+// line 152 "ST_mmgc_basics.st"
 verifyPass((int)gc->GetBytesInUse()>inuse, "(int)gc->GetBytesInUse()>inuse", __FILE__, __LINE__);
     delete mygcobject;
 //    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
     gc->Collect();
 //    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
-// line 190 "ST_mmgc_basics.st"
+// line 157 "ST_mmgc_basics.st"
 verifyPass((int)gc->GetBytesInUse()<=inuse, "(int)gc->GetBytesInUse()<=inuse", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test4() {
-// line 193 "ST_mmgc_basics.st"
+// line 160 "ST_mmgc_basics.st"
 verifyPass(gc->GetGCHeap()!=NULL, "gc->GetGCHeap()!=NULL", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test5() {
     MMgc::FixedAlloc *fa;
     fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());
-// line 198 "ST_mmgc_basics.st"
+// line 165 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetMaxAlloc()==0, "(int)fa->GetMaxAlloc()==0", __FILE__, __LINE__);
-// line 199 "ST_mmgc_basics.st"
+// line 166 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetNumBlocks()==0, "(int)fa->GetNumBlocks()==0", __FILE__, __LINE__);
     void *data1=fa->Alloc(2048);
-// line 201 "ST_mmgc_basics.st"
+// line 168 "ST_mmgc_basics.st"
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data1)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data1)==fa", __FILE__, __LINE__);
-// line 202 "ST_mmgc_basics.st"
+// line 169 "ST_mmgc_basics.st"
 verifyPass(fa->GetBytesInUse()==DebugSize()+2048, "fa->GetBytesInUse()==DebugSize()+2048", __FILE__, __LINE__);
-// line 203 "ST_mmgc_basics.st"
+// line 170 "ST_mmgc_basics.st"
 verifyPass(fa->GetItemSize()==2048, "fa->GetItemSize()==2048", __FILE__, __LINE__);
     void *data2=fa->Alloc(2048);
-// line 205 "ST_mmgc_basics.st"
+// line 172 "ST_mmgc_basics.st"
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data2)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data2)==fa", __FILE__, __LINE__);
 //    AvmLog("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
-// line 207 "ST_mmgc_basics.st"
+// line 174 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
     fa->Free(data1);
-// line 209 "ST_mmgc_basics.st"
+// line 176 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
-// line 210 "ST_mmgc_basics.st"
+// line 177 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetMaxAlloc()==1, "(int)fa->GetMaxAlloc()==1", __FILE__, __LINE__);
-// line 211 "ST_mmgc_basics.st"
+// line 178 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetNumBlocks()==1, "(int)fa->GetNumBlocks()==1", __FILE__, __LINE__);
     fa->Free(data2);
     delete fa;
@@ -1655,10 +1659,10 @@ void ST_mmgc_basics::test6() {
     int start=(int)fm->GetBytesInUse();
     int starttotal=(int)fm->GetTotalSize();
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-// line 220 "ST_mmgc_basics.st"
+// line 187 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-// line 222 "ST_mmgc_basics.st"
+// line 189 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     void *obj=fm->Alloc(8192);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
@@ -1667,24 +1671,24 @@ verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==startt
 //    %%verify (int)fm->GetTotalSize()==starttotal+2
     fm->Free(obj);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-// line 230 "ST_mmgc_basics.st"
+// line 197 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-// line 232 "ST_mmgc_basics.st"
+// line 199 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     obj=fm->Calloc(1024,10);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 // FixedMalloc is currently (as of redux 3229) tracking large allocs using a list of
 // small objects, in some debug modes.  So we can't have a precise test here.
-// line 237 "ST_mmgc_basics.st"
+// line 204 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64, "(int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-// line 239 "ST_mmgc_basics.st"
+// line 206 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal+3, "(int)fm->GetTotalSize()==starttotal+3", __FILE__, __LINE__);
     fm->Free(obj);
-// line 241 "ST_mmgc_basics.st"
+// line 208 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
-// line 242 "ST_mmgc_basics.st"
+// line 209 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
 
 }
@@ -1693,15 +1697,15 @@ void ST_mmgc_basics::test7() {
     int startfreeheap=(int)gh->GetFreeHeapSize();
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-// line 249 "ST_mmgc_basics.st"
+// line 216 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
 //gh->Config().heapLimit = 1024;
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-// line 253 "ST_mmgc_basics.st"
+// line 220 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
     void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
-// line 255 "ST_mmgc_basics.st"
+// line 222 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetTotalHeapSize()>startfreeheap, "(int)gh->GetTotalHeapSize()>startfreeheap", __FILE__, __LINE__);
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     gh->FreeNoProfile(data);
@@ -1723,9 +1727,9 @@ void ST_mmgc_basics::test8() {
     // 
     for ( size_t k=2 ; k <= 256 ; k *= 2 ) {
         void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, k);
-// line 275 "ST_mmgc_basics.st"
+// line 242 "ST_mmgc_basics.st"
 verifyPass(((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0, "((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0", __FILE__, __LINE__);
-// line 276 "ST_mmgc_basics.st"
+// line 243 "ST_mmgc_basics.st"
 verifyPass(gh->Size(data) == 10, "gh->Size(data) == 10", __FILE__, __LINE__);
         gh->Free(data);
     }
@@ -1735,9 +1739,9 @@ void ST_mmgc_basics::test9() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-// line 284 "ST_mmgc_basics.st"
+// line 251 "ST_mmgc_basics.st"
 verifyPass((MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject, "(MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject", __FILE__, __LINE__);
-// line 285 "ST_mmgc_basics.st"
+// line 252 "ST_mmgc_basics.st"
 verifyPass((MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject, "(MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject", __FILE__, __LINE__);
 
 // Bugzilla 542529 - in debug mode we would assert here due to logic flaws in the allocatr
@@ -1746,7 +1750,7 @@ void ST_mmgc_basics::test10() {
     MMGC_GCENTER(gc);
     new (gc) AllocInFinalizer();
     gc->Collect(false);
-// line 292 "ST_mmgc_basics.st"
+// line 259 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -1755,7 +1759,7 @@ void ST_mmgc_basics::test11() {
     new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
     //delete m; delete m; // this verifies we crash, it does
     gc->Collect(false);
-// line 299 "ST_mmgc_basics.st"
+// line 266 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
     GCFinalizedObject *gcfo = new (gc) GCFinalizedObject();
     gcfo->~GCFinalizedObject();
@@ -1780,7 +1784,7 @@ void ST_mmgc_basics::test12() {
     }
     a = gc->Alloc(8);
     // just fishing for asserts/hangs/crashes
-// line 322 "ST_mmgc_basics.st"
+// line 289 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
     delete gcb;
 
@@ -1799,7 +1803,7 @@ void ST_mmgc_basics::test13() {
         delete gcb;
 
         // just fishing for asserts/hangs/crashes
-// line 339 "ST_mmgc_basics.st"
+// line 306 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
     }
 
@@ -1810,37 +1814,37 @@ void ST_mmgc_basics::test14() {
         GC *gc = new GC(GCHeap::GetGCHeap(), config);
         MMGC_GCENTER(gc);
 
-// line 348 "ST_mmgc_basics.st"
+// line 315 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::createAndLockObjects(gc), "LockerAndUnlocker::createAndLockObjects(gc)", __FILE__, __LINE__);
         gc->Collect();
         gc->Collect();
-// line 351 "ST_mmgc_basics.st"
+// line 318 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::testLocksHeld(gc, 1), "LockerAndUnlocker::testLocksHeld(gc, 1)", __FILE__, __LINE__);
         gc->Collect();
         gc->Collect();
-// line 354 "ST_mmgc_basics.st"
+// line 321 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::lockLevel2(gc), "LockerAndUnlocker::lockLevel2(gc)", __FILE__, __LINE__);
         gc->Collect();
         gc->Collect();
-// line 357 "ST_mmgc_basics.st"
+// line 324 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::testLocksHeld(gc, 2), "LockerAndUnlocker::testLocksHeld(gc, 2)", __FILE__, __LINE__);
         gc->Collect();
         gc->Collect();
-// line 360 "ST_mmgc_basics.st"
+// line 327 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::unlockLevel2(gc), "LockerAndUnlocker::unlockLevel2(gc)", __FILE__, __LINE__);
         gc->Collect();
         gc->Collect();
-// line 363 "ST_mmgc_basics.st"
+// line 330 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::testLocksHeld(gc, 1), "LockerAndUnlocker::testLocksHeld(gc, 1)", __FILE__, __LINE__);
         gc->Collect();
         gc->Collect();
-// line 366 "ST_mmgc_basics.st"
+// line 333 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::unlockLevel1(gc), "LockerAndUnlocker::unlockLevel1(gc)", __FILE__, __LINE__);
 
         // Bug 637695: be aware: conservative retention may foil verify below
         gc->Collect();
         gc->Collect();
-// line 371 "ST_mmgc_basics.st"
+// line 338 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::testLocksNotHeld(gc), "LockerAndUnlocker::testLocksNotHeld(gc)", __FILE__, __LINE__);
 
         delete gc;
@@ -1876,7 +1880,7 @@ void ST_mmgc_basics::test15() {
                 //    %%verify ms.P(sentinel) == GCMarkStack::kDeadItem
                 //    %%verify ms.GetSentinel1TypeAt(ms.GetItemAbove(sentinel)) == GCMarkStack::kDeadItem
                 //}
-// line 405 "ST_mmgc_basics.st"
+// line 372 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
             }
             testGC->Mark();
@@ -1900,7 +1904,7 @@ void ST_mmgc_basics::test16() {
     gc->removeFromBlacklist(mygcobject);
     delete gc;
 #endif
-// line 427 "ST_mmgc_basics.st"
+// line 394 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -1908,23 +1912,23 @@ void ST_mmgc_basics::test17() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *) new (gc) MyGCObject();
-// line 433 "ST_mmgc_basics.st"
+// line 400 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
     delete mygcobject;
-// line 435 "ST_mmgc_basics.st"
+// line 402 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
     gc->Collect();
-// line 437 "ST_mmgc_basics.st"
+// line 404 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
     MyGCLargeObject *mygclargeobject;
     mygclargeobject = (MyGCLargeObject *) new (gc) MyGCLargeObject();
-// line 440 "ST_mmgc_basics.st"
+// line 407 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
     delete mygclargeobject;
-// line 442 "ST_mmgc_basics.st"
+// line 409 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
     gc->Collect();
-// line 444 "ST_mmgc_basics.st"
+// line 411 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast() , "gc->GetBytesInUse() == gc->GetBytesInUseFast() ", __FILE__, __LINE__);
      
 
@@ -1938,9 +1942,9 @@ void create_mmgc_basics(AvmCore* core) { new ST_mmgc_basics(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 543560 - here we risk deleting an object that is still on the mark stack because
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
@@ -2028,7 +2032,7 @@ void ST_mmgc_dependent::test0() {
     // completely.  So assume that heap size must stay below L*2*16MB for the
     // L that applies at 32MB.
 
-// line 101 "ST_mmgc_dependent.st"
+// line 68 "ST_mmgc_dependent.st"
 verifyPass(size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap, "size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap", __FILE__, __LINE__);
 
 }
@@ -2041,7 +2045,7 @@ void ST_mmgc_dependent::test1() {
     // Check total dependent memory consistency
     for(int i = 0; i < MMgc::typeCount; i++)
         depMem_start += gc->getDependentMemory((MMgc::DependentMemoryType)i);
-// line 112 "ST_mmgc_dependent.st"
+// line 79 "ST_mmgc_dependent.st"
 verifyPass(depMem_start == gc->policy.dependentAllocation, "depMem_start == gc->policy.dependentAllocation", __FILE__, __LINE__);
 
     // Check byteArray type dependent memory
@@ -2055,36 +2059,36 @@ verifyPass(depMem_start == gc->policy.dependentAllocation, "depMem_start == gc->
 
     // Allocate known type dependent memory
     size_t byteArray_bytes2 = gc->getDependentMemory(MMgc::typeByteArray);
-// line 125 "ST_mmgc_dependent.st"
+// line 92 "ST_mmgc_dependent.st"
 verifyPass(byteArray_bytes2 > byteArray_bytes1, "byteArray_bytes2 > byteArray_bytes1", __FILE__, __LINE__);
 
     // Allocate unknown dependent memory
     DependentAllocHolder* obj = new (gc) DependentAllocHolder();
 
     size_t byteArray_bytes3 = gc->getDependentMemory(MMgc::typeByteArray);
-// line 131 "ST_mmgc_dependent.st"
+// line 98 "ST_mmgc_dependent.st"
 verifyPass(byteArray_bytes3 == byteArray_bytes2, "byteArray_bytes3 == byteArray_bytes2", __FILE__, __LINE__);
     byteArray->clear();
  
-// line 134 "ST_mmgc_dependent.st"
+// line 101 "ST_mmgc_dependent.st"
 verifyPass(gc->getDependentMemory(MMgc::typeByteArray) == byteArray_bytes1, "gc->getDependentMemory(MMgc::typeByteArray) == byteArray_bytes1", __FILE__, __LINE__);
     delete obj;
 
     // Consistency check
     for(int i = 0; i < MMgc::typeCount; i++)
         depMem_end += gc->getDependentMemory((MMgc::DependentMemoryType)i);
-// line 140 "ST_mmgc_dependent.st"
+// line 107 "ST_mmgc_dependent.st"
 verifyPass(depMem_end == gc->policy.dependentAllocation, "depMem_end == gc->policy.dependentAllocation", __FILE__, __LINE__);
-// line 141 "ST_mmgc_dependent.st"
+// line 108 "ST_mmgc_dependent.st"
 verifyPass(depMem_end == depMem_start, "depMem_end == depMem_start", __FILE__, __LINE__);
 
 #if !defined DEBUG && !defined DEBUGGER
     // Get memory for out of bounds type
     // getDependentMemory has assert; skip in debug build
-// line 146 "ST_mmgc_dependent.st"
+// line 113 "ST_mmgc_dependent.st"
 verifyPass(gc->getDependentMemory(MMgc::typeCount) == 0, "gc->getDependentMemory(MMgc::typeCount) == 0", __FILE__, __LINE__);
 #endif
-// line 148 "ST_mmgc_dependent.st"
+// line 115 "ST_mmgc_dependent.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -2096,14 +2100,14 @@ void ST_mmgc_dependent::test2() {
     size_t unknownDependentMem_start = gc->getDependentMemory(MMgc::typeUnknown);
     DependentAllocHolder* obj = new (gc) DependentAllocHolder();
     size_t unknownDependentMem_end = gc->getDependentMemory(MMgc::typeUnknown);
-// line 158 "ST_mmgc_dependent.st"
+// line 125 "ST_mmgc_dependent.st"
 verifyPass((unknownDependentMem_end - unknownDependentMem_start) == nbytes, "(unknownDependentMem_end - unknownDependentMem_start) == nbytes", __FILE__, __LINE__);
     
     delete obj;
-// line 161 "ST_mmgc_dependent.st"
+// line 128 "ST_mmgc_dependent.st"
 verifyPass(unknownDependentMem_start == gc->getDependentMemory(MMgc::typeUnknown), "unknownDependentMem_start == gc->getDependentMemory(MMgc::typeUnknown)", __FILE__, __LINE__);
 #else
-// line 163 "ST_mmgc_dependent.st"
+// line 130 "ST_mmgc_dependent.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -2118,9 +2122,9 @@ void create_mmgc_dependent(AvmCore* core) { new ST_mmgc_dependent(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2175,7 +2179,7 @@ void ST_mmgc_exact::test0() {
     core->gc->Collect();
     core->gc->UnlockObject(lock);
 
-// line 75 "ST_mmgc_exact.st"
+// line 42 "ST_mmgc_exact.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 
@@ -2188,9 +2192,9 @@ void create_mmgc_exact(AvmCore* core) { new ST_mmgc_exact(core); }
 // Generated from ST_mmgc_externalalloc.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2252,14 +2256,14 @@ void ST_mmgc_externalalloc::test0() {
     // Remove the heapSoftLimit, this should ensure that we are not in a MMgc::kMemSoftLimit state,
     // and hopefully we are in a kMemNormal state otherwise we are in a kMemAbort state and all bets are off.
     GCHeap::GetGCHeap()->Config().heapSoftLimit = 0;
-// line 78 "ST_mmgc_externalalloc.st"
+// line 45 "ST_mmgc_externalalloc.st"
 verifyPass(cb->status==MMgc::kMemNormal, "cb->status==MMgc::kMemNormal", __FILE__, __LINE__);
     GCHeap::GetGCHeap()->Config().heapSoftLimit = GCHeap::GetGCHeap()->GetTotalHeapSize();
     MMgc::GCHeap::SignalExternalAllocation(1024*1024);
-// line 81 "ST_mmgc_externalalloc.st"
+// line 48 "ST_mmgc_externalalloc.st"
 verifyPass(cb->status==MMgc::kMemSoftLimit, "cb->status==MMgc::kMemSoftLimit", __FILE__, __LINE__);
     MMgc::GCHeap::SignalExternalDeallocation(1024*1024);
-// line 83 "ST_mmgc_externalalloc.st"
+// line 50 "ST_mmgc_externalalloc.st"
 verifyPass(cb->status==MMgc::kMemNormal, "cb->status==MMgc::kMemNormal", __FILE__, __LINE__);
     GCHeap::GetGCHeap()->Config().heapSoftLimit = softlimit;
     softlimit = 0;
@@ -2274,6 +2278,10 @@ void create_mmgc_externalalloc(AvmCore* core) { new ST_mmgc_externalalloc(core);
 
 // Generated from ST_mmgc_finalize_uninit.st
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 
 // Bugzilla 573737 - a throw from an argument to a constructor can
@@ -2368,7 +2376,7 @@ void ST_mmgc_finalize_uninit::test0() {
 
     // printf("D::finalized_count(): %d\n", D::finalized_count());
 
-// line 71 "ST_mmgc_finalize_uninit.st"
+// line 75 "ST_mmgc_finalize_uninit.st"
 verifyPass((D::finalized_count() > 90), "(D::finalized_count() > 90)", __FILE__, __LINE__);
 }
 
@@ -2402,7 +2410,7 @@ void ST_mmgc_finalize_uninit::test1() {
     core->gc->Collect();
 
     // (not dying is passing.)
-// line 103 "ST_mmgc_finalize_uninit.st"
+// line 107 "ST_mmgc_finalize_uninit.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 }
 
@@ -2445,7 +2453,7 @@ void ST_mmgc_finalize_uninit::test2() {
 
     // printf("D::finalized_count(): %d\n", D::finalized_count());
 
-// line 144 "ST_mmgc_finalize_uninit.st"
+// line 148 "ST_mmgc_finalize_uninit.st"
 verifyPass((D::finalized_count() > 90), "(D::finalized_count() > 90)", __FILE__, __LINE__);
 }
 
@@ -2482,7 +2490,7 @@ void ST_mmgc_finalize_uninit::test3() {
     core->gc->Collect();
 
     // (not dying is passing.)
-// line 179 "ST_mmgc_finalize_uninit.st"
+// line 183 "ST_mmgc_finalize_uninit.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 }
 
@@ -2496,9 +2504,9 @@ void create_mmgc_finalize_uninit(AvmCore* core) { new ST_mmgc_finalize_uninit(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 663508: Add FixedMalloc::FindBeginning
 
@@ -2624,7 +2632,7 @@ void ST_mmgc_fixedmalloc_findbeginning::prologue() {
 void ST_mmgc_fixedmalloc_findbeginning::test0() {
     {
         size_t sz = FixedMalloc::kSizeClasses[0];
-// line 124 "ST_mmgc_fixedmalloc_findbeginning.st"
+// line 91 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
               ;
     }
@@ -2633,7 +2641,7 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
 void ST_mmgc_fixedmalloc_findbeginning::test1() {
     {
         size_t sz = FixedMalloc::kSizeClasses[1];
-// line 131 "ST_mmgc_fixedmalloc_findbeginning.st"
+// line 98 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
               ;
     }
@@ -2642,7 +2650,7 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
 void ST_mmgc_fixedmalloc_findbeginning::test2() {
     {
         size_t sz = FixedMalloc::kSizeClasses[2];
-// line 138 "ST_mmgc_fixedmalloc_findbeginning.st"
+// line 105 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
               ;
     }
@@ -2651,7 +2659,7 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
 void ST_mmgc_fixedmalloc_findbeginning::test3() {
     {
         size_t sz = FixedMalloc::kSizeClasses[3];
-// line 145 "ST_mmgc_fixedmalloc_findbeginning.st"
+// line 112 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
               ;
     }
@@ -2660,6 +2668,48 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
 void ST_mmgc_fixedmalloc_findbeginning::test4() {
     {
         size_t sz = FixedMalloc::kLargestAlloc - 1;
+        sz = sz - DebugSize();
+// line 120 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 123 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test5() {
+    {
+        size_t sz = FixedMalloc::kLargestAlloc;
+        sz = sz - DebugSize();
+// line 131 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 134 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test6() {
+    {
+        size_t sz = FixedMalloc::kLargestAlloc+1;
+        sz = sz - DebugSize();
+// line 142 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 145 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test7() {
+    {
+        size_t sz = GCHeap::kBlockSize-1;
         sz = sz - DebugSize();
 // line 153 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
@@ -2671,9 +2721,9 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
     }
 
 }
-void ST_mmgc_fixedmalloc_findbeginning::test5() {
+void ST_mmgc_fixedmalloc_findbeginning::test8() {
     {
-        size_t sz = FixedMalloc::kLargestAlloc;
+        size_t sz = GCHeap::kBlockSize;
         sz = sz - DebugSize();
 // line 164 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
@@ -2685,9 +2735,9 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
     }
 
 }
-void ST_mmgc_fixedmalloc_findbeginning::test6() {
+void ST_mmgc_fixedmalloc_findbeginning::test9() {
     {
-        size_t sz = FixedMalloc::kLargestAlloc+1;
+        size_t sz = GCHeap::kBlockSize+1;
         sz = sz - DebugSize();
 // line 175 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
@@ -2699,9 +2749,9 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
     }
 
 }
-void ST_mmgc_fixedmalloc_findbeginning::test7() {
+void ST_mmgc_fixedmalloc_findbeginning::test10() {
     {
-        size_t sz = GCHeap::kBlockSize-1;
+        size_t sz = GCHeap::kBlockSize*2;
         sz = sz - DebugSize();
 // line 186 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
@@ -2713,57 +2763,15 @@ verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __F
     }
 
 }
-void ST_mmgc_fixedmalloc_findbeginning::test8() {
+void ST_mmgc_fixedmalloc_findbeginning::test11() {
     {
-        size_t sz = GCHeap::kBlockSize;
+        size_t sz = GCHeap::kBlockSize*10;
         sz = sz - DebugSize();
 // line 197 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
               ;
         sz = sz + DebugSize();
 // line 200 "ST_mmgc_fixedmalloc_findbeginning.st"
-verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
-              ;
-    }
-
-}
-void ST_mmgc_fixedmalloc_findbeginning::test9() {
-    {
-        size_t sz = GCHeap::kBlockSize+1;
-        sz = sz - DebugSize();
-// line 208 "ST_mmgc_fixedmalloc_findbeginning.st"
-verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
-              ;
-        sz = sz + DebugSize();
-// line 211 "ST_mmgc_fixedmalloc_findbeginning.st"
-verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
-              ;
-    }
-
-}
-void ST_mmgc_fixedmalloc_findbeginning::test10() {
-    {
-        size_t sz = GCHeap::kBlockSize*2;
-        sz = sz - DebugSize();
-// line 219 "ST_mmgc_fixedmalloc_findbeginning.st"
-verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
-              ;
-        sz = sz + DebugSize();
-// line 222 "ST_mmgc_fixedmalloc_findbeginning.st"
-verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
-              ;
-    }
-
-}
-void ST_mmgc_fixedmalloc_findbeginning::test11() {
-    {
-        size_t sz = GCHeap::kBlockSize*10;
-        sz = sz - DebugSize();
-// line 230 "ST_mmgc_fixedmalloc_findbeginning.st"
-verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
-              ;
-        sz = sz + DebugSize();
-// line 233 "ST_mmgc_fixedmalloc_findbeginning.st"
 verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
               ;
     }
@@ -2777,9 +2785,9 @@ void create_mmgc_fixedmalloc_findbeginning(AvmCore* core) { new ST_mmgc_fixedmal
 // Generated from ST_mmgc_gcheap.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2812,11 +2820,11 @@ void ST_mmgc_gcheap::test0() {
        GCHeap *heap = GCHeap::GetGCHeap();
        for(int i=1;i<4;i++) {
           void *item = heap->Alloc(GCHeap::kOSAllocThreshold*i);
-// line 50 "ST_mmgc_gcheap.st"
+// line 17 "ST_mmgc_gcheap.st"
 verifyPass(heap->Size(item) == GCHeap::kOSAllocThreshold*i, "heap->Size(item) == GCHeap::kOSAllocThreshold*i", __FILE__, __LINE__);
           heap->Free(item);
        }
-// line 53 "ST_mmgc_gcheap.st"
+// line 20 "ST_mmgc_gcheap.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -2824,9 +2832,9 @@ void ST_mmgc_gcheap::test1() {
        GCHeap *heap = GCHeap::GetGCHeap();
        for(int i=1;i<10;i++) {
           void *item = heap->Alloc(GCHeap::kOSAllocThreshold*i, GCHeap::flags_Alloc, 1<<i);
-// line 59 "ST_mmgc_gcheap.st"
+// line 26 "ST_mmgc_gcheap.st"
 verifyPass(heap->Size(item) == GCHeap::kOSAllocThreshold*i, "heap->Size(item) == GCHeap::kOSAllocThreshold*i", __FILE__, __LINE__);
-// line 60 "ST_mmgc_gcheap.st"
+// line 27 "ST_mmgc_gcheap.st"
 verifyPass(uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0, "uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0", __FILE__, __LINE__);
           heap->Free(item);
        }
@@ -2842,9 +2850,9 @@ void create_mmgc_gcheap(AvmCore* core) { new ST_mmgc_gcheap(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2942,33 +2950,33 @@ void ST_mmgc_gcoption::epilogue() {
 }
 void ST_mmgc_gcoption::test0() {
 {
-// line 108 "ST_mmgc_gcoption.st"
+// line 75 "ST_mmgc_gcoption.st"
 verifyPass(isParamOption("-memlimit"), "isParamOption(\"-memlimit\")", __FILE__, __LINE__);
-// line 109 "ST_mmgc_gcoption.st"
+// line 76 "ST_mmgc_gcoption.st"
 verifyPass(isParamOption("-load"), "isParamOption(\"-load\")", __FILE__, __LINE__);
-// line 110 "ST_mmgc_gcoption.st"
+// line 77 "ST_mmgc_gcoption.st"
 verifyPass(isParamOption("-loadCeiling"), "isParamOption(\"-loadCeiling\")", __FILE__, __LINE__);
-// line 111 "ST_mmgc_gcoption.st"
+// line 78 "ST_mmgc_gcoption.st"
 verifyPass(isParamOption("-gcwork"), "isParamOption(\"-gcwork\")", __FILE__, __LINE__);
-// line 112 "ST_mmgc_gcoption.st"
+// line 79 "ST_mmgc_gcoption.st"
 verifyPass(isParamOption("-gcstack"), "isParamOption(\"-gcstack\")", __FILE__, __LINE__);
 
-// line 114 "ST_mmgc_gcoption.st"
+// line 81 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-memlimit=10"), "notParamOption(\"-memlimit=10\")", __FILE__, __LINE__);
-// line 115 "ST_mmgc_gcoption.st"
+// line 82 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-load 1.5"), "notParamOption(\"-load 1.5\")", __FILE__, __LINE__);
-// line 116 "ST_mmgc_gcoption.st"
+// line 83 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-loadCeiling 1.5"), "notParamOption(\"-loadCeiling 1.5\")", __FILE__, __LINE__);
-// line 117 "ST_mmgc_gcoption.st"
+// line 84 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-gcwork 1.5"), "notParamOption(\"-gcwork 1.5\")", __FILE__, __LINE__);
-// line 118 "ST_mmgc_gcoption.st"
+// line 85 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-gcstack 10"), "notParamOption(\"-gcstack 10\")", __FILE__, __LINE__);
 
-// line 120 "ST_mmgc_gcoption.st"
+// line 87 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-not_an_option_and_never_will_be"), "notParamOption(\"-not_an_option_and_never_will_be\")", __FILE__, __LINE__);
-// line 121 "ST_mmgc_gcoption.st"
+// line 88 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-not_an_option_and_never_will_be 10"), "notParamOption(\"-not_an_option_and_never_will_be 10\")", __FILE__, __LINE__);
-// line 122 "ST_mmgc_gcoption.st"
+// line 89 "ST_mmgc_gcoption.st"
 verifyPass(notParamOption("-not_an_option_and_never_will_be=10"), "notParamOption(\"-not_an_option_and_never_will_be=10\")", __FILE__, __LINE__);
           ;
 }
@@ -2979,28 +2987,28 @@ void ST_mmgc_gcoption::test1() {
     // sanity checks:
     // - make sure our configUnchanged check is sane
     // - make sure our restoreHeapConfig works.
-// line 131 "ST_mmgc_gcoption.st"
+// line 98 "ST_mmgc_gcoption.st"
 verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
     memset(&m_heap->config, 0xfe, sizeof(GCHeapConfig));
-// line 133 "ST_mmgc_gcoption.st"
+// line 100 "ST_mmgc_gcoption.st"
 verifyPass(!configUnchanged(), "!configUnchanged()", __FILE__, __LINE__);
     restoreHeapConfig();
-// line 135 "ST_mmgc_gcoption.st"
+// line 102 "ST_mmgc_gcoption.st"
 verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
           ;
 
     parseApply("-memstats");
-// line 139 "ST_mmgc_gcoption.st"
+// line 106 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 140 "ST_mmgc_gcoption.st"
+// line 107 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.gcstats && m_heap->config.autoGCStats, "m_heap->config.gcstats && m_heap->config.autoGCStats", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-memstats-verbose");
-// line 145 "ST_mmgc_gcoption.st"
+// line 112 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 146 "ST_mmgc_gcoption.st"
+// line 113 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.gcstats && m_heap->config.autoGCStats && m_heap->config.verbose, "m_heap->config.gcstats && m_heap->config.autoGCStats && m_heap->config.verbose", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
@@ -3009,41 +3017,41 @@ verifyPass(m_heap->config.gcstats && m_heap->config.autoGCStats && m_heap->confi
 void ST_mmgc_gcoption::test2() {
 {
     parseApply("-memlimit   10");
-// line 153 "ST_mmgc_gcoption.st"
+// line 120 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 154 "ST_mmgc_gcoption.st"
+// line 121 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.heapLimit == 10, "m_heap->config.heapLimit == 10", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-memlimit=11");
-// line 159 "ST_mmgc_gcoption.st"
+// line 126 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 160 "ST_mmgc_gcoption.st"
+// line 127 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.heapLimit == 11, "m_heap->config.heapLimit == 11", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-memlimit = 12");
-// line 165 "ST_mmgc_gcoption.st"
+// line 132 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 166 "ST_mmgc_gcoption.st"
+// line 133 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.heapLimit == 12, "m_heap->config.heapLimit == 12", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-memlimit");
-// line 171 "ST_mmgc_gcoption.st"
+// line 138 "ST_mmgc_gcoption.st"
 verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
-// line 172 "ST_mmgc_gcoption.st"
+// line 139 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.heapLimit == m_config_orig.heapLimit, "m_heap->config.heapLimit == m_config_orig.heapLimit", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-memlimit", "13");
-// line 177 "ST_mmgc_gcoption.st"
+// line 144 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 178 "ST_mmgc_gcoption.st"
+// line 145 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.heapLimit == 13, "m_heap->config.heapLimit == 13", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
@@ -3053,26 +3061,26 @@ void ST_mmgc_gcoption::test3() {
 {
 #ifdef MMGC_POLICY_PROFILING
     parseApply("-gcbehavior");
-// line 186 "ST_mmgc_gcoption.st"
+// line 153 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 187 "ST_mmgc_gcoption.st"
+// line 154 "ST_mmgc_gcoption.st"
 verifyPass((m_heap->config.gcbehavior == 2), "(m_heap->config.gcbehavior == 2)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-gcsummary");
-// line 192 "ST_mmgc_gcoption.st"
+// line 159 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 193 "ST_mmgc_gcoption.st"
+// line 160 "ST_mmgc_gcoption.st"
 verifyPass((m_heap->config.gcbehavior == 1), "(m_heap->config.gcbehavior == 1)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 #endif
 
     parseApply("-eagersweep");
-// line 199 "ST_mmgc_gcoption.st"
+// line 166 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 200 "ST_mmgc_gcoption.st"
+// line 167 "ST_mmgc_gcoption.st"
 verifyPass(m_heap->config.eagerSweeping, "m_heap->config.eagerSweeping", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
@@ -3081,135 +3089,135 @@ verifyPass(m_heap->config.eagerSweeping, "m_heap->config.eagerSweeping", __FILE_
 void ST_mmgc_gcoption::test4() {
 {
     parseApply("-load 7.0");
-// line 207 "ST_mmgc_gcoption.st"
+// line 174 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 208 "ST_mmgc_gcoption.st"
+// line 175 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[0], 7.0), "approxEqual(m_heap->config.gcLoad[0], 7.0)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     // test load with '<space><param>'
     parseApply("-load 6.0,10,5.0");
-// line 214 "ST_mmgc_gcoption.st"
+// line 181 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 215 "ST_mmgc_gcoption.st"
+// line 182 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[0], 6.0), "approxEqual(m_heap->config.gcLoad[0], 6.0)", __FILE__, __LINE__);
-// line 216 "ST_mmgc_gcoption.st"
+// line 183 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 10.0), "approxEqual(m_heap->config.gcLoadCutoff[0], 10.0)", __FILE__, __LINE__);
-// line 217 "ST_mmgc_gcoption.st"
+// line 184 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[1], 5.0), "approxEqual(m_heap->config.gcLoad[1], 5.0)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     // test load with separate <param>
     parseApply("-load", "8.0,20.5,7.0");
-// line 223 "ST_mmgc_gcoption.st"
+// line 190 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 224 "ST_mmgc_gcoption.st"
+// line 191 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[0], 8.0), "approxEqual(m_heap->config.gcLoad[0], 8.0)", __FILE__, __LINE__);
-// line 225 "ST_mmgc_gcoption.st"
+// line 192 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 20.5), "approxEqual(m_heap->config.gcLoadCutoff[0], 20.5)", __FILE__, __LINE__);
-// line 226 "ST_mmgc_gcoption.st"
+// line 193 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[1], 7.0), "approxEqual(m_heap->config.gcLoad[1], 7.0)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     // test load with '=<param>'
     parseApply("-load=10.0,30.5,9.0");
-// line 232 "ST_mmgc_gcoption.st"
+// line 199 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 233 "ST_mmgc_gcoption.st"
+// line 200 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[0], 10.0), "approxEqual(m_heap->config.gcLoad[0], 10.0)", __FILE__, __LINE__);
-// line 234 "ST_mmgc_gcoption.st"
+// line 201 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 30.5), "approxEqual(m_heap->config.gcLoadCutoff[0], 30.5)", __FILE__, __LINE__);
-// line 235 "ST_mmgc_gcoption.st"
+// line 202 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[1], 9.0), "approxEqual(m_heap->config.gcLoad[1], 9.0)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     // Max load pairs is 7
     parseApply("-load 1.5,1.5,2,2,3,3,4,4,5,5,6,6,7,7,8,8");
-// line 241 "ST_mmgc_gcoption.st"
+// line 208 "ST_mmgc_gcoption.st"
 verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
-// line 242 "ST_mmgc_gcoption.st"
+// line 209 "ST_mmgc_gcoption.st"
 verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
     restoreHeapConfig();
 
     // Ensure that the last load value is ignored
     parseApply("-load=10.0,30.0,9.0,60.0");
-// line 247 "ST_mmgc_gcoption.st"
+// line 214 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 248 "ST_mmgc_gcoption.st"
+// line 215 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[0], 10.0), "approxEqual(m_heap->config.gcLoad[0], 10.0)", __FILE__, __LINE__);
-// line 249 "ST_mmgc_gcoption.st"
+// line 216 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 30.0), "approxEqual(m_heap->config.gcLoadCutoff[0], 30.0)", __FILE__, __LINE__);
-// line 250 "ST_mmgc_gcoption.st"
+// line 217 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoad[1], 9.0), "approxEqual(m_heap->config.gcLoad[1], 9.0)", __FILE__, __LINE__);
-// line 251 "ST_mmgc_gcoption.st"
+// line 218 "ST_mmgc_gcoption.st"
 verifyPass(!approxEqual(m_heap->config.gcLoadCutoff[1], 60.0), "!approxEqual(m_heap->config.gcLoadCutoff[1], 60.0)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-load");
-// line 256 "ST_mmgc_gcoption.st"
+// line 223 "ST_mmgc_gcoption.st"
 verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
-// line 257 "ST_mmgc_gcoption.st"
+// line 224 "ST_mmgc_gcoption.st"
 verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     // L (load) must be > 1
     parseApply("-load 1,30");
-// line 263 "ST_mmgc_gcoption.st"
+// line 230 "ST_mmgc_gcoption.st"
 verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
-// line 264 "ST_mmgc_gcoption.st"
+// line 231 "ST_mmgc_gcoption.st"
 verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-load badvalue");
-// line 269 "ST_mmgc_gcoption.st"
+// line 236 "ST_mmgc_gcoption.st"
 verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
-// line 270 "ST_mmgc_gcoption.st"
+// line 237 "ST_mmgc_gcoption.st"
 verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
 
     parseApply("-loadCeiling 11.5");
-// line 276 "ST_mmgc_gcoption.st"
+// line 243 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 277 "ST_mmgc_gcoption.st"
+// line 244 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcLoadCeiling, 11.5), "approxEqual(m_heap->config.gcLoadCeiling, 11.5)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-gcwork 12.5");
-// line 282 "ST_mmgc_gcoption.st"
+// line 249 "ST_mmgc_gcoption.st"
 verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-gcwork 0.123456");
-// line 287 "ST_mmgc_gcoption.st"
+// line 254 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 288 "ST_mmgc_gcoption.st"
+// line 255 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcEfficiency, .123456), "approxEqual(m_heap->config.gcEfficiency, .123456)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-gcwork=0.23456");
-// line 293 "ST_mmgc_gcoption.st"
+// line 260 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 294 "ST_mmgc_gcoption.st"
+// line 261 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcEfficiency, .23456), "approxEqual(m_heap->config.gcEfficiency, .23456)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
 
     parseApply("-gcwork", "0.3456");
-// line 299 "ST_mmgc_gcoption.st"
+// line 266 "ST_mmgc_gcoption.st"
 verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
-// line 300 "ST_mmgc_gcoption.st"
+// line 267 "ST_mmgc_gcoption.st"
 verifyPass(approxEqual(m_heap->config.gcEfficiency, .3456), "approxEqual(m_heap->config.gcEfficiency, .3456)", __FILE__, __LINE__);
           ;
     restoreHeapConfig();
@@ -3225,9 +3233,9 @@ void create_mmgc_gcoption(AvmCore* core) { new ST_mmgc_gcoption(core); }
 // Generated from ST_mmgc_mmfx_array.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3272,14 +3280,14 @@ void ST_mmgc_mmfx_array::test0() {
     int* m_ints = mmfx_new_array(int, 1048576);
     mmfx_delete_array(m_ints);
     m_ints = NULL;
-// line 60 "ST_mmgc_mmfx_array.st"
+// line 27 "ST_mmgc_mmfx_array.st"
 verifyPass(false, "false", __FILE__, __LINE__);
 
 }
 void ST_mmgc_mmfx_array::test1() {
     // This should fail and return NULL, run with -memlimit 1024
     int* m_ints = mmfx_new_array_opt(int, 1048576, MMgc::kCanFail);
-// line 65 "ST_mmgc_mmfx_array.st"
+// line 32 "ST_mmgc_mmfx_array.st"
 verifyPass(m_ints == NULL, "m_ints == NULL", __FILE__, __LINE__);
     mmfx_delete_array(m_ints);
     m_ints = NULL;
@@ -3290,7 +3298,7 @@ void ST_mmgc_mmfx_array::test2() {
     int* m_ints = mmfx_new_array_opt(int, 1048576, MMgc::kZero);
     mmfx_delete_array(m_ints);
     m_ints = NULL;
-// line 74 "ST_mmgc_mmfx_array.st"
+// line 41 "ST_mmgc_mmfx_array.st"
 verifyPass(false, "false", __FILE__, __LINE__);
 
 
@@ -3305,9 +3313,9 @@ void create_mmgc_mmfx_array(AvmCore* core) { new ST_mmgc_mmfx_array(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3445,16 +3453,16 @@ void ST_mmgc_threads::test0() {
           gc->CreateRootFromCurrentStack(kickAndWait, this);
        }
 
-// line 155 "ST_mmgc_threads.st"
+// line 122 "ST_mmgc_threads.st"
 verifyPass(result, "result", __FILE__, __LINE__);
 
-// line 157 "ST_mmgc_threads.st"
+// line 124 "ST_mmgc_threads.st"
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
        gc->ReapZCT();
-// line 159 "ST_mmgc_threads.st"
+// line 126 "ST_mmgc_threads.st"
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
        gc->Collect();
-// line 161 "ST_mmgc_threads.st"
+// line 128 "ST_mmgc_threads.st"
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 
        pthread_join(pthread, NULL);
@@ -3472,9 +3480,9 @@ void create_mmgc_threads(AvmCore* core) { new ST_mmgc_threads(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3593,7 +3601,7 @@ void ST_mmgc_weakref::test0() {
     // crash.
 
     for ( int i=1 ; i < 1000 ; i+= 2 ) {
-// line 137 "ST_mmgc_weakref.st"
+// line 104 "ST_mmgc_weakref.st"
 verifyPass(objs[i]->next->key == i-1, "objs[i]->next->key == i-1", __FILE__, __LINE__);
     }
 
@@ -3638,7 +3646,7 @@ void ST_mmgc_weakref::test1() {
 
     gc->Collect();
 
-// line 180 "ST_mmgc_weakref.st"
+// line 147 "ST_mmgc_weakref.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 }
 
@@ -3652,9 +3660,9 @@ void create_mmgc_weakref(AvmCore* core) { new ST_mmgc_weakref(core); }
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3860,7 +3868,7 @@ for (uint32_t i = 0; i < n_ap; i++) {
 #endif /* VMCFG_NANOJIT */
 
 // We pass if we don't crash or assert.
-// line 223 "ST_nanojit_codealloc.st"
+// line 194 "ST_nanojit_codealloc.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 
@@ -3874,9 +3882,9 @@ void create_nanojit_codealloc(AvmCore* core) { new ST_nanojit_codealloc(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -4235,7 +4243,7 @@ void ST_vmbase_concurrency::test0() {
     TestRunner runner(THREAD_QTY);
     MutexTest test(ITERATIONS);
     runner.runTest(test);
-// line 361 "ST_vmbase_concurrency.st"
+// line 328 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4245,7 +4253,7 @@ void ST_vmbase_concurrency::test1() {
     TestRunner runner(THREAD_QTY);
     ConditionTest test(ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-// line 369 "ST_vmbase_concurrency.st"
+// line 336 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4255,7 +4263,7 @@ void ST_vmbase_concurrency::test2() {
     TestRunner runner(THREAD_QTY);
     AtomicCounterTest test(ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-// line 377 "ST_vmbase_concurrency.st"
+// line 344 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == 0, "test.sharedCounter == 0", __FILE__, __LINE__);
 #endif
 
@@ -4265,7 +4273,7 @@ void ST_vmbase_concurrency::test3() {
     TestRunner runner(THREAD_QTY);
     CASTest test(ITERATIONS, false);
     runner.runTest(test);
-// line 385 "ST_vmbase_concurrency.st"
+// line 352 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4275,7 +4283,7 @@ void ST_vmbase_concurrency::test4() {
     TestRunner runner(THREAD_QTY);
     CASTest test(ITERATIONS, true);
     runner.runTest(test);
-// line 393 "ST_vmbase_concurrency.st"
+// line 360 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4293,11 +4301,11 @@ void ST_vmbase_concurrency::test5() {
     TestRunner runner(2);
     MemoryBarrierTest test(ITERATIONS);
     runner.runTest(test);
-// line 409 "ST_vmbase_concurrency.st"
+// line 376 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == 2 * ITERATIONS, "test.sharedCounter == 2 * ITERATIONS", __FILE__, __LINE__);
     */
     
-// line 412 "ST_vmbase_concurrency.st"
+// line 379 "ST_vmbase_concurrency.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -4307,7 +4315,7 @@ void ST_vmbase_concurrency::test6() {
     TestRunner runner(THREAD_QTY);
     ConditionWithWaitTest test(2000); // Use 2000 iterations with a 1 ms wait
     runner.runTest(test);
-// line 420 "ST_vmbase_concurrency.st"
+// line 387 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * 2000, "test.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -4317,7 +4325,7 @@ void ST_vmbase_concurrency::test7() {
     TestRunner runner(THREAD_QTY);
     SleepTest test(2000); // Use 2000 iterations with a 1 ms sleep
     runner.runTest(test);
-// line 428 "ST_vmbase_concurrency.st"
+// line 395 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * 2000, "test.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -4327,7 +4335,7 @@ void ST_vmbase_concurrency::test8() {
     TestRunner runner(THREAD_QTY);
     VMThreadLocalTest test(ITERATIONS);
     runner.runTest(test);
-// line 436 "ST_vmbase_concurrency.st"
+// line 403 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4342,7 +4350,7 @@ void ST_vmbase_concurrency::test9() {
     TestRunner runner(THREAD_QTY, false);
     MutexTest test(ITERATIONS);
     runner.runTest(test);
-// line 449 "ST_vmbase_concurrency.st"
+// line 416 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4360,9 +4368,9 @@ void create_vmbase_concurrency(AvmCore* core) { new ST_vmbase_concurrency(core);
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -4874,7 +4882,7 @@ void ST_vmbase_safepoints::test0() {
     TestRunner runner(THREAD_QTY!=0);
     SimpleTest test(runner.safepointManager(), ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-// line 529 "ST_vmbase_safepoints.st"
+// line 496 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4884,7 +4892,7 @@ void ST_vmbase_safepoints::test1() {
     TestRunner runner(THREAD_QTY!=0);
     ProducerConsumerTest test(runner.safepointManager(), ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-// line 537 "ST_vmbase_safepoints.st"
+// line 504 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -4894,7 +4902,7 @@ void ST_vmbase_safepoints::test2() {
     TestRunner runner(THREAD_QTY!=0);
     NestedProducerConsumerTest test(runner.safepointManager(), ITERATIONS * 100, THREAD_QTY, NESTING_DEPTH);
     runner.runTest(test);
-// line 545 "ST_vmbase_safepoints.st"
+// line 512 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS * 100, "test.sharedCounter == THREAD_QTY * ITERATIONS * 100", __FILE__, __LINE__);
 #endif
 
@@ -4912,9 +4920,9 @@ void create_vmbase_safepoints(AvmCore* core) { new ST_vmbase_safepoints(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Bugzilla 543560 - here we risk deleting an object that is still on the mark stack because
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
@@ -5287,7 +5295,7 @@ void ST_vmpi_threads::test0() {
 #ifndef UNDER_CE
     MutexTest mutexTest(THREAD_QTY, ITERATIONS);
     mutexTest.runTest();
-// line 367 "ST_vmpi_threads.st"
+// line 334 "ST_vmpi_threads.st"
 verifyPass(mutexTest.sharedCounter == THREAD_QTY * ITERATIONS, "mutexTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5296,7 +5304,7 @@ void ST_vmpi_threads::test1() {
 #ifndef UNDER_CE
     ConditionTest conditionTest(THREAD_QTY, ITERATIONS);
     conditionTest.runTest();
-// line 374 "ST_vmpi_threads.st"
+// line 341 "ST_vmpi_threads.st"
 verifyPass(conditionTest.sharedCounter == THREAD_QTY * ITERATIONS, "conditionTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5305,7 +5313,7 @@ void ST_vmpi_threads::test2() {
 #ifndef UNDER_CE
     AtomicIncrementTest atomicIncrementTest(THREAD_QTY, ITERATIONS, false);
     atomicIncrementTest.runTest();
-// line 381 "ST_vmpi_threads.st"
+// line 348 "ST_vmpi_threads.st"
 verifyPass(atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS, "atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
     
@@ -5314,7 +5322,7 @@ void ST_vmpi_threads::test3() {
 #ifndef UNDER_CE
     AtomicDecrementTest atomicDecrementTest(THREAD_QTY, ITERATIONS, false);
     atomicDecrementTest.runTest();
-// line 388 "ST_vmpi_threads.st"
+// line 355 "ST_vmpi_threads.st"
 verifyPass(atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS), "atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS)", __FILE__, __LINE__);
 #endif
     
@@ -5323,7 +5331,7 @@ void ST_vmpi_threads::test4() {
 #ifndef UNDER_CE
     CASTest casTest(THREAD_QTY, ITERATIONS, false);
     casTest.runTest();
-// line 395 "ST_vmpi_threads.st"
+// line 362 "ST_vmpi_threads.st"
 verifyPass(casTest.sharedCounter == THREAD_QTY * ITERATIONS, "casTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5332,7 +5340,7 @@ void ST_vmpi_threads::test5() {
 #ifndef UNDER_CE
     AtomicIncrementTest atomicIncrementTest(THREAD_QTY, ITERATIONS, true);
     atomicIncrementTest.runTest();
-// line 402 "ST_vmpi_threads.st"
+// line 369 "ST_vmpi_threads.st"
 verifyPass(atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS, "atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
     
@@ -5341,7 +5349,7 @@ void ST_vmpi_threads::test6() {
 #ifndef UNDER_CE
     AtomicDecrementTest atomicDecrementTest(THREAD_QTY, ITERATIONS, true);
     atomicDecrementTest.runTest();
-// line 409 "ST_vmpi_threads.st"
+// line 376 "ST_vmpi_threads.st"
 verifyPass(atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS), "atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS)", __FILE__, __LINE__);
 #endif
     
@@ -5350,7 +5358,7 @@ void ST_vmpi_threads::test7() {
 #ifndef UNDER_CE
     CASTest casTest(THREAD_QTY, ITERATIONS, true);
     casTest.runTest();
-// line 416 "ST_vmpi_threads.st"
+// line 383 "ST_vmpi_threads.st"
 verifyPass(casTest.sharedCounter == THREAD_QTY * ITERATIONS, "casTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5367,11 +5375,11 @@ void ST_vmpi_threads::test8() {
     // only ever use 2 threads.
     MemoryBarrierTest memoryBarrierTest(ITERATIONS);
     memoryBarrierTest.runTest();
-// line 431 "ST_vmpi_threads.st"
+// line 398 "ST_vmpi_threads.st"
 verifyPass(memoryBarrierTest.sharedCounter == 2 * ITERATIONS, "memoryBarrierTest.sharedCounter == 2 * ITERATIONS", __FILE__, __LINE__);
     
     */
-// line 434 "ST_vmpi_threads.st"
+// line 401 "ST_vmpi_threads.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -5380,7 +5388,7 @@ void ST_vmpi_threads::test9() {
 #ifndef UNDER_CE
     TryLockTest tryLockTest(THREAD_QTY, ITERATIONS);
     tryLockTest.runTest();
-// line 441 "ST_vmpi_threads.st"
+// line 408 "ST_vmpi_threads.st"
 verifyPass(tryLockTest.sharedCounter == THREAD_QTY * ITERATIONS, "tryLockTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5390,7 +5398,7 @@ void ST_vmpi_threads::test10() {
     // Use 2000 iterations with a 1 ms wait
     ConditionWithWaitTest conditionWithWaitTest(THREAD_QTY, 2000);
     conditionWithWaitTest.runTest();
-// line 449 "ST_vmpi_threads.st"
+// line 416 "ST_vmpi_threads.st"
 verifyPass(conditionWithWaitTest.sharedCounter == THREAD_QTY * 2000, "conditionWithWaitTest.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -5400,7 +5408,7 @@ void ST_vmpi_threads::test11() {
     // Use 2000 iterations with a 1 ms sleep
     SleepTest sleepTest(THREAD_QTY, 2000);
     sleepTest.runTest();
-// line 457 "ST_vmpi_threads.st"
+// line 424 "ST_vmpi_threads.st"
 verifyPass(sleepTest.sharedCounter == THREAD_QTY * 2000, "sleepTest.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -5410,7 +5418,7 @@ void ST_vmpi_threads::test12() {
     // We can't really test for much here...
     vmpi_thread_t thread;
     VMPI_threadCreate(&thread, NULL, ThreadTestBase::detachbleThreadEntry, NULL);
-// line 465 "ST_vmpi_threads.st"
+// line 432 "ST_vmpi_threads.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -5418,7 +5426,7 @@ verifyPass(true, "true", __FILE__, __LINE__);
 void ST_vmpi_threads::test13() {
 #ifndef UNDER_CE
     vmpi_thread_attr_t attr;
-// line 471 "ST_vmpi_threads.st"
+// line 438 "ST_vmpi_threads.st"
 verifyPass(VMPI_threadAttrInit(&attr) == true, "VMPI_threadAttrInit(&attr) == true", __FILE__, __LINE__);
     
     VMPI_threadAttrSetGuardSize(&attr, VMPI_threadAttrDefaultGuardSize());
@@ -5429,13 +5437,13 @@ verifyPass(VMPI_threadAttrInit(&attr) == true, "VMPI_threadAttrInit(&attr) == tr
     
     vmpi_thread_t thread;
     bool started = VMPI_threadCreate(&thread, &attr, ThreadTestBase::joinableThreadEntry, NULL);
-// line 481 "ST_vmpi_threads.st"
+// line 448 "ST_vmpi_threads.st"
 verifyPass(started == true, "started == true", __FILE__, __LINE__);
     if (started) {
         VMPI_threadJoin(thread);
     }
     
-// line 486 "ST_vmpi_threads.st"
+// line 453 "ST_vmpi_threads.st"
 verifyPass(VMPI_threadAttrDestroy(&attr) == true, "VMPI_threadAttrDestroy(&attr) == true", __FILE__, __LINE__);
 #endif
 
@@ -5447,12 +5455,11 @@ void create_vmpi_threads(AvmCore* core) { new ST_vmpi_threads(core); }
 #endif
 
 // Generated from ST_workers_Buffer.st
-// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
-// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
-//
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -5481,7 +5488,6 @@ void test7();
     NoSyncMultiItemBuffer *multiItemBuffer;
     NonBlockingMultiItemBuffer *nonBlockMultiItemBuffer;
     Atom *atom;
-    ChannelItem* itemp;
  
 };
 ST_workers_Buffers::ST_workers_Buffers(AvmCore* core)
@@ -5520,16 +5526,16 @@ void ST_workers_Buffers::epilogue() {
 
 }
 void ST_workers_Buffers::test0() {
-// line 72 "ST_workers_Buffer.st"
+// line 37 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer!=NULL, "nonBlockMultiItemBuffer!=NULL", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test1() {
-// line 75 "ST_workers_Buffer.st"
+// line 40 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 76 "ST_workers_Buffer.st"
+// line 41 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
-// line 77 "ST_workers_Buffer.st"
+// line 42 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->get(atom), "!nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
 
 }
@@ -5537,97 +5543,97 @@ void ST_workers_Buffers::test2() {
     bool result;
     for (int i=0;i<14;i++) {
         result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 83 "ST_workers_Buffer.st"
+// line 48 "ST_workers_Buffer.st"
 verifyPass(result, "result", __FILE__, __LINE__);
-// line 84 "ST_workers_Buffer.st"
+// line 49 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 85 "ST_workers_Buffer.st"
+// line 50 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
     }
     result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 88 "ST_workers_Buffer.st"
+// line 53 "ST_workers_Buffer.st"
 verifyPass(result, "result", __FILE__, __LINE__);
-// line 89 "ST_workers_Buffer.st"
+// line 54 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 90 "ST_workers_Buffer.st"
+// line 55 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isFull(), "nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
     result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 93 "ST_workers_Buffer.st"
+// line 58 "ST_workers_Buffer.st"
 verifyPass(!result, "!result", __FILE__, __LINE__);
-// line 94 "ST_workers_Buffer.st"
+// line 59 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 95 "ST_workers_Buffer.st"
+// line 60 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isFull(), "nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
     for (int i=0;i<14;i++) {
-// line 98 "ST_workers_Buffer.st"
+// line 63 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->get(atom), "nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 99 "ST_workers_Buffer.st"
+// line 64 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 100 "ST_workers_Buffer.st"
+// line 65 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
     }
-// line 102 "ST_workers_Buffer.st"
+// line 67 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->get(atom), "nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 103 "ST_workers_Buffer.st"
+// line 68 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 104 "ST_workers_Buffer.st"
+// line 69 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
-// line 106 "ST_workers_Buffer.st"
+// line 71 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->get(atom), "!nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 107 "ST_workers_Buffer.st"
+// line 72 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 108 "ST_workers_Buffer.st"
+// line 73 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test3() {
-// line 111 "ST_workers_Buffer.st"
+// line 76 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer!=NULL, "singleItemBuffer!=NULL", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test4() {
-// line 114 "ST_workers_Buffer.st"
+// line 79 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 115 "ST_workers_Buffer.st"
+// line 80 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
-// line 116 "ST_workers_Buffer.st"
+// line 81 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->get(atom), "!singleItemBuffer->get(atom)", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test5() {
     bool result;
     result=singleItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 121 "ST_workers_Buffer.st"
+// line 86 "ST_workers_Buffer.st"
 verifyPass(result, "result", __FILE__, __LINE__);
-// line 122 "ST_workers_Buffer.st"
+// line 87 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isEmpty(), "!singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 123 "ST_workers_Buffer.st"
+// line 88 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isFull(), "singleItemBuffer->isFull()", __FILE__, __LINE__);
     result=singleItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 125 "ST_workers_Buffer.st"
+// line 90 "ST_workers_Buffer.st"
 verifyPass(!result, "!result", __FILE__, __LINE__);
-// line 126 "ST_workers_Buffer.st"
+// line 91 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->get(atom), "singleItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 127 "ST_workers_Buffer.st"
+// line 92 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 128 "ST_workers_Buffer.st"
+// line 93 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test6() {
-// line 131 "ST_workers_Buffer.st"
+// line 96 "ST_workers_Buffer.st"
 verifyPass(multiItemBuffer!=NULL, "multiItemBuffer!=NULL", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test7() {
-// line 134 "ST_workers_Buffer.st"
+// line 99 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 135 "ST_workers_Buffer.st"
+// line 100 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
-// line 136 "ST_workers_Buffer.st"
+// line 101 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->get(atom), "!singleItemBuffer->get(atom)", __FILE__, __LINE__);
 
 // Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=758260
@@ -5665,12 +5671,11 @@ void create_workers_Buffers(AvmCore* core) { new ST_workers_Buffers(core); }
 #endif
 
 // Generated from ST_workers_NoSyncSingleItemBuffer.st
-// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
-// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
-//
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -5721,36 +5726,36 @@ void ST_workers_NoSyncSingleItemBuffer::epilogue() {
 }
 
 void ST_workers_NoSyncSingleItemBuffer::test0() {
-// line 64 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 30 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(buffer!=NULL, "buffer!=NULL", __FILE__, __LINE__);
 	
 }
 void ST_workers_NoSyncSingleItemBuffer::test1() {
-// line 67 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 33 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(buffer->isEmpty(), "buffer->isEmpty()", __FILE__, __LINE__);
-// line 68 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 34 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(!buffer->isFull(), "!buffer->isFull()", __FILE__, __LINE__);
-// line 69 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 35 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(!buffer->get(atom), "!buffer->get(atom)", __FILE__, __LINE__);
 	
 }
 void ST_workers_NoSyncSingleItemBuffer::test2() {
     buffer->put(String::createLatin1(core,"test string")->atom());
-// line 73 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 39 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(!buffer->isEmpty(), "!buffer->isEmpty()", __FILE__, __LINE__);
-// line 74 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 40 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(buffer->isFull(), "buffer->isFull()", __FILE__, __LINE__);
-// line 75 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 41 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(buffer->get(atom), "buffer->get(atom)", __FILE__, __LINE__);
-// line 76 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 42 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(buffer->isEmpty(), "buffer->isEmpty()", __FILE__, __LINE__);
-// line 77 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 43 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(!buffer->isFull(), "!buffer->isFull()", __FILE__, __LINE__);
 	
 }
 void ST_workers_NoSyncSingleItemBuffer::test3() {
     buffer->unregisterRoot();
-// line 81 "ST_workers_NoSyncSingleItemBuffer.st"
+// line 47 "ST_workers_NoSyncSingleItemBuffer.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 	
@@ -5763,12 +5768,11 @@ void create_workers_NoSyncSingleItemBuffer(AvmCore* core) { new ST_workers_NoSyn
 #endif
 
 // Generated from ST_workers_Promise.st
-// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
-// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
-//
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -5803,16 +5807,16 @@ void ST_workers_Promise::prologue() {
 }
 void ST_workers_Promise::test0() {
     // verify the main worker can be retrieved from AvmCore
-// line 53 "ST_workers_Promise.st"
+// line 19 "ST_workers_Promise.st"
 verifyPass(main!=NULL, "main!=NULL", __FILE__, __LINE__);
     uint32_t state=main->getAggregate()->queryState(main);
     // verify state == RUNNING
-// line 56 "ST_workers_Promise.st"
+// line 22 "ST_workers_Promise.st"
 verifyPass(state==3, "state==3", __FILE__, __LINE__);
 
-// line 58 "ST_workers_Promise.st"
-// verifyPass(main->targetCore() == core, "main->targetCore() == core", __FILE__, __LINE__);
-// line 59 "ST_workers_Promise.st"
+// line 24 "ST_workers_Promise.st"
+verifyPass(main->getAvmCore() == core, "main->getAvmCore() == core", __FILE__, __LINE__);
+// line 25 "ST_workers_Promise.st"
 verifyPass(main->isParentOf(main) == false, "main->isParentOf(main) == false", __FILE__, __LINE__);
 
 
