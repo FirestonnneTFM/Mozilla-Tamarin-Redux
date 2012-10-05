@@ -10,6 +10,17 @@
 #include "Channels.cpp"
 #include "VMThread.h"
 
+#ifdef DEBUG
+//#define DEBUG_LIST
+#endif
+
+#ifdef DEBUG_LIST
+#define DEBUG_CONDITION_MUTEX
+#define DUMP_LIST(x) { avmplus::Isolate::InterruptibleState::WaitRecord* t = x; while(t) { AvmLog("thread %d signaled %d\n", t->threadID, t->signaled); t = t->next; }}
+#else
+#define DUMP_LIST(x)  do { } while(0)
+#endif
+
 namespace avmplus
 {
 
@@ -67,7 +78,7 @@ namespace avmplus
         SCOPE_LOCK_NAMED(locker, m_globals.m_lock) {
             Isolate* isolate = m_globals.getIsolateForID(desc);
             // if the isolate isn't found in the global table terminate 
-            // has been called previously, and we can skip the rest.
+            // has been called previously, skip the rest.
             if (isolate == NULL) { 
                 return false; 
             }
@@ -78,7 +89,7 @@ namespace avmplus
             result = true;
 
             // if the isolate has not been started i.e. it is still
-            // in the NEW state then we should leave it in the table
+            // in the NEW state then leave it in the table,
             // it will then be properly disposed of during aggregate exit.
             if (isolate->m_state != Isolate::NEW) {
                 SCOPE_LOCK(m_globals.m_isolateMap.m_lock) { 
@@ -95,26 +106,24 @@ namespace avmplus
             }
 
 			AvmCore* core = isolate->m_core;
-            if (core == NULL) {
-                // FIXME - what invariant holds here?
-                return result;
-            } else if (core == currentToplevel->core()) {
-                // Don't wait for itself, unwind the stack
-                goto scope_end;
-            } else {
-                // Interrupt other, fall through and wait.
+            if (core == currentToplevel->core()) {
+                // calling terminate on this thread:
+                // no need to interrupt or signal as
+                // the thread is currently active (not blocked)
+                goto throw_terminated_error;
+            } else if (core != NULL) {
+                // interrupt actionscript 
                 core->raiseInterrupt(AvmCore::ExternalInterrupt);
                 // Hope for the best? the thread being interrupted won't necessarily fence
                 vmbase::MemoryBarrier::readWrite();
-                isolate->signalInterruptibleState();
             }
-
-            return result;
-            // We are relying on the isolate to clean itself up.
-        scope_end: // unlock before throwing
-            ;
+            isolate->releaseActiveResources();
         }
+        return result;
+
+throw_terminated_error:
         throwWorkerTerminatedException(currentToplevel);
+        AvmAssert(false);
         return false;
     }
 
@@ -175,7 +184,8 @@ namespace avmplus
             //      thing they do is unwind, we don't want to continue executing if they could
             //      possibly be in an ideteriminate state (get unblocked from a Mutex or Condition
             //      when the condition hasn't been met.
-            //  (2) needs to release resources (unlock any held Mutex or Condition, clear shared properties, etc)
+            //  (2) needs to release resources (unlock any held Mutex or Condition, wake any blocked
+            //      workers, clear shared properties, etc)
             IsolateCoreInterrupt iInterrupt(this);
             ReleaseResources iRelease(this);
             SCOPE_LOCK(m_globals.m_isolateMap.m_lock) {
@@ -191,11 +201,23 @@ namespace avmplus
         AvmCore* core = currentToplevel->core();
         AvmAssert(core->getIsolate()->getAggregate() == this);
         Stringp errorMessage = core->getErrorMessage(kWorkerTerminated);
-        GCRef<ErrorObject> error = currentToplevel->errorClass()->constructObject(errorMessage->atom(), core->intToAtom(0));
+        GCRef<ErrorObject> error = currentToplevel->errorClass()->constructObject(errorMessage->atom(), core->intToAtom(kWorkerTerminated));
         Exception *exception = new (core->GetGC()) Exception(core, error->atom());
         exception->flags |= Exception::EXIT_EXCEPTION;
         exception->flags |= Exception::SUPPRESS_ERROR_REPORT;
         core->throwException(exception);
+    }
+    
+    void Aggregate::processWorkerInterrupt(Toplevel* currentToplevel)
+    {
+        AvmCore* core = currentToplevel->core();
+        if (!core->interruptCheckReason(AvmCore::ScriptTimeout)) {
+            throwWorkerTerminatedException(currentToplevel);
+        }
+        else {
+            core->raiseInterrupt(AvmCore::NotInterrupted); // clear existing interrupt before throwing
+            core->interrupt(currentToplevel, AvmCore::ScriptTimeout);
+        }
     }
 
     Isolate::Isolate(Isolate::descriptor_t desc, Isolate::descriptor_t parentDesc, Aggregate* aggregate)
@@ -247,7 +269,7 @@ namespace avmplus
                 AvmAssert(isolate->m_core != NULL);
             } else if (to == Isolate::EXCEPTION) {
                 AvmAssert(from > Isolate::NEW);
-				isolate->m_interrupted = true;
+                setIsolateAsInterrupted(isolate);
                 isolate->stopRunLoop();
                 isolateInactive = true;
             } else if (to == Isolate::FAILED) {
@@ -259,12 +281,12 @@ namespace avmplus
                 AvmAssert(isolate->getDesc() == m_primordialGiid || m_activeIsolateThreadMap.LookupItem(isolate->getDesc(), &t) == true); 
 				if (from != Isolate::FINISHING)
 				{
-		            isolate->m_interrupted = true;
+                    setIsolateAsInterrupted(isolate);
 					isolate->stopRunLoop();
 				}
             } else if (to == Isolate::TERMINATED) {
                 AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING || from == Isolate::NEW);
-				isolate->m_interrupted = true;
+                setIsolateAsInterrupted(isolate);
                 isolateInactive = true;
 			}
             
@@ -273,6 +295,23 @@ namespace avmplus
                 locker.notifyAll();
             }
         }
+    }
+
+    void Aggregate::setIsolateAsInterrupted(Isolate* isolate) 
+    {
+        Isolate::lockInSafepoint(&isolate->m_interruptibleStateMutex);
+        {
+            Isolate::InterruptibleState* state = isolate->m_interruptibleState;
+            if (state) {
+                SCOPE_LOCK(state->getMonitor()) {
+                    isolate->m_interrupted = true;
+                }
+            }
+            else {
+                isolate->m_interrupted = true;
+            }
+        }
+        VMPI_recursiveMutexUnlock(&isolate->m_interruptibleStateMutex);
     }
 
     
@@ -482,7 +521,7 @@ namespace avmplus
 
     void Isolate::signalInterruptibleState()
     {
-        lockInSafepoint(&m_interruptibleStateMutex);
+        Isolate::lockInSafepoint(&m_interruptibleStateMutex);
         if (m_interruptibleState) {
             // We need to notify all threads
             // as we do not know where in the
@@ -579,11 +618,12 @@ namespace avmplus
         mmfx_delete(this);
     }
 
-    REALLY_INLINE void Isolate::lockInSafepoint(vmpi_mutex_t* mutex) const
+    /* static */
+    void Isolate::lockInSafepoint(vmpi_mutex_t* mutex)
     {
         if (VMPI_recursiveMutexTryLock(mutex) == false) {
             vmbase::SafepointRecord* const current = vmbase::SafepointRecord::current();
-            if (current && current->isSafe()) {
+            if (current && !current->isSafe()) {
                 VMPI_callWithRegistersSaved(lockInSafepointGate, (void*)mutex);
             } else {
                 assert(!vmbase::SafepointRecord::hasCurrent() || vmbase::SafepointRecord::current()->manager()->inSafepointTask());
@@ -609,8 +649,9 @@ namespace avmplus
         : m_isolate(isolate)
     {
         AvmAssert(m_isolate != NULL);
+        AvmAssert(state != NULL);
         m_mutex = &m_isolate->m_interruptibleStateMutex;
-        m_isolate->lockInSafepoint(m_mutex);
+        Isolate::lockInSafepoint(m_mutex);
         m_isolate->m_interruptibleState = state;
     #ifdef DEBUG_INTERRUPTIBLE_STATE
         gid = state->gid;
@@ -619,7 +660,7 @@ namespace avmplus
 
     Isolate::InterruptibleState::Enter::ActiveInterruptibleStateHelper::~ActiveInterruptibleStateHelper()
     {
-        m_isolate->lockInSafepoint(m_mutex);
+        Isolate::lockInSafepoint(m_mutex);
         m_isolate->m_interruptibleState = NULL;
         unlock();
     }
@@ -636,15 +677,56 @@ namespace avmplus
     //
     // InterruptibleState Enter
     //
-    Isolate::InterruptibleState::Enter::Enter(InterruptibleState* state, Isolate* isolate)
+    Isolate::InterruptibleState::Enter::Enter(WaitRecord& record, InterruptibleState* state, Isolate* isolate)
         : interrupted(false)
         , result(false)
         , m_stateSetter(isolate, state) // asserts state != NULL
-        , m_monitor(state->m_condition)
+        , m_monitor(state->m_condition) // acquires m_condition lock
         , m_state(state)
+        , m_waitRecord(&record)
     {
         AvmAssert(vmbase::SafepointRecord::hasCurrent());
+        AvmAssert(m_state->getMonitor().isLockedByCurrentThread());
+        // ensure that m_condition lock is held before allowing 
+        // a call to Isolate::signal() to continue or
+        // reading the current state of the Isolate's reference
+        // to this InterruptibleState
         m_stateSetter.unlock();
+
+        if (m_state->m_head == NULL) {
+            m_state->m_head = m_waitRecord;
+        }
+        else {
+            m_state->m_tail->next = m_waitRecord;
+        }
+        m_state->m_tail = m_waitRecord;
+
+    }
+
+    Isolate::InterruptibleState::Enter::~Enter()
+    {
+        AvmAssert(m_state->getMonitor().isLockedByCurrentThread());
+        // walk through the list and remove current wait record from it
+        WaitRecord* cur = m_state->m_head;
+        WaitRecord* prev = NULL;
+        do {
+            if (cur == m_waitRecord) {
+                if (prev == NULL) {
+                    m_state->m_head = cur->next;
+                } 
+                else {
+                    prev->next = cur->next;
+                }
+
+                if (cur->next == NULL) {
+                    m_state->m_tail = prev;
+                }
+                break;
+            } 
+            prev = cur;
+            cur = cur->next;
+        } while (cur);
+        DUMP_LIST((m_state->m_head));
     }
 
     void Isolate::InterruptibleState::Enter::notify()
@@ -656,7 +738,6 @@ namespace avmplus
     void Isolate::InterruptibleState::Enter::wait(int32_t millis)
     {
         AvmAssert(m_state->getMonitor().isLockedByCurrentThread());
-        DEBUG_STATE(("thread %d is sleeping\n", VMPI_currentThread()));
         // we might have to wait again if we get signaled and we are
         // not the target isolate, i.e. our associated isolate isn't
         // being terminated or signaled.
@@ -667,69 +748,90 @@ namespace avmplus
         // thread is executing in this block. The following code
         // is provided to insure proper execution in the following
         // situation:
-        //  (1) a signal is issued
-        //  (2) before any signaled threads wake 
-        //  (3) wait is called
+        //  * a signal is issued.
+        //  * before any existing signaled threads wake 
+        //  * wait is called for this thread
+        //  * this thread owns the condition
         // In this situation only a check that this state's associated isolate
-        // is not being terminated is required. If it is being terminated
+        // is not being terminated is required. If it is being terminated/interrupted
         // then no wait should be attempted, if not then it is safe to wait.
-        if (m_state->m_signaledWaiters != 0 && (isolate->isInterrupted() || 
-            isolate->getAvmCore()->interruptCheckReason(AvmCore::ScriptTimeout))) 
+        if (isolate->isInterrupted() || isolate->getAvmCore()->interruptCheckReason(AvmCore::ScriptTimeout))
         {
-	        interrupted = true;
+            interrupted = true;
+            // no need to set m_waitRecord->signaled = false since 
+            // the record will be removed from the list after returning
+            // and the waiter count won't be updated, this also means 
+            // that signaled watiers count will not be affected.
             return;
         }
 
         VMPI_atomicIncAndGet32(&m_state->m_waiterCount);
         bool continueWait = false;
         uint64_t endTime = millis != -1 ? VMPI_getTime() + millis : 0;    
+        DEBUG_STATE(("thread %d is sleeping (iso-id:%d)\n", VMPI_currentThread(), isolate->getDesc()));
+
         do {
             if (millis == -1) {
                 m_monitor.wait();
             }
             else {
-                // if we are signaled during a timed wait
-                // we must return to waiting but not wait
-                // for the original time but only what time
-                // is still remaining
+                // if signaled during a timed wait return
+                // to waiting for the remaining time
                 uint64_t now = VMPI_getTime();
                 if (now < endTime) {
                     result = m_monitor.wait(int32_t(endTime - now));
                 }
-                else {
-                    result = true;
-                    break;
+                else if (!continueWait)
+				{
+					// In order to ensure that the lock is released even though the wait time
+					// has expired, a wait() for the minimum time must be done here. 
+                    result = m_monitor.wait(0);
                 }
+				else
+				{
+					// continueWait can only be true iff a wait has occurred.
+					result = true;
+				}
             }
 
             // the value of interrupt tells us if the isolate was terminated OR 
             // if a script timeout has fired; script timeouts only happen for the primordial isolate. 
 	        interrupted = isolate->isInterrupted() || isolate->getAvmCore()->interruptCheckReason(AvmCore::ScriptTimeout);
 
-            // being signaled indicates that we *may* need to return
-            // to a waiting state. when signaled each waiting thread
-            // must check its associated isolate to see if it will
-            // need to return to a waiting state. it should only 
-            // return to a waiting state if the associated isolate has 
-            // not been interrupted (asked to terminate).
-            // each state tracks the number of waiting threads to indicate
-            // when a signal "cycle" has completed.  each "waiter" must
-            // decrement the count of signaled threads as reaching zero
-            // indicates a signal "cycle" has completed.
-            continueWait = !result && (m_state->m_signaledWaiters > 0) && !interrupted;
-            if (continueWait) {
+            // when signaled a thread will return to a blocked
+            // waiting state if it's associated isolate has not
+            // been terminated.
+            // threads are only signaled because of a termination request, 
+            // caused by either a call to terminate or shutdown, otherwise
+            // they are notified by user code. 
+            // when signaled each waiting thread must check its associated 
+            // isolate to see if it will need to return to a waiting state. 
+            // to distingush between a user code notify/notifyAll and a signal
+            // each state tracks the number of waiting and signaled threads.  
+            // a signal "cycle" is completed when all threads waiting at 
+            // the moment of the signal call have woken and taken action (either exit 
+            // or return to a waiting state).
+            // the cycle is completed when the signaled waiters count reaches zero.
+            //
+            // there is the possibility that a timed wait expired and tried to
+            // acquire the condition but could not because a call to signal()
+            // has already acquired it.  in this situation the record would
+            // remain signaled and the signaled waiters value needs to be 
+            // decremented but no continuation of waiting should occur.
+            if (m_waitRecord->signaled) {
+                AvmAssert(m_state->m_signaledWaiters > 0);
+                continueWait = !interrupted && !result;
+                m_waitRecord->signaled = false;
                 m_state->m_signaledWaiters--;
             }
-            DEBUG_STATE(("thread %d has been interrupted with %d(ms) remaining\n", VMPI_currentThread(), millis));
         } 
-        while(continueWait);
-        VMPI_atomicDecAndGet32(&m_state->m_waiterCount);
-		// decrement the signaledWaiters if there are any as this object would be one.
-        if ((m_state->m_signaledWaiters > 0) && interrupted) {
-			m_state->m_signaledWaiters--;
-        }
+        while (continueWait);
 
-        DEBUG_STATE(("thread %d is awake\n", VMPI_currentThread()));
+        VMPI_atomicDecAndGet32(&m_state->m_waiterCount);
+        AvmAssert(m_state->getMonitor().isLockedByCurrentThread());
+
+        DEBUG_STATE(("thread %d is awake (iso-id:%d)\n", VMPI_currentThread(), isolate->getDesc()));
+        DUMP_LIST((m_state->m_head));
     }
 
     //
@@ -738,6 +840,8 @@ namespace avmplus
     Isolate::InterruptibleState::InterruptibleState()
         : m_waiterCount(0)
         , m_signaledWaiters(0)
+        , m_head(NULL)
+        , m_tail(NULL)
     {
 #ifdef DEBUG_INTERRUPTIBLE_STATE
         gid = ++globalId;
@@ -761,15 +865,35 @@ namespace avmplus
     // waiting state. a count of waiting threads is kept to 
     // determine when a signal "cycle" has completed.
     //
+    // a signal "cycle" determines whether the spurious waking
+    // event is caused by terminate/shutdown versus user
+    // code calling notify/notifyAll
+    //
     void Isolate::InterruptibleState::signal()
     {
         DEBUG_STATE(("thread %d is calling signal on (%d)\n", VMPI_currentThread(), gid));
+
         SCOPE_LOCK_NAMED(cond, m_condition) {
-            // we will only signal once per cycle, as multiple signals during
-            // a cycle is not useful.
-            if ((m_signaledWaiters == 0) && (m_waiterCount > 0))
-            {
+            // a notifyAll must occur for each call to signal
+            // otherwise shutdown can be stopped waiting for
+            // blocked workers.  if a signal cycle is already
+            // in progress wait until it is completed and then
+            // start a new one.
+            while (m_signaledWaiters > 0) {
+                cond.wait(1);
+            }
+            
+            if (m_waiterCount > 0) {
                 m_signaledWaiters = m_waiterCount;
+                // mark all waiting threads as signaled so only those
+                // threads will check state and possibly wait again
+                // other threads will simply ignore the wake request
+                // and return immediately to a waiting state.
+                WaitRecord* cur = m_head;
+                while (cur) {
+                    cur->signaled = true;
+                    cur = cur->next;
+                }
                 cond.notifyAll();
             }
         }
@@ -778,6 +902,11 @@ namespace avmplus
     void Isolate::InterruptibleState::notify()
     {
         SCOPE_LOCK_NAMED(cond, m_condition) {
+            // wait until the current signal cycle completes
+            // if there is one.
+            while (m_signaledWaiters > 0) {
+                cond.wait(1);
+            }
             DEBUG_STATE(("thread %d is calling notify on (%d)\n", VMPI_currentThread(), gid));
             cond.notify();
         }
@@ -786,6 +915,12 @@ namespace avmplus
     void Isolate::InterruptibleState::notifyAll()
     {
         SCOPE_LOCK_NAMED(cond, m_condition) {
+            // wait until the current signal cycle completes
+            // if there is one.
+            while (m_signaledWaiters > 0) {
+                cond.wait(1);
+            }
+
             DEBUG_STATE(("thread %d is calling notifyAll on (%d)\n", VMPI_currentThread(), gid));
             cond.notifyAll();
         }
@@ -1071,18 +1206,18 @@ namespace avmplus
 				if (isolate->m_state == Isolate::RUNNING)
 				{
 					for (uint32_t i = 0, n = core->m_domainEnvs.length(); i < n; ++i)
-					{
-						DomainEnv* domainEnv = core->m_domainEnvs.get(i);
-						if (domainEnv) {
-							ByteArrayObject* mem = domainEnv->get_globalMemory();
-							if (mem)
-							{
-								mem->GetByteArray().NotifySubscribers();
-							}
-						}
-					}
+					    {
+						    DomainEnv* domainEnv = core->m_domainEnvs.get(i);
+						    if (domainEnv) {
+							    ByteArrayObject* mem = domainEnv->get_globalMemory();
+							    if (mem)
+							    {
+								    mem->GetByteArray().NotifySubscribers();
+							    }
+						    }
+					    }
+                    }
 				}
-            }
         };
      
         AvmAssert(m_globals.m_isolateMap.m_lock.isLockedByCurrentThread());

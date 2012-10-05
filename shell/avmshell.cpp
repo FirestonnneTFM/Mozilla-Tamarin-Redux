@@ -164,12 +164,12 @@ namespace avmshell
     {
         MMGC_ENTER_VOID;
         
-        ShellSettings settings;
-        
+        Shell* aggregate = static_cast<Shell*> (getAggregate());
+        ShellSettings& settings = aggregate->settings;
+
         MMgc::GCConfig gcconfig;
         gcconfig.mode = settings.gcMode();
         MMgc::GC* gc = mmfx_new(MMgc::GC(MMgc::GCHeap::GetGCHeap(),  gcconfig));
-        avmplus::Aggregate* aggregate = getAggregate();
         ShellToplevel* toplevel = NULL;
         {
             MMGC_GCENTER(gc);

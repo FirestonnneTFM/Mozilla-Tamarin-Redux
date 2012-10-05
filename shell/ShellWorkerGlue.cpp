@@ -29,7 +29,7 @@ namespace avmshell {
 
     bool ShellWorkerObject::terminate()
     {
-        return stopInternal();
+        return internalStop();
     }
 
     ShellWorkerClass::ShellWorkerClass(avmplus::VTable *cvtable)

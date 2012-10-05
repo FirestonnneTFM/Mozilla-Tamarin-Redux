@@ -5632,10 +5632,7 @@ return the result of the comparison ToPrimitive(x) == y.
         core->interrupted = NotInterrupted;
         if (reason == SafepointPoll)
         {
-            // expended SAFEPOINT_POLL()
-            if (vmbase::SafepointRecord::current()->manager()->hasRequest()) {
-                vmbase::SafepointGate::gateWithRegistersSaved();
-            }
+            SAFEPOINT_POLL();
             if (core->pending_interrupt != NotInterrupted && canUnwindStack) {
                 reason = core->pending_interrupt;
                 core->pending_interrupt = NotInterrupted;

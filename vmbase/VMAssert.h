@@ -16,7 +16,7 @@
 //    assert(!"message");
 //
 
-#if defined(DEBUG)
+#if defined(DEBUG) || defined(_DEBUG)
     // turn off assert suppression
     #undef NDEBUG
 #elif !defined(NDEBUG)

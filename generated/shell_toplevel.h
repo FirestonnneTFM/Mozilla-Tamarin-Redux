@@ -296,21 +296,20 @@ const uint32_t flash_system_WorkerState_code = 249; // abc
 const uint32_t flash_system_Worker_current_get = 252; // abc
 const uint32_t flash_system_Worker_pr = 253; // native
 const uint32_t flash_system_Worker_state_get = 255; // native
-const uint32_t flash_system_Worker_start = 256; // abc
-const uint32_t flash_system_Worker_private_startVeryInternal = 257; // native
-const uint32_t flash_system_Worker_isParentOf = 258; // native
-const uint32_t flash_system_Worker_isPrimordial_get = 259; // native
-const uint32_t flash_system_Worker_setSharedProperty = 260; // native
-const uint32_t flash_system_Worker_getSharedProperty = 261; // native
-const uint32_t flash_system_Worker_terminate = 262; // native
-const uint32_t flash_system_WorkerEvent_currentState_get = 265; // abc
-const uint32_t flash_system_WorkerEvent_previousState_get = 266; // abc
-const uint32_t flash_system_WorkerEvent_target_get = 267; // abc
-const uint32_t flash_system_WorkerDomain_current_get = 270; // abc
-const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 272; // abc
-const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 273; // abc
-const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 274; // native
-const uint32_t flash_system_WorkerDomain_listWorkers = 275; // native
+const uint32_t flash_system_Worker_start = 256; // native
+const uint32_t flash_system_Worker_isParentOf = 257; // native
+const uint32_t flash_system_Worker_isPrimordial_get = 258; // native
+const uint32_t flash_system_Worker_setSharedProperty = 259; // native
+const uint32_t flash_system_Worker_getSharedProperty = 260; // native
+const uint32_t flash_system_Worker_terminate = 261; // native
+const uint32_t flash_system_WorkerEvent_currentState_get = 264; // abc
+const uint32_t flash_system_WorkerEvent_previousState_get = 265; // abc
+const uint32_t flash_system_WorkerEvent_target_get = 266; // abc
+const uint32_t flash_system_WorkerDomain_current_get = 269; // abc
+const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 271; // abc
+const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 272; // abc
+const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 273; // native
+const uint32_t flash_system_WorkerDomain_listWorkers = 274; // native
 
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -372,8 +371,8 @@ extern avmplus::Atom flash_system_Worker_pr_thunk(MethodEnv* env, uint32_t argc,
 extern avmplus::Atom flash_system_Worker_pr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_state_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_state_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_private_startVeryInternal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_private_startVeryInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_start_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_start_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_isParentOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_isParentOf_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_isPrimordial_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);

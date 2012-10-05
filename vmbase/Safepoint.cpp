@@ -136,7 +136,6 @@ namespace vmbase {
             // this critical section.
             SafepointRecord::current()->m_status = SafepointRecord::SP_UNSAFE;
             m_requester = (vmpi_thread_t) 0;
-            locker.wait(1); //@TODO: this is not correct - needs to be fixed
         }
     }
 

@@ -51,11 +51,15 @@ namespace avmplus
             // this new isolate so far.
             // At aggregate termination we'll probably kill all the isolates first.
 
-			AvmAssert(isolate != NULL); // the only way this should happen is if we run out of ids; you'd need > 2 billion active workers
+            // the only way this should happen is if we run out of ids 
+            // (you'd need > 2 billion active workers), memory, or aggregate is in shutdown 
+			AvmAssert(isolate != NULL || parent->getAggregate()->inShutdown()); 
 		}
 
-        setIsolate(isolate);
-		self()->toplevel()->addWorker(self());
+        if (isolate) {
+            setIsolate(isolate);
+		    self()->toplevel()->addWorker(self());
+        }
     }
 
     template<class T>
@@ -75,7 +79,11 @@ namespace avmplus
     template<class T>
 	Isolate::descriptor_t WorkerObjectBase<T>::descriptor() const
     {
-        return m_isolate->getDesc();
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        return m_isolate ? m_isolate->getDesc() : Isolate::INVALID_DESC;
     }
     
     template<class T>
@@ -99,46 +107,80 @@ namespace avmplus
     template<class T>
     bool WorkerObjectBase<T>::isPrimordial() const
     {
-        AvmAssert(m_isolate != NULL);
-        AvmAssert(m_isolate->getDesc() >= 0);
-        // if this isolate has had terminate called on it before the run loop
-        // has started then its m_isolate value could be NULL since we may
-        // be calling this method from Worker.current (see setDescriptors)
-        return m_isolate->isPrimordial();
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        if (m_isolate)
+        {
+            AvmAssert(m_isolate->getDesc() >= 0);
+            // if this isolate has had terminate called on it before the run loop
+            // has started then its m_isolate value could be NULL since we may
+            // be calling this method from Worker.current (see setDescriptors)
+            return m_isolate->isPrimordial();
+        }
+        else
+        {
+            return false;
+        }
 	}
 
-    template<class T>
-    bool WorkerObjectBase<T>::start( )
+    template <class T>
+    void WorkerObjectBase<T>::start()
     {
-        return startInternal();
+        // because AS thunkers cannot call virtual methods on all
+        // platforms one level of indirection is used.
+        internalStart();
     }
 
     template <class T>
     Stringp WorkerObjectBase<T>::get_state()
     {
-        Aggregate* aggregate = m_isolate->getAggregate();
-        Isolate::State code = aggregate->queryState(m_isolate);
-        AvmAssert(code >= Isolate::NEW && code <= Isolate::EXCEPTION);
-        if (code == Isolate::STARTING)
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        if (m_isolate)
         {
-            code = Isolate::NEW;
+            Aggregate* aggregate = m_isolate->getAggregate();
+            Isolate::State code = aggregate->queryState(m_isolate);
+            AvmAssert(code >= Isolate::NEW && code <= Isolate::EXCEPTION);
+            if (code == Isolate::STARTING)
+            {
+                code = Isolate::NEW;
+            }
+            else if (code == Isolate::FINISHING)
+            {
+                code = Isolate::RUNNING;
+            }
+            return self()->core()->workerStates[code];
         }
-        else if (code == Isolate::FINISHING)
+        else
         {
-            code = Isolate::RUNNING;
+            return self()->core()->workerStates[Isolate::ABORTED];
         }
-        return self()->core()->workerStates[code];
      }
     
     template <class T>
-    bool WorkerObjectBase<T>::stopInternal() 
+    bool WorkerObjectBase<T>::internalStop() 
     {
-        Aggregate* aggregate = m_isolate->getAggregate();
-        if (aggregate->isPrimordial(m_isolate->getDesc()))  {
-            aggregate->throwWorkerTerminatedException(self()->toplevel());
-            return true; // not reached
-        } else {
-            return aggregate->requestIsolateExit(m_isolate->getDesc(), self()->toplevel());
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        if (m_isolate)
+        {
+            Aggregate* aggregate = m_isolate->getAggregate();
+            if (aggregate->isPrimordial(m_isolate->getDesc()))  {
+                aggregate->throwWorkerTerminatedException(self()->toplevel());
+                return true; // not reached
+            } else {
+                return aggregate->requestIsolateExit(m_isolate->getDesc(), self()->toplevel());
+            }
+        }
+        else
+        {
+            return false;
         }
     }
     
@@ -146,57 +188,70 @@ namespace avmplus
     template <class T>
     void WorkerObjectBase<T>::setSharedProperty(String* key, Atom value)
     {
-        StUTF8String buf(key);
-        ChannelItem* item = m_isolate->makeChannelItem(self()->toplevel(), value);
-        m_isolate->setSharedProperty(buf, item);
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        if (m_isolate)
+        {
+            StUTF8String buf(key);
+            ChannelItem* item = m_isolate->makeChannelItem(self()->toplevel(), value);
+            m_isolate->setSharedProperty(buf, item);
+        }
     }
 
     template <class T>
     Atom WorkerObjectBase<T>::getSharedProperty(String* key)
     {
-		Atom result = undefinedAtom;
-		StUTF8String buf(key);
-		ChannelItem* item;
-		const bool cOk = m_isolate->getSharedProperty(buf, &item);
-		if (cOk) 
-		{
-			result =  item->getAtom(self()->toplevel());
-		}
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        if (m_isolate)
+        {
+		    Atom result = undefinedAtom;
+		    StUTF8String buf(key);
+		    ChannelItem* item;
+		    const bool cOk = m_isolate->getSharedProperty(buf, &item);
+		    if (cOk) 
+		    {
+			    result =  item->getAtom(self()->toplevel());
+		    }
 
-        return result;
+            return result;
+        }
+        else
+        {
+            return undefinedAtom;
+        }
     }
 
-    template<class T>
-    bool WorkerObjectBase<T>::startVeryInternal()
-    {
-        if (m_isolate->getAggregate()->queryState(m_isolate) != Isolate::NEW)
-            throwIllegalOperationError(kWorkerAlreadyStarted);
-        
-        if (m_isolate->getParentDesc() != AvmCore::getActiveCore()->getIsolate()->getDesc())
-            throwIllegalOperationError(kWorkerIllegalCallToStart);
-
-        return startInternal();
-    }
-    
     template <class T>
-    bool WorkerObjectBase<T>::startInternal( )
+    void WorkerObjectBase<T>::internalStart()
     {
-        if (m_isolate->hasFailed())
-            throwIllegalOperationError(kFailedWorkerCannotBeRestarted);
-        Aggregate* aggregate = m_isolate->getAggregate();
-        
-        ByteArrayObject* byteCode = self()->getByteCode();
-        // stash away in non-gc'd memory
-        // If byteCode == NULL, will try to get from primordial (shell only).
-        m_isolate->copyByteCode(byteCode);
-        self()->clearByteCode();
+        // the isolate can be NULL in the situation where a
+        // worker is busy creating workers during a shutdown cycle,
+        // as the logic for creating an isolate will return NULL 
+        // in that situation.
+        if (m_isolate)
+        {
+            if (m_isolate->getAggregate()->queryState(m_isolate) != Isolate::NEW)
+                throwIllegalOperationError(kWorkerAlreadyStarted);
+            
+            if (m_isolate->getParentDesc() != AvmCore::getActiveCore()->getIsolate()->getDesc())
+                throwIllegalOperationError(kWorkerIllegalCallToStart);
 
-        if (aggregate->spawnIsolateThread(m_isolate)) { // FIXME atomicity here?
-            return true;
-        } else {
-            // spawnIsolateThread() will recordSpawnFailure()
-            // Not programmer's fault (unlike wrong argument types), don't throw, just return false.
-            return false;
+            if (m_isolate->hasFailed())
+                throwIllegalOperationError(kFailedWorkerCannotBeRestarted);
+
+            Aggregate* aggregate = m_isolate->getAggregate();
+            
+            ByteArrayObject* byteCode = self()->getByteCode();
+            // stash away in non-gc'd memory
+            // If byteCode == NULL, will try to get from primordial (shell only).
+            m_isolate->copyByteCode(byteCode);
+            self()->clearByteCode();
+            aggregate->spawnIsolateThread(m_isolate);
         }
     }
 

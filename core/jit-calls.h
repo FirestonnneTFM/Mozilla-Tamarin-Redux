@@ -1358,7 +1358,7 @@ SSE2_ONLY(
     typedef Atom (*coerce_MethodEnv)(MethodEnv*, Atom, Traits*);
     FUNCTION(FUNCADDR((coerce_MethodEnv)&coerce<MethodEnv*>), SIG3(A,P,A,P), coerce)
 
-    PUREFASTFUNCTION(FUNCADDR(finddef_cache), SIG2(P,P,P), finddef_cache)
+    FASTFUNCTION(FUNCADDR(finddef_cache), SIG2(P,P,P), finddef_cache)
 
     METHOD(ENVADDR(MethodEnv::argcError), SIG2(V,P,I), argcError)
 
