@@ -445,8 +445,8 @@ namespace avmplus
         if (!curMemBase)
         {
             //AvmAssert(curMemSize == NULL);
-            curMemBase = out->insLoad(LIR_ldp, env_domainenv, offsetof(DomainEnv,m_globalMemoryBase), ACCSET_OTHER);
-            curMemSize = out->insLoad(LIR_ldi, env_domainenv, offsetof(DomainEnv,m_globalMemorySize), ACCSET_OTHER);
+            curMemBase = out->insLoad(LIR_ldp, env_domainenv, offsetof(DomainEnv,m_globalMemoryBase), ACCSET_OTHER, LOAD_VOLATILE);
+            curMemSize = out->insLoad(LIR_ldi, env_domainenv, offsetof(DomainEnv,m_globalMemorySize), ACCSET_OTHER, LOAD_VOLATILE);
         }
 
         AvmAssert((curRangeCheckLHS != NULL) == (curRangeCheckRHS != NULL));

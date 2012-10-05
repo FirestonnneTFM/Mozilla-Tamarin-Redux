@@ -107,17 +107,10 @@ package flash.system
         * Run the code blobs passed into the constructor in order and enter the event loop.
         * @return proxy to the remote worker.
         */
-        public function start() :void
-        {
-            startVeryInternal();
-        }
-
-        private native function startVeryInternal() :void;
+        public native function start() :void;
 
         public native function isParentOf(other: Worker): Boolean;
-
         public native function get isPrimordial(): Boolean;
-
 
         public native function setSharedProperty(key:String, value:*):void;
         public native function getSharedProperty(key:String):*;

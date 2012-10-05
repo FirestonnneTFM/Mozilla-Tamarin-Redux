@@ -10,6 +10,7 @@
 #include "Channels.h"
 
 #ifdef DEBUG
+#define DEBUG_CONDITION_MUTEX
 #define DEBUG_INTERRUPTIBLE_STATE
 #endif // DEBUG 
 
@@ -149,16 +150,44 @@ namespace avmplus
         class InterruptibleState
         {
         public:
+            /*
+             * the wait record holds a reference to
+             * a thread that is waiting on this state's
+             * condition variable.
+             * it is used to manage fairness for locks
+             * and conditions as well as mark individual
+             * threads to be signaled in a special way
+             * by the runtime (see signal for more details)
+             */ 
+            struct WaitRecord
+            {
+                WaitRecord() 
+                    : next(NULL)
+                    , signaled(false)
+    #ifdef DEBUG_CONDITION_MUTEX
+                    , threadID(VMPI_currentThread())
+    #endif // DEBUG_CONDITION_MUTEX
+                {}
+
+                WaitRecord* next;
+                bool signaled;
+    #ifdef DEBUG_CONDITION_MUTEX
+                vmpi_thread_t threadID;
+    #endif // DEBUG_CONDITION_MUTEX
+            };
+
             InterruptibleState();
             bool hasWaiters();
             void notify();
             void notifyAll();
             // signal is a specialized case of notifyAll.
+            // it makes the distinction between user code
+            // waking up blocked threads with notify/notifyAll
+            // and the runtime waking up threads due to a
+            // termination request, script timeout, etc.
             // it is used to wake up all threads and have
             // them check if they should exit their waiting
-            // state or return to a blocked state. this
-            // is needed to support script timeout, terminate
-            // and call stack acquisition for fdb.
+            // state or return to a blocked state. 
             void signal();
 
             //
@@ -169,8 +198,13 @@ namespace avmplus
             class Enter
             {
             public:
-                Enter(InterruptibleState* state, Isolate* isolate);
+                Enter(WaitRecord& record, InterruptibleState* state, Isolate* isolate);
+                ~Enter();
                 void wait(int32_t timeout=-1);
+                WaitRecord* waitListHead() const 
+                {
+                    return m_state->m_head;
+                }
                 void notify();
                 bool interrupted;
                 bool result;
@@ -209,6 +243,7 @@ namespace avmplus
                 ActiveInterruptibleStateHelper m_stateSetter;
                 vmbase::MonitorLocker< vmbase::IMPLICIT_SAFEPOINT > m_monitor;
                 InterruptibleState* m_state;
+                WaitRecord* m_waitRecord;
             };
 
             vmbase::WaitNotifyMonitor& getMonitor() { return m_condition; }
@@ -219,9 +254,21 @@ namespace avmplus
 
         private:
             friend class Enter;
+            // to distingush between a call to signal from runtime
+            // code and user code calling notify/notifyAll
+            // a waiter count and signaled waiter counts along with
+            // the wait list are used.
+            // when a signal cycle starts it sets the singaled waiters
+            // count to the current waiters count.  
+            // when a signal is requested it must first check that 
+            // a signal has not already been requested and wait until
+            // it is complete.
             vmbase::WaitNotifyMonitor m_condition;
             volatile int32_t m_waiterCount;
-            int32_t m_signaledWaiters;
+            uint32_t m_signaledWaiters;
+            // list of threads waiting on this state, in FIFO order
+            WaitRecord* m_head;
+            WaitRecord* m_tail;
 
 #ifdef DEBUG_INTERRUPTIBLE_STATE
             static  int32_t globalId; // global id counter
@@ -231,7 +278,7 @@ namespace avmplus
     private:
         friend class InterruptibleState::Enter::ActiveInterruptibleStateHelper;
 
-        void lockInSafepoint(vmpi_mutex_t* mutex) const;
+        static void lockInSafepoint(vmpi_mutex_t* mutex);
         static void lockInSafepointGate(void* stackPointer, void* mutex);
 
 		AvmCore* m_core;
@@ -376,6 +423,7 @@ namespace avmplus
         void requestAggregateExit();
         void waitUntilNoIsolates();
 
+        void processWorkerInterrupt(Toplevel* toplevel);
         virtual void throwWorkerTerminatedException(Toplevel* toplevel);
 
         GCRef<ObjectVectorObject> listWorkers(Toplevel* toplevel);
@@ -398,6 +446,8 @@ namespace avmplus
         }
 		
     private:
+        void setIsolateAsInterrupted(Isolate* isolate);
+
         Globals m_globals;
 		Isolate::descriptor_t m_primordialGiid;
         int m_activeIsolateCount;
@@ -439,25 +489,20 @@ namespace avmplus
 
         GCRef<ScriptObject> setIsolate(Isolate* isolate);
 
-        ~WorkerObjectBase();
+        virtual ~WorkerObjectBase();
 		Isolate::descriptor_t descriptor() const;
         Stringp get_state();
 
         bool isParentOf(WorkerObjectBase* worker);
         bool isPrimordial() const;
-
-        bool start( );
-        bool startInternal( );
-        // obviously candidate for further refactoring
-        bool startVeryInternal();
-        bool stopInternal();
-
+        void start();
         void setSharedProperty(String* key, Atom value);
         Atom getSharedProperty(String* key);
-        
     	static void throwIllegalOperationError(int errorID);
 
     protected:
+        virtual void internalStart();
+        bool internalStop();
 		Isolate* getIsolate() const 		{ return m_isolate; }
 		
 	private:

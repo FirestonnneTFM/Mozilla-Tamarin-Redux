@@ -1227,7 +1227,7 @@ namespace avmplus
             m_buffer->capacity = origCap;
             m_position         = origPos;
             SetCopyOnWriteOwner(origCopyOnWriteOwner);
-
+            origBuffer = NULL; // release ref before throwing
             m_toplevel->core()->throwException(exn);
         }
 
@@ -1294,8 +1294,8 @@ namespace avmplus
             m_buffer->capacity = origCap;
             m_position         = origPos;
             SetCopyOnWriteOwner(origCopyOnWriteOwner);
+            origBuffer = NULL; // release ref before throwing
             toplevel()->throwIOError(kCompressedDataError);
-
             break;
         }
 
@@ -1419,6 +1419,7 @@ namespace avmplus
             m_buffer->capacity = origCap;
             m_position         = origPos;
             SetCopyOnWriteOwner(origCopyOnWriteOwner);
+            origBuffer = NULL; // release ref before throwing
             toplevel()->throwIOError(kCompressedDataError);
         }
     }
