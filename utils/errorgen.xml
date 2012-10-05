@@ -22,39 +22,15 @@
 
         <Languages>
                 <language id='0'>en</language>
-                <language id='1'>cs</language>
-                <language id='2'>de</language>
-                <language id='3'>es</language>
-                <language id='4'>fr</language>
-                <language id='5'>it</language>
-                <language id='6'>ja</language>
-                <language id='7'>ko</language>
-                <language id='8'>nl</language>
-                <language id='9'>pl</language>
-                <language id='10'>pt</language>
-                <language id='11'>ru</language>
-                <language id='12'>sv</language>
-                <language id='13'>tr</language>
-                <language id='14'>zh_CN</language>
-                <language id='15'>zh_TW</language>
+                <language id='1'>fr</language>
+                <language id='2'>ja</language>
+                <language id='3'>zh_CN</language>
         </Languages>
 
         <LangFile_en    file='../core/ErrorConstants.xml' />
-        <LangFile_cs    file='../localization/cs/ErrorConstants.xml' />
-        <LangFile_de    file='../localization/de/ErrorConstants.xml' />
-        <LangFile_es    file='../localization/es/ErrorConstants.xml' />
         <LangFile_fr    file='../localization/fr/ErrorConstants.xml' />
-        <LangFile_it    file='../localization/it/ErrorConstants.xml' />
         <LangFile_ja    file='../localization/ja/ErrorConstants.xml' />
-        <LangFile_ko    file='../localization/ko/ErrorConstants.xml' />
-        <LangFile_nl    file='../localization/nl/ErrorConstants.xml' />
-        <LangFile_pl    file='../localization/pl/ErrorConstants.xml' />
-        <LangFile_pt    file='../localization/pt/ErrorConstants.xml' />
-        <LangFile_ru    file='../localization/ru/ErrorConstants.xml' />
-        <LangFile_sv    file='../localization/sv/ErrorConstants.xml' />
-        <LangFile_tr    file='../localization/tr/ErrorConstants.xml' />
         <LangFile_zh_CN file='../localization/zh_Hans/ErrorConstants.xml' />
-        <LangFile_zh_TW file='../localization/zh_Hant/ErrorConstants.xml' />
 
         <dotAs>
 <![CDATA[
@@ -104,34 +80,10 @@ namespace avmplus
 {{ErrorGenerator.LangTable_en}}
             },
         #endif
-        #ifdef AVMPLUS_ERROR_LANG_cs
-            // cs
-            {
-{{ErrorGenerator.LangTable_cs}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_de
-            // de
-            {
-{{ErrorGenerator.LangTable_de}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_es
-            // es
-            {
-{{ErrorGenerator.LangTable_es}}
-            },
-        #endif
         #ifdef AVMPLUS_ERROR_LANG_fr
             // fr
             {
 {{ErrorGenerator.LangTable_fr}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_it
-            // it
-            {
-{{ErrorGenerator.LangTable_it}}
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ja
@@ -140,59 +92,11 @@ namespace avmplus
 {{ErrorGenerator.LangTable_ja}}
             },
         #endif
-        #ifdef AVMPLUS_ERROR_LANG_ko
-            // ko
-            {
-{{ErrorGenerator.LangTable_ko}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_nl
-            // nl
-            {
-{{ErrorGenerator.LangTable_nl}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_pl
-            // pl
-            {
-{{ErrorGenerator.LangTable_pl}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_cs
-            // pt
-            {
-{{ErrorGenerator.LangTable_pt}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_ru
-            // ru
-            {
-{{ErrorGenerator.LangTable_ru}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_sv
-            // sv
-            {
-{{ErrorGenerator.LangTable_sv}}
-            },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_tr
-            // tr
-            {
-{{ErrorGenerator.LangTable_tr}}
-            },
-        #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_CN
             // zh_CN
             {
 {{ErrorGenerator.LangTable_zh_CN}}
             },
-        #endif
-        #ifdef AVMPLUS_ERROR_LANG_zh_TW
-            // zh_TW
-            {
-{{ErrorGenerator.LangTable_zh_TW}}
-            }
         #endif
         };
 
@@ -220,66 +124,18 @@ namespace avmplus
                 <![CDATA[                /*{{error.@id}},{{LangTable_en.count}}*/ "{{escape(error.*.0)}}",
 ]]>
         </LangTable_en>
-        <LangTable_cs repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_cs.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_cs.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_cs>
-        <LangTable_de repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_de.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_de.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_de>
-        <LangTable_es repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_es.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_es.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_es>
         <LangTable_fr repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_fr.errors' mergeAttribute='id' trim='2' >
                 <![CDATA[                /*{{error.@id}},{{LangTable_fr.count}}*/ "{{escape(merge.error.*.0)}}",
 ]]>
         </LangTable_fr>
-        <LangTable_it repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_it.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_it.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_it>
         <LangTable_ja repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_ja.errors' mergeAttribute='id' trim='2' >
                 <![CDATA[                /*{{error.@id}},{{LangTable_ja.count}}*/ "{{escape(merge.error.*.0)}}",
 ]]>
         </LangTable_ja>
-        <LangTable_ko repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_ko.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_ko.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_ko>
-        <LangTable_nl repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_nl.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_nl.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_nl>
-        <LangTable_pl repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_pl.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_pl.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_pl>
-        <LangTable_pt repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_pt.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_pt.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_pt>
-        <LangTable_ru repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_ru.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_ru.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_ru>
-        <LangTable_sv repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_sv.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_sv.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_sv>
-        <LangTable_tr repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_tr.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_tr.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_tr>
         <LangTable_zh_CN repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_zh_CN.errors' mergeAttribute='id' trim='2' >
                 <![CDATA[                /*{{error.@id}},{{LangTable_zh_CN.count}}*/ "{{escape(merge.error.*.0)}}",
 ]]>
         </LangTable_zh_CN>
-        <LangTable_zh_TW repeat='ErrorGenerator.LangFile_en.errors' mergeWith='ErrorGenerator.LangFile_zh_TW.errors' mergeAttribute='id' trim='2' >
-                <![CDATA[                /*{{error.@id}},{{LangTable_zh_TW.count}}*/ "{{escape(merge.error.*.0)}}",
-]]>
-        </LangTable_zh_TW>
 
 
         <dotH>
