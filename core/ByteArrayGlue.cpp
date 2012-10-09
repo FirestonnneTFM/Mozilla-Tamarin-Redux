@@ -185,6 +185,12 @@ namespace avmplus
         , m_isShareable(shareable) 
         , m_isLinkWrapper(false)
     {
+		// Note that this constructor is only used when receiving a ByteArray from another worker
+		if (!m_isShareable) {
+			// If we made a copy of the ByteArray (i.e. it's not sharable), then we should account for the memory that we're about to receive.
+			// (until now, it's been sitting in the message queue, not assigned to any GC)
+			TellGcNewBufferMemory(m_buffer->array, m_buffer->capacity);
+		}
     }
 
 
