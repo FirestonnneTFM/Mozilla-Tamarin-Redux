@@ -177,6 +177,8 @@ namespace avmplus
         /*protected: */
         virtual Toplevel* toplevel() const { return m_toplevel; }
 
+        static void UpdateSubscribers();
+
     private:
 
         void CompressViaZlibVariant(CompressionAlgorithm algorithm);

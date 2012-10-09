@@ -565,6 +565,9 @@ namespace avmplus
             src->array = NULL;
 
             m_byteArray->m_buffer = m_destination;
+
+            // notify all interested parties
+            ByteArray::UpdateSubscribers();
         }
 
     private:
@@ -680,13 +683,9 @@ namespace avmplus
             m_owner->m_position = newLength;
         }
 
-        // anytime the length of the bytearray is updated we have to notify all isolates
-        // regardless of if the backing store is reallocated or not.
-        if (vmbase::SafepointRecord::hasCurrent()) {
-            if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
-                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
-            }
-        }
+        // notify all subscribers to this byte array data if it is being
+        // shared between workers
+        ByteArray::UpdateSubscribers();
     }
 
 
@@ -705,6 +704,18 @@ namespace avmplus
         CheckEOF(count);
         move_or_copy(buffer, m_buffer->array + m_position, count);
         m_position += count;
+    }
+
+    /*static*/
+    void ByteArray::UpdateSubscribers() 
+    {
+        // anytime the length of the bytearray is updated notify all workers
+        // regardless of if the backing store is reallocated or not.
+        if (vmbase::SafepointRecord::hasCurrent()) {
+            if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
+                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
+            }
+        }
     }
 
     void ByteArray::Write(const void* buffer, uint32_t count)
@@ -1231,7 +1242,7 @@ namespace avmplus
             m_toplevel->core()->throwException(exn);
         }
 
-        int retcode;
+        int retcode = SZ_OK;
         size_t destLen = unpackedLen;
 
         retcode = LzmaUncompress(m_buffer->array, &destLen,
@@ -1255,9 +1266,6 @@ namespace avmplus
 
             m_buffer->length = uint32_t(destLen);
 
-            // Analogous to zlib, maintain policy that Uncompress() sets
-            // position == 0 (while Compress() sets position == length).
-            // (it was set above)
             if (cShared) {
                 ByteArraySwapBufferTask task(this, origBuffer);
                 task.exec();

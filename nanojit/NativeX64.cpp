@@ -1577,6 +1577,7 @@ namespace nanojit
 
     void Assembler::asm_pushstate()
     {
+        SUBQRI(RSP, 32);
         PUSHR(R15);
         PUSHR(R14);
         PUSHR(R13);
@@ -1613,6 +1614,7 @@ namespace nanojit
         POPR(R13);
         POPR(R14);
         POPR(R15);
+        ADDQRI(RSP, 32);
     }
     
     void Assembler::asm_savepc()
