@@ -406,6 +406,7 @@ namespace avmplus
         virtual ~Aggregate();
         virtual void destroy();
 
+        void outOfMemoryShutdown();
         bool isPrimordial(Isolate::descriptor_t giid) const;
 
         // If parent == NULL, the primordial isolate will be created.

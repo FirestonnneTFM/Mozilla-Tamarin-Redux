@@ -215,7 +215,7 @@ process_interrupt:
 
     bool MutexClass::get_isSupported()
     {
-        return core()->getIsolate() != NULL;
+		return MutexClass::getMutexSupported( toplevel() );
     }
 
     //
@@ -465,7 +465,7 @@ process_interrupt:
 
     bool ConditionClass::get_isSupported()
     {
-        return core()->getIsolate() != NULL;
+		return MutexClass::getMutexSupported( toplevel() );
     }
 
     //
