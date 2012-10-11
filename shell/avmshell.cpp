@@ -1386,5 +1386,13 @@ namespace avmplus
             return mmfx_new(avmshell::ShellIsolate(desc, parentDesc, aggregate));
         }
     }
+
+	/*static*/
+	bool MutexClass::getMutexSupported (GCRef<avmplus::Toplevel> toplevel)
+	{
+		AvmAssert(toplevel != NULL);
+		
+		return toplevel->core()->getIsolate() != NULL;;
+	}
 }
 

@@ -210,6 +210,10 @@ namespace avmplus {
     public:
         MutexClass(VTable* cvtable);
         bool get_isSupported();
+		
+		// implemented per FP/AIR/Shell to determine mutex/condition support
+		static bool getMutexSupported( GCRef<avmplus::Toplevel> toplevel );
+		
     private:
         GC_NO_DATA(MutexClass)
         DECLARE_SLOTS_MutexClass;

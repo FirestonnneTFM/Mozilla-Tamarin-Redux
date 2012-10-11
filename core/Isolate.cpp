@@ -63,8 +63,6 @@ namespace avmplus
 
     Aggregate::~Aggregate()
     {
-		if(MMgc::GCHeap::GetGCHeap()->GetStatus() == MMgc::kMemAbort)
-			vmbase::SafepointRecord::cleanupAfterOOM();
     }
 
     void Aggregate::destroy()
@@ -72,6 +70,12 @@ namespace avmplus
         mmfx_delete(this);
     }
     
+    void Aggregate::outOfMemoryShutdown()
+    {
+        requestAggregateExit();
+		vmbase::SafepointRecord::cleanupAfterOOM();
+    }
+
     bool Aggregate::requestIsolateExit(Isolate::descriptor_t desc, Toplevel* currentToplevel)
     {
         bool result = false;
@@ -1072,11 +1076,11 @@ throw_terminated_error:
 			// hang onto the aggregate during the safepont to ensure it doesn't go away.
 		    m_aggregate = isolate->getAggregate();
 			
-			m_safepointMgr = core->getSafepointManager();
+			m_safepointMgr = m_aggregate->safepointManager();
 			m_spRecord.setLocationAndDesc( (int32_t*)&core->interrupted, core->getIsolateDesc() ); 
-			
-			if (m_safepointMgr)
-				m_safepointMgr->enter(&m_spRecord);
+
+            AvmAssert(m_safepointMgr != NULL);
+			m_safepointMgr->enter(&m_spRecord);
 		}
     }
     
