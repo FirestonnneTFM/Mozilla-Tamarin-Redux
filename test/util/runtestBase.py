@@ -77,6 +77,7 @@ class RuntestBase(object):
     ascOutputFilename = 'ascoutput.log'
     ascOutputFile = None
     ascversion = ''
+    ascbuild= ''
     avm = ''
     avmce = ''
     avmversion = ''
@@ -292,7 +293,6 @@ class RuntestBase(object):
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
                 self.forcerebuild = True
-                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
             elif o in ('--addtoconfig',):
@@ -332,7 +332,6 @@ class RuntestBase(object):
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
                 self.forcerebuild = True
-                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('--cleanexit',):
                 self.cleanexit = True
             elif o in ('-q', '--quiet'):
@@ -386,11 +385,11 @@ class RuntestBase(object):
 
     ### Config and Settings ###
 
-    def determineConfig(self, vm_str='tvm'):
+    def determineConfig(self):
         # ================================================
         # Determine the configruation if it has not been
         # passed into the script:
-        # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+        # {CPU_ARCH}-{OS}-{ASC}-{VERSION}-{VMSWITCH}
         # ================================================
 
         try:
@@ -506,8 +505,11 @@ class RuntestBase(object):
             wordcode = '-wordcode'
         else:
             wordcode = ''
+        asc_str="asc1"
+        if self.ascversion:
+            asc_str="asc%s" % self.ascversion
             
-        self.config = cputype+'-'+self.osName+'-'+vm_str+'-'+self.vmtype+ \
+        self.config = cputype+'-'+self.osName+'-'+asc_str+'-'+self.vmtype+ \
                       wordcode+self.vmargs.replace(" ", "")+self.addtoconfig
         
         
@@ -1188,6 +1190,9 @@ class RuntestBase(object):
         elif as_file.endswith(self.executableExtensions):
             # directly executable file doesn't need to be compiled
             return
+
+        if self.ascversion=='3':
+            cmd=self.translateToAsc3(cmd)
         
         if self.ascOutputOnly:
             self.ascOutputFile.write('%s %s\n' % (cmd, as_file))
@@ -1373,6 +1378,8 @@ class RuntestBase(object):
                                 child.expect("\(ash\)")
                                 moveAtsSwf(dir,file, self.atsDir)
                         else:
+                            if self.ascversion=='3':
+                                cmd=self.translateToAsc3(cmd)
                             cmd += " %s" % test
                             cmd=self.fixAbcCommand(cmd)
                             child.sendline(cmd)
@@ -1403,6 +1410,29 @@ class RuntestBase(object):
 
 
         end_time = datetime.today()
+
+    def translateToAsc3(self,cmd):
+        # translates the asc switches syntax from asc1,2 to asc3
+        # from: java -jar asc.jar -import builtin.abc -import shell_toplevel.abc test.as
+        #   to: java -jar asc.jar -builtin-external-library-path builtin.abc shell_toplevel.abc -abc -c -include-sources test.as
+        self.verbose_print("translate to as3 before: %s"%cmd)
+        
+        tokens=cmd.split()
+        newcmd=[]
+        imports=['Assert.abc','Utils.abc','DateUtils.abc']
+        for i in range(len(tokens)):
+            if tokens[i]=="-import" and len(tokens)>i+1:
+                imports.append(tokens[i+1])
+            elif tokens[i] not in imports and tokens[i]!='-AS3':
+                newcmd.append(tokens[i])
+        if len(imports)>0:
+            newcmd.append('-builtin-external-library-path')
+            newcmd+=imports
+        newcmd+=['-dialect','3.0','-abc','-c','-include-sources']
+        cmd=string.join(newcmd)
+
+        self.verbose_print("translate to as3 after: %s"%cmd)
+        return cmd
 
     def compile_support_files_extra_pass(self, support_dir, abc_files, outputCalls = []):
         # One of the support files may have required another file to be imported.
@@ -1741,8 +1771,8 @@ class RuntestBase(object):
         self.verbose_print(self.avm_features)
         if self.avmversion:
             self.js_print('avm version: %s' % self.avmversion)
-        if self.ascversion:
-            self.js_print('asc version: %s' % self.ascversion)
+        if self.ascversion and self.ascbuild:
+            self.js_print('asc version: %s build: %s' % (self.ascversion,self.ascbuild))
         self.js_print('thread count: %d' % self.threads)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
 
@@ -1911,6 +1941,8 @@ class RuntestBase(object):
     ### Misc Functions ###
 
     def getAscVersion(self, asc):
+        build='unknown'
+        version='unknown'
         if asc.endswith('.jar'):
             cmd = '"%s" -jar %s' % (self.java,asc)
         else:
@@ -1919,9 +1951,14 @@ class RuntestBase(object):
         (f,err,exitcode) = self.run_pipe(cmd)
 
         try:
-            return re.compile('.*build (\d+|\S+)').search(f[1]).group(1)
+            build=re.compile('.*build (\d+|\S+)').search(f[1]).group(1)
         except:
-            return 'unknown'
+            pass
+        try:
+            version=re.compile('[Vv]ersion (\d+)\.').search(f[1]).group(1)
+        except:
+            pass
+        return(build,version)    
 
     def getAvmVersion(self, vm=None, txt=None):
         '''Pull the avm version out of the vm info or description string if provided.'''

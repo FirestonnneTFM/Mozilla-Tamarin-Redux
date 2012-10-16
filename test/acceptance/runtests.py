@@ -118,6 +118,7 @@ class AcceptanceRuntest(RuntestBase):
         self.parseOptions()
         self.setTimestamp()
         self.checkPath()
+        (self.ascbuild,self.ascversion)=self.getAscVersion(self.asc)
         if not self.config:
             self.determineConfig()
         if self.verifyonly and 'debugger' not in self.vmtype:

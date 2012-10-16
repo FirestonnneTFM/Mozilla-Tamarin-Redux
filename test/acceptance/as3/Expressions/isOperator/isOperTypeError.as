@@ -21,7 +21,8 @@ try {
 } finally {
     Assert.expectEq("is Operator: invalid Type - notAValidType","ReferenceError: Error #1065", Utils.referenceError(result));
 }
-
+// The following tests are now compile-time errors in falcon - See CMP-2028 for details.
+/*
 result = "Type Error Not Thrown";
 try {
     myNumber is 897;
@@ -48,7 +49,7 @@ try {
 } finally {
     Assert.expectEq("is Operator: invalid Type - different var on RHS","TypeError: Error #1009", Utils.typeError(result));
 }
-
+*/
 result = "Value error not thrown";
 try {
     nonDeclaredVar is Object;

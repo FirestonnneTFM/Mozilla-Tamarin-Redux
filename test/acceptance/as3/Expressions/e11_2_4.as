@@ -172,7 +172,7 @@ function getTestCases() {
    array[item++] = Assert.expectEq( 
                                     "Function with arguments of different data types",
                                     "passed",
-                                    MyFunction4(1,"string",[2,3,4],goo(),false,null,void));
+                                    MyFunction4(1,"string",[2,3,4],goo(),false,null,void 0));
 
    array[item++] = Assert.expectEq( 
                                     "Function with arguments of different data types",

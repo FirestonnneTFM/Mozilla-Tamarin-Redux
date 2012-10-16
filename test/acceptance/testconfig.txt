@@ -44,7 +44,7 @@
 # Some operating systems do not adjust past dates for historical DST settings
 regress/bug_606478:.*(19\d\d|200[0-6]).*, (arm-lnx|mips-lnx|win), diff, expectedfail, Operating system does not adjust past dates for historical DST settings
 # These fail when run on panda boards. Turning them off for all android to avoid unexpected passes when run againnst actual phone devices.
-regress/bug_606478:.*(19\d\d|200[0-6]).*, (arm-android-ssh-tvm-), diff, skip, Skip on android because panda boards do not adjust past dates for historical DST settings
+regress/bug_606478:.*(19\d\d|200[0-6]).*, (arm-android-ssh-), diff, skip, Skip on android because panda boards do not adjust past dates for historical DST settings
 
 ####################
 # abcasm:
@@ -97,9 +97,9 @@ as3/Vector/nonindexproperty, .*diff, , skip, https://bugzilla.mozilla.org/show_b
 ####################
 # Windows Mobile
 ####################
-mops/mops, arm-winmobile-tvm.*,, skip, multiple abc files not supported on winmo devices
-abcasm/.*, arm-winmobile-tvm.*,, skip, multiple abc files not supported on winmo devices
-versioning/.*, arm-winmobile.*,, skip, passing args to abc does not work with winmo tools that we use
+mops/mops, arm-winmobile,, skip, multiple abc files not supported on winmo devices
+abcasm/.*, arm-winmobile,, skip, multiple abc files not supported on winmo devices
+versioning/.*, arm-winmobile,, skip, passing args to abc does not work with winmo tools that we use
 
 ####################
 # ARM
@@ -119,10 +119,10 @@ mops/mops , (arm|mips|sh4),, deep, test runs too slowly
 # Windows Mobile Emulator
 ####################
 # emulator is not using DST by default
-ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm,, skip, emulator DST problem
-ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator-tvm,, skip, emulator DST problem
-ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator-tvm,, skip, emulator DST problem
-ecma3/Date/e15_9_5_10, arm-winmobile-emulator-tvm,, skip, tests run too slowly on winmo
+ecma3/Date/e15_9_5_14, arm-winmobile-emulator,, skip, emulator DST problem
+ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator,, skip, emulator DST problem
+ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator,, skip, emulator DST problem
+ecma3/Date/e15_9_5_10, arm-winmobile-emulator,, skip, tests run too slowly on winmo
 
 ####################
 # SH4
@@ -146,14 +146,14 @@ as3/Definitions/Function/ArgumentsOptimization,  .* ,  (interp|wordcode|(debugge
 ####################
 # run slow tests in deep test phase
 ####################
-ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-ecma3/Unicode/u5000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-ecma3/Unicode/u6000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-ecma3/Unicode/u7000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-ecma3/Unicode/u9000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|x64-lnx|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
-mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|x64-lnx|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
+mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-asc[0-9]+-debug(|debugger).*),, deep, bug 499685 skip slow tests
 regress/bug_483783, .*,, deep, skip slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
 mmgc/pauseForGCIfCollectionImminent, mips-.*,, deep,  bug 499685 skip slow tests
 misc/catchableTimeout, .*,, deep, skip slow tests
@@ -296,7 +296,7 @@ e4x/XML/e13_4_4_32,             AOT ,, skip, AOT does not support versioning yet
 ecma3/JSON/versioned,           AOT ,, skip, AOT does not support versioning yet
 misc/bug_526662,                AOT ,, skip, AOT does not support versioning yet
 misc/invalid_opcodes,           AOT ,, skip, Handled by the GO
-mops/mops.abc_,                 AOT ,, skip, precompilation of AOT application currently doesn't handle precompiled abcs
+mops/mops,                      AOT ,, skip, precompilation of AOT application currently doesn't handle precompiled abcs
 regress/bug_498979,             AOT ,, skip, AOT catches Verify errors at compile time 
 regress/bug_520888,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_548684,             AOT ,, skip, AOT catches Verify errors at compile time
@@ -336,7 +336,7 @@ versioning/.*,                  AOT ,, skip, AOT does not support versioning yet
 ###########
 mmgc/outofmemory , (.*-Dgcthreshold|.*-Dverifyonly) ,, skip , Threshold test takes too long to run out of mem
 mmgc/pauseForGCIfCollectionImminent, arm-.*-debug,, skip, Test takes too long to run on debug android shell
-as3/ByteArray/ByteArray_bug662851 , (AOT|x86-mac-tvm-releasedebugger-air),, skip , system malloc on mac32 produces stderr for this testcase which trips up the testing framework
+as3/ByteArray/ByteArray_bug662851 , (AOT|x86-mac-asc[0-9]+-releasedebugger-air),, skip , system malloc on mac32 produces stderr for this testcase which trips up the testing framework
 mmgc/outofmemory, .*, , verify_skip, Test takes too long to run when attempting to run with --verify
 
 ###########
@@ -364,7 +364,7 @@ ecma3/Unicode/uAC00_HangulSyllables , .*valgrind , , skip , This test takes over
 ###########
 as3/asc/import-with-float4-helper , .* , , skip , Not a test on its own
 generated/.* , .* , , skip , Not a test on its own
-as3/ByteArray/ByteArrayLzmaThirdParty , arm-android-tvm-,, skip, reads helper files which are not deployed on Android see https://bugzilla.mozilla.org/show_bug.cgi?id=733051
+as3/ByteArray/ByteArrayLzmaThirdParty , arm-android,, skip, reads helper files which are not deployed on Android see https://bugzilla.mozilla.org/show_bug.cgi?id=733051
 
 
 

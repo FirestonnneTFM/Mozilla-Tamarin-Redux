@@ -7,7 +7,8 @@ package dynamic {}
 package each {}
 package final {}
 package get {}
-package internal {}
+// Not a valid testcase anymore - see jira bugs: CMP-1137, ASLSPEC-9
+// package internal {}
 package namespace {}
 package override {}
 package set {}

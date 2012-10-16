@@ -23,7 +23,7 @@ function addtestcases()
   //printBugNumber(BUGNUMBER);
   //printStatus (summary);
  
-  "" + (function() { if(delete(null?0:{})){[]} });
+  "" + (function() { if(delete(null?0:{})){var x=[]} });
 
   Assert.expectEq(summary, expect, actual);
 

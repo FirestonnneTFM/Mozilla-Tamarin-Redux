@@ -12,13 +12,12 @@ var BUGNUMBER = "";
 function myConstArgs( arg1 ) {
 
     const n2;
-    n2 = -( n1 / 30 );
+    n2 = -( arg1 / 30 );
     return n2;
 }
 
 
 var thisError:String = "no error";
-
 try
 {
     myConstArgs( 10 );

@@ -61,7 +61,9 @@ for (var i = 0; i < 10; i ++) {
     subject.match(/(?i)a(?-i)b(b*|ba){1,2}?c/g);
     subject.match(/(?i)a(?-i)b(ba|b*){1,2}?c/g);
     subject.match(/(?i)a(?-i)b\c/g);
+    /* bug http://watsonexp.corp.adobe.com/#bug=3345099
     subject.match(/(?i)a(?-i)b[c/g);
+    */
     subject.match(/(?i)a(?-i)bc{c/g);
     subject.match(/(?i)a(?-i)b[ab\]cde]c/g);
     subject.match(/(?i)a(?-i)b[]cde]c/g);

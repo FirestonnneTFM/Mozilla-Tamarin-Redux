@@ -26,7 +26,7 @@ function addtestcases()
 
 
 
-  for(i=0;i<4;++i) [,];
+  for(i=0;i<4;++i) var x=[,];
 
 
 
