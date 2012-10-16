@@ -15,7 +15,7 @@ import com.adobe.test.Assert;
 
 
     Assert.expectEq("queue a gc collection",
-      void,
+      void 0,
       System.queueCollection());
 
     Assert.expectEq("playerType is AVMPlus",

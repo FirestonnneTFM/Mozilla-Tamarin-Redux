@@ -16,11 +16,11 @@ import com.adobe.test.Assert;
 import com.adobe.test.Utils;
 
 var eg = new BugTest();
-Assert.expectEq("Trying to initialize public  class identifier", "ReferenceError: Error #1056", Utils.referenceError(eg.thisError));
-Assert.expectEq("Trying to initialize default class identifier", "ReferenceError: Error #1056", Utils.referenceError(eg.thisError1));
-Assert.expectEq("Trying to initialize internal class identifier", "ReferenceError: Error #1056", Utils.referenceError(eg.thisError2));
-Assert.expectEq("Trying to initialize dynamic class identifier", "ReferenceError: Error #1056", Utils.referenceError(eg.thisError3));
-Assert.expectEq("Trying to initialize final class identifier", "ReferenceError: Error #1056", Utils.referenceError(eg.thisError4));
+Assert.expectEq("Trying to initialize public  class identifier", "ReferenceError: Error #1074", Utils.referenceError(eg.thisError));
+Assert.expectEq("Trying to initialize default class identifier", "ReferenceError: Error #1074", Utils.referenceError(eg.thisError1));
+Assert.expectEq("Trying to initialize internal class identifier", "ReferenceError: Error #1074", Utils.referenceError(eg.thisError2));
+Assert.expectEq("Trying to initialize dynamic class identifier", "ReferenceError: Error #1074", Utils.referenceError(eg.thisError3));
+Assert.expectEq("Trying to initialize final class identifier", "ReferenceError: Error #1074", Utils.referenceError(eg.thisError4));
 
 
 

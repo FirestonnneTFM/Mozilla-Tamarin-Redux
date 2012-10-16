@@ -180,7 +180,7 @@ spidermonkey/js1_5/GC/.*, .*,, skip, GC tests for spidermonkey
 spidermonkey/js1_5/Object/regress-308806-01, .*, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550358
 spidermonkey/js1_5/Regress/regress-58116, .*,, skip, locale-specific test: https://bugzilla.mozilla.org/show_bug.cgi?id=564127
 spidermonkey/js1_5/Regress/regress-104077, .*,, skip, verifyerror: https://bugzilla.mozilla.org/show_bug.cgi?id=550512
-spidermonkey/js1_5/Regress/regress-140974:^Section [3-6].*, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550530
+spidermonkey/js1_5/Regress/regress-140974:^Section [3-6].*, asc1,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550530
 spidermonkey/js1_5/Regress/regress-169559, .*,, skip, need to investigate if global performance is really an issue
 spidermonkey/js1_5/Regress/regress-174709, .*,, skip, need to figure out what test is trying to do
 spidermonkey/js1_5/Regress/regress-179524, .*,, skip, needs investigation, may not have to port this one over
@@ -210,7 +210,7 @@ spidermonkey/js1_5/Regress/regress-352009, .*,, exclude, should array comprehens
 spidermonkey/js1_5/Regress/regress-230216-1:Section 1.*, .*, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550976
 spidermonkey/js1_5/Regress/regress-247179:RegExp \\b.*, .*, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550984
 spidermonkey/js1_5/Regress/regress-248444:.*Section (4|5).*, .*, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550987
-spidermonkey/js1_5/Regress/regress-252892:Section (5|7).*, .*, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550990
+spidermonkey/js1_5/Regress/regress-252892:Section (5|7).*, asc1, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550990
 
 spidermonkey/js1_5/Regress/regress-271716-n, .*,, skip, \
     takes too long to run - tries to crash by doing while (1) a=new Array(a) - possibly run in deep?
@@ -306,36 +306,36 @@ as3/Math/e15_1_2_2:radix 32, .*, diff, expectedfail, https://bugzilla.mozilla.or
 as3/RegExp/replace:str\.replace\(pattern. \".02-.01, .*, diff, expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=605552
 
 ecma3/Boolean/e15_6_4_2_2:tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr;x=new Boolean\(false\), \
-    ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608132
+    ppc64-mac, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608132
 ecma3/Boolean/e15_6_4_2_3:tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr; x=false, \
-    ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608132
+    ppc64-mac, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608132
 
-ecma3/Boolean/e15_6_4_3_2, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Boolean/e15_6_4_3_3, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Expressions/e11_2_1_2, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Expressions/e11_2_1_5, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Boolean/e15_6_4_3_2, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Boolean/e15_6_4_3_3, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Expressions/e11_2_1_2, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Expressions/e11_2_1_5, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-.*, Dinterp, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
 
 # These failed before exact tracing landed, then started working again.
 # Probably there's still a bug so just skip them.
-ecma3/Boolean/e15_6_4_3_2, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Boolean/e15_6_4_3_3, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Expressions/e11_2_1_2, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Expressions/e11_2_1_5, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Boolean/e15_6_4_3_2, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Boolean/e15_6_4_3_3, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Expressions/e11_2_1_2, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Expressions/e11_2_1_5, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-asc[0-9]+-(?!.*Dinterp).*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
 
 
 as3/sampling/BackwardBranches , .* ,, skip, Bugzilla 614529
 as3/sampling/Callback , .* ,, skip,  Bugzilla 614529
 as3/sampling/FunctionEntry , .* ,, skip,  Bugzilla 614529
 
-as3/Definitions/Function/OneOptArgFunction, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 638533
+as3/Definitions/Function/OneOptArgFunction, mips-lnx-.*,, skip, Intermittent Failure: Bugzilla 638533
 # Temporarily re-instate to see if removing asteammips1 from build system (in bug 679515) fixed this as well.
-ecma3/Statements/eregress_74474_003, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 658253
+ecma3/Statements/eregress_74474_003, mips-lnx-.*,, skip, Intermittent Failure: Bugzilla 658253
 
 regress/bug_654807:semisealed.*, .*-ES,, skip, Bugzilla 661575
 spidermonkey/js1_5/Array/regress-465980-02, .*, diff,expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=681399
@@ -421,11 +421,32 @@ regress/security/bug_689243b:Correct exception thrown , (x86|arm)-.*-Dinterp , ,
 ####################
 # Workers
 ####################
-regress/.*243b,(x86-lnx-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|x86-win-tvm-release-Dinterp), , expectedfail, bug 
+regress/.*243b,(x86-lnx-asc[0-9]+-release-Dinterp|arm-android-asc[0-9]+-release-Dinterp|arm-android-asc[0-9]+-release-Dinterp|x86-win-asc[0-9]+-release-Dinterp), , expectedfail, bug 
 regress/.*243a,.*,, skip, bug
 as3/ShellClasses/toplevel:exitcode, arm-lnx,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698855 System.exit(n) always exits 1 linux arm does not support exitcode
 as3/Workers/(ByteArrayWorkersLzma|WorkerDomain|Worker|WorkerErrors|regress/bug774294|regress/bug774302), (android|arm-) ,, skip, ARM platforms not supported https://bugzilla.mozilla.org/show_bug.cgi?id=755345
 as3/Workers/(ByteArrayWorkers|RemoteCall|WorkerCreateMax), .*, ,skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774332
 as3/Workers/(Worker|WorkerDomain|WorkerCreateMax|WorkerErrors|regress/bug774294|regress/bug774302), -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774294
 as3/Workers/ByteArrayWorkersLzma, -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=778727
-as3/Workers/ByteArrayWorkersLzma, x64-win-tvm ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=780127
+as3/Workers/ByteArrayWorkersLzma, x64-win ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=780127
+
+####################
+# ASC2
+####################
+ecma3/Expressions/e11_6_3 : Number.MAX_VALUE \+, asc1,, expectedfail, precision increased in ASC2 bug 3346729
+ecma3/LexicalConventions/e7_7_3 : (123456789012345671.9999|123456789012345672 F|123456789012345672.000000000000000000000000000|123456789012345672.01|123456789012345673|-123456789012345680 F|12345678901234567890), asc1,, expectedfail, precision differences in ASC2 bug 3346729
+as3/Definitions/Variable/ConstVariables : Class2 const variable classItem6, asc[23],, expectedfail, static const when import class fails bug 3346810
+as3/Directives/usenamespace/NSInsideTryCatch, asc[23],, skip, not legal in falcon - see CMP-1147 for details
+as3/Directives/usenamespace/longQualifier, asc[23] ,, skip, CMP-1150
+as3/RuntimeErrors/Error1112ArgCountMismatchOnClassCoercion, asc[23] ,, skip, CMP-1177
+as3/Definitions/const/ConstConditionalInitializationInClass3_rt, asc[23],, skip, CMP-1177 - increment op is invalid
+as3/Expressions/QualifiedReferences/AS3NSReferences, asc[23],, skip, importing namespace causes NPE: http://watsonexp.corp.adobe.com/#bug=3345064
+as3/Expressions/QualifiedReferences/AssignmentExp, asc[23],, skip, importing namespace causes NPE: http://watsonexp.corp.adobe.com/#bug=3345064
+as3/RuntimeErrors/Error1041RHSOfIsMustBeClass, asc[23],, skip, CMP-1177
+spidermonkey/js1_5/Regress/regress-326453, asc[23],, skip, Skip this test since this is not permitted in falcon - function def in a with statement not in a block.
+as3/Vector/bug_683507, asc[23],, skip, CMP-2130
+as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize public  class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
+as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize default class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
+as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize internal class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
+as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize dynamic class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
+as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize final class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056

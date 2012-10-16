@@ -36,6 +36,7 @@ try {
     Assert.expectEq( "as Type Error: temp='hello'; (x as temp)", "TypeError: Error #1009", Utils.typeError(y) );
 }
 
+/* errors are now compile-time in falcon
 try {
     x = 13;
     y = "";
@@ -69,6 +70,7 @@ try {
     Assert.expectEq( "as Type Error: (x as 'string')", "TypeError: Error #1009", Utils.typeError(y) );
 }
 
+*/
 
 //
 ////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@ function addtestcases()
 
 
   function g() {
-    [];
+    var x = [];
   }
 
   try {
