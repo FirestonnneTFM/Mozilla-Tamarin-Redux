@@ -6,6 +6,19 @@
 
 namespace avmplus
 {
+
+REALLY_INLINE bool FrameState::typeNotNull(Traits* t) {
+    switch (Traits::getBuiltinType(t)) {
+        case BUILTIN_int:
+        case BUILTIN_uint:
+        case BUILTIN_number:
+        case BUILTIN_boolean:
+            return true;
+        default:
+            return false;
+    }
+}
+
 REALLY_INLINE FrameValue& FrameState::value(int32_t i)
 {
     AvmAssert(i >= 0 && i < frameSize);
@@ -46,6 +59,11 @@ REALLY_INLINE int32_t FrameState::sp() const
     return stackBase + stackDepth - 1;
 }
 
+REALLY_INLINE void FrameState::setType(int32_t i, Traits* t)
+{
+    setType(i, t, typeNotNull(t));
+}
+
 REALLY_INLINE void FrameState::setType(int32_t i, Traits* t, bool notNull, bool isWith)
 {
     FrameValue& v = value(i);
@@ -78,6 +96,11 @@ REALLY_INLINE const FrameValue& FrameState::peek(int32_t n) const
     return value(stackBase + stackDepth - n);
 }
 
+REALLY_INLINE void FrameState::pop_push(int32_t n, Traits* t)
+{
+    pop_push(n, t, typeNotNull(t));
+}
+
 REALLY_INLINE void FrameState::pop_push(int32_t n, Traits* type, bool notNull)
 {
     int32_t sp = stackDepth - n;
@@ -89,6 +112,11 @@ REALLY_INLINE void FrameState::push(FrameValue& value)
 {
     AvmAssert(stackBase + stackDepth + 1 <= frameSize);
     setType(stackBase + stackDepth++, value.traits, value.notNull);
+}
+
+REALLY_INLINE void FrameState::push(Traits* traits)
+{
+    push(traits, typeNotNull(traits));
 }
 
 REALLY_INLINE void FrameState::push(Traits* traits, bool notNull)

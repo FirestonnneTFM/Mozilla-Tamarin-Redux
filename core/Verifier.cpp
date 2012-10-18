@@ -3281,6 +3281,20 @@ namespace avmplus
         AvmAssert(false);
     }
 
+    /**
+      * Insert f into list in abc_pc order.  Use a linear search for the
+      * right position.  Keeping the worklist sorted avoids pathologically
+      * revisiting the same block too many times as long as predecessors
+      * generally come before successors in ABC order.
+      */
+    void requeue(FrameState* f, FrameState** list) {
+      while (*list && (*list)->abc_pc < f->abc_pc)
+           list = &(*list)->wl_next;
+      f->wl_next = *list;
+      *list = f;
+      f->wl_pending = true;
+    }
+
     // Merge the current FrameState (this->state) with the target
     // FrameState (getFrameState(target)), and report verify errors.
     // Fixme: Bug 558876 - |current| must not be dereferenced, it could point
@@ -3377,11 +3391,8 @@ namespace avmplus
             targetChanged |= true;
         targetState->targetOfExceptionBranch = targetOfExceptionBranch;
 
-        if (targetChanged && !targetState->wl_pending) {
-            targetState->wl_pending = true;
-            targetState->wl_next = worklist;
-            worklist = targetState;
-        }
+        if (targetChanged && !targetState->wl_pending)
+            requeue(targetState, &worklist);
     }
 
     bool Verifier::mergeState(FrameState* targetState)

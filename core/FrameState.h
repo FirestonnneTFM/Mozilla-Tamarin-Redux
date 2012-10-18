@@ -69,13 +69,19 @@ namespace avmplus
         FrameValue& stackValue(int32_t i);
         FrameValue& stackTop();
         int32_t sp() const;
-        void setType(int32_t i, Traits* t, bool notNull=false, bool isWith=false);
+        void setType(int32_t i, Traits* t);
+		void setType(int32_t i, Traits* t, bool notNull, bool isWith = false);
         void pop(int32_t n=1);
         FrameValue& peek(int32_t n=1);
         const FrameValue& peek(int32_t n) const;
-        void pop_push(int32_t n, Traits* type, bool notNull=false);
+        void pop_push(int32_t n, Traits* t);
+		void pop_push(int32_t n, Traits* t, bool notNull);
         void push(FrameValue& _value);
-        void push(Traits* traits, bool notNull=false);
+        void push(Traits* t);
+        void push(Traits* traits, bool notNull);
+
+    private:
+        bool typeNotNull(Traits* t);
     };
 }
 
