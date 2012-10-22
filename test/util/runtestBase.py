@@ -1308,17 +1308,22 @@ class RuntestBase(object):
                             self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc_", '\n'.join(str(x) for x in err)))
                     continue
                 else:
-                    extraVmArgs=_extraVmArgs=''
+                    extraAscArgs=_extraAscArgs=''
+                    extraABCs=[]
+                    _extraABCs=''
                     outputCalls=[]
                     if os.path.exists(testdir):
                         self.compile_support_files(testdir, outputCalls)
                         for testfile in glob(join(testdir,'*.abc')):
-                            _extraVmArgs += ' %s' % testfile
-                        if 'Interface' in extraVmArgs:
-                            _extraVmArgs = self.sortInterfaces(extraVmArgs)
-                    for abcfile in _extraVmArgs.split():
-                        extraVmArgs+=' -import %s' % abcfile
-
+                            _extraABCs += ' %s' % testfile
+                            _extraAscArgs += ' %s' % testfile
+                        if 'Interface' in _extraAscArgs:
+                            _extraAscArgs = self.sortInterfaces(_extraAscArgs)
+                            _extraABCs = self.sortInterfaces(_extraABCs)
+                    for abcfile in _extraAscArgs.split():
+                        extraAscArgs+=' -import %s' % abcfile
+                    extraABCs = _extraABCs.split();
+                    
                     arglist = parseArgStringToList(self.ascargs)
 
                     # Check for a local .java_args file (either dir or file specific)
@@ -1341,7 +1346,7 @@ class RuntestBase(object):
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
 
                         cmd = "asc -import %s " % (self.builtinabc)
-                        cmd += extraVmArgs
+                        cmd += extraAscArgs
                         for arg in arglist:
                             cmd += ' %s' % arg
 
@@ -1399,7 +1404,7 @@ class RuntestBase(object):
                         start_time=time()
                     else:
                         self.js_print('AOT compiling %s' % (testdir+".abc"))
-                    (f,err,exitcode) = self.compile_aot(testdir+".abc")
+                    (f,err,exitcode) = self.compile_aot(testdir+".abc", extraABCs)
                     if self.show_time:
                         self.js_print('AOT compiling %s %.1f' % (testdir+".abc",time()-start_time))
                     if exitcode != 0:
