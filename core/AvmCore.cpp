@@ -5866,6 +5866,9 @@ return the result of the comparison ToPrimitive(x) == y.
             bugzilla619148 = 1;     // Stack traces in release builds
         }
         
+        if (v >= kSWF19)    /* Folsom */
+        {
+        }
     }
 
     /*static*/ uint32_t const BugCompatibility::kNames[BugCompatibility::VersionCount] =
@@ -5879,6 +5882,7 @@ return the result of the comparison ToPrimitive(x) == y.
         15,
         16,
         17,
-		18
+		18,
+		19
     };
 }
