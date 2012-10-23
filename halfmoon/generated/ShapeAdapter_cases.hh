@@ -6,6 +6,8 @@ case GOTOINSTR_SHAPE:
   return a->do_GotoInstr(cast<GotoInstr>(instr));
 case ARMINSTR_SHAPE: 
   return a->do_ArmInstr(cast<ArmInstr>(instr));
+case CATCHBLOCKINSTR_SHAPE: 
+  return a->do_CatchBlockInstr(cast<CatchBlockInstr>(instr));
 case LABELINSTR_SHAPE: 
   return a->do_LabelInstr(cast<LabelInstr>(instr));
 case CONSTANTEXPR_SHAPE: 
@@ -32,12 +34,14 @@ case VOIDSTMT_SHAPE:
   return a->do_VoidStmt(cast<VoidStmt>(instr));
 case NARYSTMT0_SHAPE: 
   return a->do_NaryStmt0(cast<NaryStmt0>(instr));
+case SAFEPOINTINSTR_SHAPE: 
+  return a->do_SafepointInstr(cast<SafepointInstr>(instr));
+case DEBUGINSTR_SHAPE: 
+  return a->do_DebugInstr(cast<DebugInstr>(instr));
 case DEOPTFINISHCALLINSTR_SHAPE: 
   return a->do_DeoptFinishCallInstr(cast<DeoptFinishCallInstr>(instr));
 case NARYSTMT1_SHAPE: 
   return a->do_NaryStmt1(cast<NaryStmt1>(instr));
-case SAFEPOINTINSTR_SHAPE: 
-  return a->do_SafepointInstr(cast<SafepointInstr>(instr));
 case UNARYSTMT_SHAPE: 
   return a->do_UnaryStmt(cast<UnaryStmt>(instr));
 case CALLSTMT2_SHAPE: 

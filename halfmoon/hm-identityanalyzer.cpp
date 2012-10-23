@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -28,6 +28,10 @@ Def* IdentityAnalyzer::identity(UnaryStmt* instr) {
              instr->value_in());
 }
 
+Def* IdentityAnalyzer::identity(NaryStmt3* instr, Def* value_in) {
+  return (def_ == instr->effect_out() ? def(instr->effect_in()) : value_in);
+}
+
 Def* IdentityAnalyzer::identity(Instr* instr) {
   assert(definer(def_) == instr && "Illegal def");
   return do_instr(this, instr);
@@ -35,10 +39,10 @@ Def* IdentityAnalyzer::identity(Instr* instr) {
 
 /// Analyze lexical lookup instructions HR_findprop and HR_findpropstrict.
 ///
-Def* IdentityAnalyzer::doFindStmt(NaryStmt2* instr) {
+Def* IdentityAnalyzer::doFindStmt(NaryStmt3* instr) {
   int index;
   if (findScope(lattice_, instr, &index) == kScopeLocal)
-    return def(instr->vararg(index));
+    return identity(instr, def(instr->vararg(index)));
   return def_;
 }
 

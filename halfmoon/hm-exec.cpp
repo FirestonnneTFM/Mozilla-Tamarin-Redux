@@ -1,5 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -18,15 +18,26 @@ using halfmoon::JitManager;
 
 bool BaseExecMgr::verifyOptimizeJit(MethodInfo* m, MethodSignaturep ms,
                            Toplevel* toplevel, AbcEnv* abc_env, OSR* /* osr_state */) {
-  if (!halfmoon::canCompile(m))
-    return false;
-  halfmoon::JitWriter jit(m, toplevel, abc_env);
-  verifyCommon(m, ms, toplevel, abc_env, &jit);
-  GprMethodProc code = jit.finish();
-  if (code) {
-    setJit(m, code);
-    return true;
+  if (halfmoon::canCompile(m)) {
+    halfmoon::JitWriter jit(m, toplevel, abc_env);
+    verifyCommon(m, ms, toplevel, abc_env, &jit);
+    GprMethodProc code = jit.finish();
+    if (code) {
+      setJit(m, code);
+      return true;
+    }
   }
+  if (config.jitordie && halfmoon::enable_mode != 0) {
+    Exception* e = new (core->GetGC())
+      Exception(core, core->newStringLatin1("JIT failed")->atom());
+    e->flags |= Exception::EXIT_EXCEPTION;
+#ifdef AVMPLUS_VERBOSE
+    if (m->pool()->isVerbose(VB_execpolicy))
+      core->console << "execpolicy die " << m << " method-jit-failed\n";
+#endif
+    core->throwException(e);
+  }
+
   return false;
 }
 

@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -12,10 +12,12 @@ namespace halfmoon {
 /// Print the details of one instruction.
 ///
 PrintWriter& printInstr(PrintWriter&, Instr*);
+void printInstr(Instr*);
 
 /// Print the brief essentials of one instruction.
 ///
 PrintWriter& printCompactInstr(PrintWriter&, Instr*, bool print_defs = true);
+void printCompactInstr(Instr*, bool print_defs = true);
 
 /**
  * Print list of instructions in detail.
@@ -89,10 +91,12 @@ extern const char* kDefPrefix;      // Prefix for a def.
 /// Print the def as kDefPrefix + owner->id + field name.
 ///
 void printDef(PrintWriter& out, const Def* def);
+void printDef(const Def* def);
 
 /// Print just the name of the def.  fixme: field is a historical term, change it.
 ///
 void printDef(PrintWriter& out, const Def& ref);
+void printDef(const Def& ref);
 
 /// Return the pretty-print name of this instruction's opcode.
 ///

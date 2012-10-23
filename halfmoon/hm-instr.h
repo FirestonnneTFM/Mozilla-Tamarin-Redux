@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -80,7 +80,7 @@ public:
 /// custom allocation (see InstrFactory) and
 /// precluding structural extension by subclasses.
 ///
-template<int USEMIN, int DEFC>
+template<int USEMIN, int DEFC, class BASE>
 class VarArgInstr : public Instr {
   friend class InfoManager;
   friend class InstrFactory;
@@ -88,7 +88,7 @@ class VarArgInstr : public Instr {
   static InstrInfo createInfo(InstrKind kind, int argc, const Type** insig,
                               const Type** outsig, InstrGraph* ir) {
     return InstrInfo(USEMIN + argc, DEFC,
-                     sizeof(VarArgInstr),
+                     sizeof(BASE),
                      offsetof(VarArgInstr, defs),
                      kind, insig, outsig, ir);
   }
@@ -99,7 +99,7 @@ protected:
   }
 
   Use* uses() {
-    return (Use*)(this + 1);
+    return (Use*)((intptr_t)this + info->uses_off);
   }
 
   Def defs[DEFC];
@@ -127,6 +127,7 @@ public:
   }
 };
 
+
 /// VarArgStmt is a VarArgInstr with a fixed minimum number
 /// of arguments, whose first input and output are effects,
 /// and whose second output is a data result. VarArgStmt is
@@ -134,10 +135,10 @@ public:
 /// the "arg" range of a VarArgStmt maps exactly to VarArgInstr's
 /// "vararg" range.
 template<int ARGMIN>
-class NaryStmt : public VarArgInstr<ARGMIN + 1, 2> {
+class NaryStmt : public VarArgInstr<ARGMIN + 1, 2, class NaryStmt<ARGMIN> > {
 protected:
   NaryStmt(const InstrInfo* info) :
-      VarArgInstr<ARGMIN + 1, 2>(info) {
+    VarArgInstr<ARGMIN + 1, 2, class NaryStmt<ARGMIN> >(info) {
   }
 
 public:
@@ -178,10 +179,10 @@ public:
 /// between CallStmt and NaryStmt is the definition of the 'arg' range.
 ///
 template<int ARGMIN>
-class CallStmt : public VarArgInstr<ARGMIN + 1, 2> {
+class CallStmt : public VarArgInstr<ARGMIN + 1, 2, class CallStmt<ARGMIN> > {
 protected:
   CallStmt(const InstrInfo* info) :
-      VarArgInstr<ARGMIN + 1, 2>(info) {
+    VarArgInstr<ARGMIN + 1, 2, class CallStmt<ARGMIN> >(info) {
   }
 
 public:
@@ -273,7 +274,6 @@ public:
   // for findproperty opcodes
   Use& name_in() { return uses()[1]; }
   Use& env_in() { return uses()[2]; }
-  Use& ns_in() { return uses()[3]; }    // namespace variable
   Use& index_in() { return uses()[3]; } // index variable
 
 public:
@@ -291,8 +291,6 @@ public:
   // for findproperty opcodes
   Use& name_in() { return uses()[1]; }
   Use& env_in() { return uses()[2]; }
-  Use& ns_in() { return uses()[3]; }    // namespace variable
-  Use& index_in() { return uses()[4]; } // index variable
 
 public:
   static const InstrShape shape = NARYSTMT4_SHAPE;
@@ -574,14 +572,18 @@ public:
 ///
 /// Safepoint MUST output state, because it has an implicit setlocal
 /// It implicitly saves the current abc
-class SafepointInstr : public FixedArgStmt<1, 1> {
+class SafepointInstr : public VarArgInstr<1, 2, class SafepointInstr> {
   friend class InfoManager;
   friend class InstrFactory;
   friend class Copier;
 
   SafepointInstr(const InstrInfo* info) :
-    FixedArgStmt<1, 1>(info) {
+    VarArgInstr<1, 2, class SafepointInstr>(info) {
+    assert(info->uses_off == sizeof(SafepointInstr));
   }
+
+  static const int USEMIN = 1;  // effect in
+  static const int DEFC = 2;    // effect out, state out
 
 public:
   static const InstrShape shape = SAFEPOINTINSTR_SHAPE;
@@ -590,12 +592,16 @@ public:
   int sp; // points to top of operand stack
   int scopep; // points to top of abc scope stack.
 
-  Use& state_in() {
-    return this->uses[1];
+  Def* effect_out() {
+    return &this->defs[0];
   }
 
   Def* state_out() {
     return &this->defs[1];
+  }
+
+  Use& effect_in() {
+    return this->uses()[0];
   }
 };
 
@@ -744,6 +750,25 @@ public:
   }
 };
 
+
+class DebugInstr : public FixedArgStmt<1, 0> {
+  friend class InfoManager;
+  friend class InstrFactory;
+  friend class Copier;
+
+  DebugInstr(const InstrInfo* info) :
+      FixedArgStmt<1, 0>(info) {
+  }
+
+public:
+  static const InstrShape shape = DEBUGINSTR_SHAPE;
+
+  Use& value_in() {
+    return this->uses[1];
+  }
+};
+
+
 // ------------------------------- IR5 start ---------------------------------
 
 /// BlockStartInstr is the common superclass of all IR5
@@ -804,6 +829,16 @@ public:
 /// we can factor out a nonvirtual superclass of
 /// block end delimiters.
 ///
+
+class ExceptionEdge {
+ public:
+  ExceptionEdge(BlockStartInstr* f, CatchBlockInstr* t): from(InstrGraph::blockEnd(f)), to(t), next_exception(NULL), prev_exception(NULL) {}
+
+  BlockEndInstr* from;
+  CatchBlockInstr* to;
+  ExceptionEdge *next_exception, *prev_exception;
+};
+
 class BlockEndInstr : public Instr {
 protected:
   static InstrInfo createInfo(InstrKind kind, const Type** insig,
@@ -812,12 +847,15 @@ protected:
   }
 
   BlockEndInstr(const InstrInfo* info, Use* args) :
-      Instr(info), args(args) {
+    Instr(info), args(args), catch_blocks(NULL) {
   }
 
 public:
   Use* args; // arguments for successor
+
+  SeqBuilder<ExceptionEdge*>* catch_blocks;
 };
+
 
 /// A BlockFooterInstr ends a block that is a unique
 /// predecessor - i.e., none of its successors has any
@@ -936,6 +974,8 @@ class LabelInstr : public BlockHeaderInstr {
   friend class InstrFactory;
   friend class Copier;
 
+
+protected:
   LabelInstr(const InstrInfo* info, int paramc, Def* params) :
       BlockHeaderInstr(info, paramc, params), preds(0) {
   }
@@ -1103,13 +1143,103 @@ public:
   }
 };
 
+/// A CatchBlockInstr begins the initial block of a catch block. Legal
+/// opcodes are HR_catchblock. The parameters of a CatchBlockInstr are
+/// the incoming state.
+///
+/// HR_catchblock: ([args]
+class CatchBlockInstr : public LabelInstr {
+  friend class InfoManager;
+  friend class InstrFactory;
+  friend class Copier;
+
+  CatchBlockInstr(const InstrInfo* info, int paramc, Def* params) :
+    LabelInstr(info, paramc, params), catch_preds(NULL) {
+  }
+
+public:
+  static const InstrShape shape = CATCHBLOCKINSTR_SHAPE;
+
+  /** Number of parameters, not counting effect */
+  int data_param_count() const {
+    return paramc - 1;
+  }
+
+  /** get data param i */
+  Def* data_param(int i) {
+    assert(i >= 0 && i < data_param_count());
+    return &params[1 + i];
+  }
+
+  Def* effect_out() {
+    return &params[0];
+  }
+
+  int vpc;
+  ExceptionEdge* catch_preds;
+
+  inline void printCatchPreds();
+};
+
+class CatchBlockRange: public SeqRange<ExceptionEdge*> {
+ public:
+  explicit CatchBlockRange(BlockStartInstr* block): SeqRange<ExceptionEdge*>(*InstrGraph::blockEnd(block)->catch_blocks) {}
+  explicit CatchBlockRange(BlockEndInstr* block): SeqRange<ExceptionEdge*>(*block->catch_blocks) {}
+
+  CatchBlockInstr* front() const {
+    return SeqRange<ExceptionEdge*>::front()->to;
+  }
+  CatchBlockInstr* popFront() {
+    CatchBlockInstr* t = front();
+    SeqRange<ExceptionEdge*>::popFront();
+    return t;
+  }
+};
+
+
+class ExceptionEdgeRange {
+public:
+  explicit ExceptionEdgeRange(CatchBlockInstr* catch_block) {
+    ExceptionEdge* p = catch_block->catch_preds;
+    front_ = p;
+    back_ = p ? p->prev_exception : 0;
+  }
+
+  bool empty() const {
+    return !front_;
+  }
+
+  ExceptionEdge* front() const {
+    assert(!empty());
+    return front_;
+  }
+
+  ExceptionEdge* popFront() {
+    ExceptionEdge* t = front();
+    ExceptionEdge* F = front_;
+    front_ = (F == back_) ? (back_ = 0) : F->next_exception;
+    return t;
+  }
+
+private:
+  ExceptionEdge *front_, *back_;
+};
+
+inline void CatchBlockInstr::printCatchPreds() {
+  printf("exception edges ( ");
+  for (ExceptionEdgeRange r(this); !r.empty(); r.popFront())
+    printf("i%d ", r.front()->from->id);
+  printf(") -> i%d\n", id);
+}
+
 // ------------------------------- IR5 end ---------------------------------
 
 /// true if this goto is the only predecessor of its target.
 ///
 inline bool isAlone(GotoInstr* go) {
   assert(go->target);
-  return go->next_goto == go;
+  // Don't allow start block to merge into main block
+  return go->next_goto == go && kind(InstrGraph::blockStart(go)) != HR_start;
 }
 
 /// Range over the param at the given position

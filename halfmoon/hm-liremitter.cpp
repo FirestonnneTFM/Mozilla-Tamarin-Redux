@@ -101,26 +101,126 @@ CodeList* LirHelper2::assemble(const nanojit::Config& config,
   }
 #endif
 
-  AvmAssert(halfmoon::checkLir(frag));
+  AvmAssert(halfmoon::checkLir(frag, &codeMgr->log));
 
   Assembler *assm =
     new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator,
                                *lir_alloc, &codeMgr->log, config, mdwriter);
-  verbose_only( StringList asmOutput(*lir_alloc);)verbose_only(
-      if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput;)
-  LirReader bufreader(frag->lastIns);
+
+#ifdef AVMPLUS_VERBOSE
+  StringList asmOutput(*lir_alloc);
+  if (!pool->isVerbose(VB_raw))
+    assm->_outputCache = &asmOutput;
+#endif
+
   assm->beginAssembly(frag);
+  LirReader bufreader(frag->lastIns);
   assm->assemble(frag, &bufreader);
   CodeList* code_list = assm->endAssembly(frag);
 
-#ifdef NJ_VERBOSE
+#ifdef AVMPLUS_VERBOSE
   assm->_outputCache = 0;
-  for (Seq<char*>* p = asmOutput.get(); p != NULL; p = p->tail)
+  for (Seq<char*>* p = asmOutput.get(); p != NULL; p = p->tail) {
     assm->outputf("%s", p->head);
+  }
 #endif
 
   return code_list;
 }
+
+#ifdef AVMPLUS_ARM
+#ifdef _MSC_VER
+#define RETURN_METHOD_PTR(_class, _method) \
+return *((int*)&_method);
+#else
+#define RETURN_METHOD_PTR(_class, _method) \
+union { \
+    int (_class::*bar)(); \
+    int foo[2]; \
+}; \
+bar = _method; \
+return foo[0];
+#endif
+
+#elif defined __GNUC__
+#define RETURN_METHOD_PTR(_class, _method)      \
+  union {                                       \
+    int (_class::*bar)();                       \
+    intptr_t foo;                               \
+  };                                            \
+  bar = _method;                                \
+  return foo;
+#else
+#define RETURN_METHOD_PTR(_class, _method)      \
+  return *((intptr_t*)&_method);
+#endif
+
+#ifdef _MSC_VER
+    #if !defined (AVMPLUS_ARM) || defined(UNDER_RT)
+    extern "C"
+    {
+        int __cdecl _setjmp3(jmp_buf jmpbuf, int arg);
+    }
+    #else
+    #include <setjmp.h>
+    #undef setjmp
+    extern "C"
+    {
+        int __cdecl setjmp(jmp_buf jmpbuf);
+    }
+    #endif // AVMPLUS_ARM
+#endif // _MSC_VER
+  
+#if defined _MSC_VER && !defined AVMPLUS_ARM
+#  define SETJMP ((uintptr_t)_setjmp3)
+#elif defined AVMPLUS_MAC_CARBON
+#  define SETJMP setjmpAddress
+#else
+#  define SETJMP ((uintptr_t)VMPI_setjmpNoUnwind)
+#endif // _MSC_VER
+  
+#define FUNCADDR(addr) (uintptr_t)addr
+#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
+  
+  intptr_t efAddr( int (ExceptionFrame::*f)() )
+  {
+    RETURN_METHOD_PTR(ExceptionFrame, f);
+  }
+  
+
+  int32_t hmBeginCatch(AvmCore* core,
+                       ExceptionFrame* ef,
+                       MethodInfo* info,
+                       intptr_t pc,
+                       AnyVal* slotPtr)
+  {
+    int32_t ordinal;
+    ef->beginCatch();
+    Exception* exception = core->exceptionAddr;
+    ExceptionHandler* handler = core->findExceptionHandlerNoRethrow(info, pc, exception, &ordinal);
+    if (!handler) {
+      // No matching exception, so rethrow.
+      core->throwException(exception);
+    }
+    ef->beginTry(core);
+    slotPtr->atom = exception->atom;
+
+    return ordinal;
+  }
+
+  void hmBeginTry(ExceptionFrame* ef, AvmCore* core) {
+    ef->beginTry(core);
+  }
+  void hmEndTry(ExceptionFrame* ef) {
+    ef->endTry();
+  }
+
+  FUNCTION(FUNCADDR(hmBeginCatch), SIG5(I,P,P,P,P,P), hmBeginCatch)
+  
+  FUNCTION(SETJMP, SIG2(I,P,I), fsetjmp)
+  METHOD(FUNCADDR(hmBeginTry), SIG2(V,P,P), hmBeginTry)
+  METHOD(FUNCADDR(hmEndTry), SIG1(V,P), hmEndTry)
+  
 
 /// Types understood by LIR.  We don't use LTy here because it conflates
 /// LTy_P with either LTy_I or LTy_Q, but we want to distinguish them.
@@ -224,8 +324,6 @@ LirEmitter::LirEmitter(Context* cxt, InstrGraph* ir,
 , upe_label(0)
 , interrupt_label(0)
 , safepoint_space_(NULL)
-, safepoint_tags_(NULL)
-, vpc_space_(NULL)
 , get_cache_builder(*alloc1, *pool->codeMgr)
 , set_cache_builder(*alloc1, *pool->codeMgr)
 , call_cache_builder(*alloc1, *pool->codeMgr)
@@ -233,6 +331,9 @@ LirEmitter::LirEmitter(Context* cxt, InstrGraph* ir,
 , profiled_info_(profiled_info)
 , bailout_branches_(*alloc1)
 , have_safepoints(false)
+, have_catchblocks_(false)
+, emittedBeginCatch(false)
+, catchLabels(NULL)
 {
   allocateTables();
 }
@@ -441,6 +542,12 @@ void LirEmitter::analyzeLiveness() {
         default:
           break;
       }
+      if (InstrGraph::blockEnd(block)->catch_blocks != NULL) {
+        for (CatchBlockRange cb(block); !cb.empty();) {
+          analyzeEdgeLiveness(livemap, live, branch, cb.popFront(), scratch,
+                              ir->size());
+        }
+      }
       for (InstrRange i(block); !i.empty(); i.popBack()) {
         Instr* instr = i.back();
         live.clear(instr->id);
@@ -499,6 +606,16 @@ void LirEmitter::allocateTables() {
   int max_argc = 0;
   for (ArrayRange<BlockStartInstr*> b(blocks_, num_blocks_); 
         !b.empty(); b.popFront()) {
+
+    if (kind(b.front()) == HR_catchblock) {
+      have_catchblocks_ = true;
+      if (catchLabels == NULL) {
+        catchLabels = new (*lir_alloc) HashMap<intptr_t,CatchBlock*>(*lir_alloc, 4);
+      }
+      CatchBlockInstr* cblock = cast<CatchBlockInstr>(b.front());
+      catchLabels->put(cblock->vpc, new (*lir_alloc) CatchBlock(cblock));
+    }
+
     for (InstrRange r(b.front()); !r.empty(); r.popFront()) {
       max_argc = max(max_argc, numUses(r.front()));
     }
@@ -572,7 +689,7 @@ void LirEmitter::emitStackOverflowCheck() {
   stack_overflow->setTarget(begin_label);
 }
 
-void LirEmitter::emitBegin() {
+void LirEmitter::emitBegin(bool has_reachable_exceptions) {
 #ifdef NJ_VERBOSE
   bool verbose = enable_verbose_lir_ || pool->isVerbose(VB_jit);
 #else
@@ -603,6 +720,22 @@ void LirEmitter::emitBegin() {
 #endif
   traps_lir = new (*alloc1) LirBufWriter(epilog_buf, core->config.njconfig);
   traps_skip = traps_lir->insSkip(0);
+
+  // then space for the exception frame, be safe if its an init stub
+  if (has_reachable_exceptions) {
+    // [_save_eip][ExceptionFrame]
+    // offsets of local vars, rel to current ESP
+    _save_eip = stackAlloc(sizeof(intptr_t), "_save_eip");
+    _ef       = stackAlloc(sizeof(ExceptionFrame), "_ef");
+    MethodSignaturep method_signature = signature;
+    int alloc_size = method_signature->frame_size();
+    safepoint_space_ = stackAlloc(alloc_size << VARSHIFT(cxt->method),
+                                  "deopt locals");
+  } else {
+    _save_eip = NULL;
+    _ef = NULL;
+    safepoint_space_ = NULL;
+  }
 }
 
 LIns* LirEmitter::emitConst(const Type* t) {
@@ -631,6 +764,8 @@ LIns* LirEmitter::emitConst(const Type* t) {
           assert(false && "unsupported model");
         case kModelScriptObject:
           return InsConstPtr(objectVal(t));
+        case kModelNamespace:
+          return InsConstPtr(nsVal(t));
         case kModelString:
           return InsConstPtr(stringVal(t));
         case kModelAtom: {
@@ -842,27 +977,38 @@ LIns* LirEmitter::emitLabel(BlockStartInstr* block) {
   return setName(label(), name.c_str());
 }
 
+LIns* LirEmitter::emitCatchLabel(CatchBlockInstr* block) {
+  StringBuffer name(core);
+  name << halfmoon::label(block) << block->id;
+  LIns* catchLabel = label();
+  CatchBlock* cb = catchLabels->get(block->vpc);
+  cb->jmp->setTarget(catchLabel);
+  return setName(catchLabel, name.c_str());
+}
+
 /// Patches all points that speculate to jump to bailout point
 void LirEmitter::patchBailouts() {
-  LIns* bailout_label = setName(label(), "Deopt Point");
-  for (SeqRange<LIns*> branches(bailout_branches_); !branches.empty();)
-    branches.popFront()->setTarget(bailout_label);
+  AvmAssert(false && "Unimplemented");
 
-  LIns* abc_pc = ldi(vpc_space_, 0, ACCSET_OTHER, LOAD_NORMAL);
+  // LIns* bailout_label = setName(label(), "Deopt Point");
+  // for (SeqRange<LIns*> branches(bailout_branches_); !branches.empty();)
+  //   branches.popFront()->setTarget(bailout_label);
+
+  // LIns* abc_pc = ldi(vpc_space_, 0, ACCSET_OTHER, LOAD_NORMAL);
   
-  bool returns_double = signature->returnTraitsBT() == BUILTIN_number;
-  const CallInfo* deopt_call = returns_double ?
-          FUNCTIONID(fprBailout) : FUNCTIONID(gprBailout);
+  // bool returns_double = signature->returnTraitsBT() == BUILTIN_number;
+  // const CallInfo* deopt_call = returns_double ?
+  //         FUNCTIONID(fprBailout) : FUNCTIONID(gprBailout);
 
-  LIns* return_val = callIns(deopt_call, 5,
-                             coreAddr, env_param, abc_pc,
-                             safepoint_space_, safepoint_tags_);
+  // LIns* return_val = callIns(deopt_call, 5,
+  //                            coreAddr, env_param, abc_pc,
+  //                            safepoint_space_, safepoint_tags_);
 
-  popMethodFrame(method_frame_);
-  if (returns_double)
-    retd(return_val);
-  else
-    retp(return_val);
+  // popMethodFrame(method_frame_);
+  // if (returns_double)
+  //   retd(return_val);
+  // else
+  //   retp(return_val);
 }
 
 GprMethodProc LirEmitter::finish(DeoptData** deopt_data) {
@@ -871,11 +1017,14 @@ GprMethodProc LirEmitter::finish(DeoptData** deopt_data) {
 
   livep(args_);
   livep(coreAddr);
-  if (have_safepoints) {
+  if (safepoint_space_ != NULL) {
     livep(safepoint_space_);
-    livep(vpc_space_);
-    livep(safepoint_tags_);
-  } 
+  }
+  if (catchLabels != NULL) {
+    livep(_ef);
+    livep(_save_eip);
+  }
+
   livep(method_frame_);
   LIns* last_ins = livep(env_param);
 
@@ -933,14 +1082,36 @@ GprMethodProc LirEmitter::emit(DeoptData** deopt_data) {
   }
 #endif
 
-  emitBegin();
+  emitBegin(have_catchblocks_);
 
-   for (int b = 0, n = num_blocks_; b < n; ++b) {
-      current_block_ = b;
-      for (InstrRange r(blocks_[b]); !r.empty(); r.popFront()) {
-        emit(r.front());
-     }
-   }
+  // The start block is emitted specially
+  current_block_ = 0;
+  for (InstrRange r(blocks_[0]); !r.empty(); r.popFront()) {
+    if (have_catchblocks_ && kind(r.front()) == HR_goto) {
+      // Initiailize the eip
+      stp(InsConstPtr((void*)-1), _save_eip, 0, ACCSET_OTHER);
+
+      // _ef.beginTry(core);
+      callIns(FUNCTIONID(hmBeginTry), 2, _ef, coreAddr);
+      
+      // Exception* setjmpResult = setjmp(_ef.jmpBuf);
+      // ISSUE this needs to be a cdecl call
+      LIns* jmpbuf = lea(offsetof(ExceptionFrame, jmpbuf), _ef);
+      LIns* setjmpResult = callIns(FUNCTIONID(fsetjmp), 2, jmpbuf, InsConst(0));
+      
+      // If (setjmp() != 0) goto catch dispatcher, which we generate in the epilog.
+      // Note that register contents following setjmp return via longjmp are not predictable.
+      catch_branch = lirout->insBranch(LIR_jf, eqi0(setjmpResult), NULL);
+    }
+    emit(r.front());
+  }
+
+  for (int b = 1, n = num_blocks_; b < n; ++b) {
+    current_block_ = b;
+    for (InstrRange r(blocks_[b]); !r.empty(); r.popFront()) {
+      emit(r.front());
+    }
+  }
 
   return finish(deopt_data);
 }
@@ -1308,7 +1479,22 @@ void LirEmitter::do_callinterface(CallStmt2* call) {
   set_def_ins(call->value_out(), result);
 }
 
+void LirEmitter::do_callstatic(CallStmt2* call) {
+  const Use& method_in = call->param_in();
+  MethodInfo* callee = getMethod(type(method_in));
+  MethodSignaturep callee_sig = callee->getMethodSignature();
+  LIns* callee_method = def_ins(method_in);
+  LIns* result = emitAvmCall(call->args(), call->arg_count(), 
+                             callee_sig, callee_method, call->value_out());
+  set_def_ins(call->value_out(), result);
+}
+
 void LirEmitter::do_return(StopInstr* stop) {
+  if (have_catchblocks_) {
+    // _ef.endTry();
+    callIns(FUNCTIONID(hmEndTry), 1, _ef);
+  }
+
   // brute force; tear down MethodFrame
   popMethodFrame(method_frame_);
   frag->lastIns = emitReturn(stop->value_in());
@@ -1329,9 +1515,11 @@ bool LirEmitter::isFallthruLabel(LabelInstr* label) {
   assert(blocks_[current_block_] == label &&
          "fallthru check on non-current block");
   PredRange p(label);
-  if (p.empty() || (p.popFront(), !p.empty()))
-    return false; // 0 or 2+ predecessors
-  GotoInstr* go = p.front();
+  if (p.empty())
+    return false; // 0 predecessors
+  GotoInstr* go = p.popFront();
+  if (!p.empty())
+    return false; // 2+ predecessors
   return current_block_ > 0 &&
          blocks_[current_block_ - 1] == ir->blockStart(go);
 }
@@ -1345,6 +1533,16 @@ bool LirEmitter::enableSSE() {
   return false;
 #endif
 }
+
+
+// Save our current PC location for the catch finder later.
+void LirEmitter::emitSetPc(DeoptSafepointInstr* instr)
+{
+  int vpc = instr->vpc;
+  // update bytecode ip if necessary
+  stp(InsConstPtr((void*)vpc), _save_eip, 0, ACCSET_OTHER);
+}
+
 
 /// BRANCH PATCHING
 ///
@@ -1429,6 +1627,93 @@ void LirEmitter::do_label(LabelInstr* instr) {
       set_def_ins(
           param,
           emitLoad(param_type, args_, i << VARSHIFT(cxt->method),
+                   ACCSET_OTHER, LOAD_NORMAL));
+    }
+  }
+}
+
+void LirEmitter::emitBeginCatch() {
+  if (emittedBeginCatch)
+    return;
+
+  if (have_catchblocks_) {
+    emittedBeginCatch = true;
+
+    // exception case
+    LIns* catch_label = setName(label(), "catch");
+
+    catch_branch->setTarget(catch_label);
+    
+    // This regfence is necessary for correctness,
+    // as register contents after a longjmp are unpredictable.
+    lirout->ins0(LIR_regfence);
+    
+    MethodInfo* info = cxt->method;
+
+    // _ef.beginCatch()
+    int stackBase = signature->stack_base();
+    LIns* pc = lirout->insLoad(LIR_ldp, _save_eip, 0, ACCSET_OTHER, LOAD_NORMAL);
+    LIns* slotAddr = lea(stackBase << VARSHIFT(info) , safepoint_space_);
+    LIns* handler_ordinal = callIns(FUNCTIONID(hmBeginCatch), 5, coreAddr, _ef, InsConstPtr(info), pc, slotAddr);
+
+    (void)handler_ordinal;
+
+    int handler_count = info->abc_exceptions()->exception_count;
+    // Jump to catch handler
+    // Find last handler, to optimize branches generated below.
+    int i;
+    for (i = handler_count-1; i >= 0; i--) {
+      ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
+      CatchBlock* cb = catchLabels->get(h->target);
+      if (cb != NULL) break;
+    }
+    int last_ordinal = i;
+    // There should be at least one reachable handler.
+    AvmAssert(last_ordinal >= 0);
+    // Do a compare & branch to each possible target.
+    for (int j = 0; j <= last_ordinal; j++) {
+      ExceptionHandler* h = &info->abc_exceptions()->exceptions[j];
+      CatchBlock* cb = catchLabels->get(h->target);
+      if (cb != NULL) {
+        if (j == last_ordinal) {
+          cb->jmp = lirout->insBranch(LIR_j, NULL, NULL);
+        } else {
+          LIns* cond = binaryIns(LIR_eqi, handler_ordinal, InsConst(j));
+          cb->jmp = lirout->insBranch(LIR_jt, cond, NULL);
+        }
+      }
+    }
+
+    livep(_ef);
+    livep(_save_eip);
+    livep(safepoint_space_);
+  }
+
+
+}
+
+
+void LirEmitter::do_catchblock(CatchBlockInstr* instr) {
+  emitBeginCatch();
+
+  emitCatchLabel(instr);
+
+  lirout->ins0(LIR_regfence);
+
+  int pc = instr->vpc;
+  stp(InsConstPtr((void*)pc), _save_eip, 0, ACCSET_OTHER);
+  lastPcSave = pc;
+
+  // load stuff passed by incoming gotos
+  for (int i = 0, n = instr->paramc; i < n; ++i) {
+    Def* param = &instr->params[i];
+    if (!param->isUsed())
+      continue;
+    const Type* param_type = type(param);
+    if (!isLinear(param_type) && !isState(param_type)) {
+      set_def_ins(
+          param,
+          emitLoad(param_type, safepoint_space_, i << VARSHIFT(cxt->method),
                    ACCSET_OTHER, LOAD_NORMAL));
     }
   }
@@ -1779,7 +2064,22 @@ LIns* LirEmitter::emitUpeHandler() {
 
 /** Generate one handler for all timeout interrupts */
 LIns* LirEmitter::emitInterruptHandler() {
-  return emitHandler(&interrupt_label, &ci_handleInterruptMethodEnv);
+  if (interrupt_label == NULL) {
+    LIns* args[] = { env_param };
+    interrupt_label = traps_lir->ins0(LIR_label);
+    
+#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+    traps_lir->ins0(LIR_pushstate);
+#endif 
+    traps_lir->ins0(LIR_regfence);
+    traps_lir->insCall(&ci_handleInterruptMethodEnv, args);
+#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+    traps_lir->ins0(LIR_popstate);
+    traps_lir->ins0(LIR_restorepc);
+#endif
+    
+  }
+  return interrupt_label;
 }
 
 void LirEmitter::do_cknull(UnaryStmt* instr) {
@@ -1802,11 +2102,18 @@ void LirEmitter::do_cktimeout(UnaryStmt* instr) {
   // Omit timeout checks if they are turned off.  We don't do this further
   // upstream, because it can cause the graph to have no endpoints, if there
   // is an infinite loop.
-  if (core->config.interrupts) {
+#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+  bool check_interrupt = true;
+#else
+  bool check_interrupt = core->config.interrupts;
+#endif
+  if (check_interrupt) {
+    lirout->ins0(LIR_savepc);
     LIns* interrupted = ldi(coreAddr, JitFriend::core_interrupted_offset,
                             ACCSET_OTHER, LOAD_VOLATILE);
     LIns* cond = eqi(interrupted, AvmCore::NotInterrupted);
     lirout->insBranch(LIR_jf, cond, emitInterruptHandler());
+    lirout->ins0(LIR_discardpc);
   }
   set_def_ins(instr->value_out(), InsConst(0)); // always return false.
 }
@@ -1960,18 +2267,9 @@ void LirEmitter::emitHelperCall2(UnaryExpr* instr, const CallInfo* call) {
 /// Currently assumes newstate occurs in the entry block prior to any safepoint 
 /// or setlocal instructions.
 void LirEmitter::do_newstate(ConstantExpr* instr) {
-  MethodSignaturep method_signature = signature;
-  int alloc_size = method_signature->frame_size();
-  assert (safepoint_space_ == NULL);
-  assert (safepoint_tags_ == NULL);
-
-  vpc_space_ = stackAlloc(sizeof(int), "safepoint abc pc");
-  safepoint_space_ = stackAlloc(alloc_size << VARSHIFT(cxt->method),
-                                "deopt locals");
-  safepoint_tags_ = stackAlloc(alloc_size * sizeof(SlotStorageType),
-                               "deopt tags");
-  set_def_ins(instr->value(), safepoint_space_);
-  have_safepoints = true;
+  if (safepoint_space_ != NULL) {
+    set_def_ins(instr->value(), safepoint_space_);
+  }
 }
 
 /// Saves the ABC local var, which also represents ABC operand stack values
@@ -1985,10 +2283,6 @@ void LirEmitter::do_setlocal(SetlocalInstr* instr) {
             safepoint_space_, stackIndex << VARSHIFT(cxt->method),
             ACCSET_STORE_ANY);
   set_def_ins(instr->state_out(), def_ins(instr->state_in()));
-
-  LIns* sst_model = InsConst(type2sst(type(instr->value_in())));
-  sti(sst_model, safepoint_tags_, 
-      stackIndex * sizeof(int32_t), ACCSET_STORE_ANY);
 
   /// This is really ugly, to directly access J2.
   /// Still contemplating if we should make
@@ -2007,15 +2301,15 @@ void LirEmitter::do_setlocal(SetlocalInstr* instr) {
 /// Stores the abc pc, setlocals store the actual data prior to this safepoint
 void LirEmitter::do_safepoint(SafepointInstr* instr) {
   assert (safepoint_space_ != NULL);
-  int offset = 0;
-  int abc_pc = instr->vpc;
-  sti(InsConst(abc_pc), vpc_space_, offset, ACCSET_STORE_ANY);
+  int vpc = instr->vpc;
+  // update bytecode ip
+  stp(InsConstPtr((void*)vpc), _save_eip, 0, ACCSET_OTHER);
   
   /// See do_setlocal for why we grab metadata here
   JitManager* jit = JitManager::init(this->pool);
   BailoutData* metaData = jit->ensureMethodData(cxt->method)->bailout_data;
   assert (metaData != NULL);
-  metaData->do_safepoint(abc_pc, instr->scopep, instr->sp);
+  metaData->do_safepoint(vpc, instr->scopep, instr->sp);
 }
 
 // DEOPT

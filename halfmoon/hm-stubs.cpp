@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -101,6 +101,10 @@ MethodEnv* Stubs::do_loadinitenv(MethodFrame*, ScriptObject* object) {
 
 MethodEnv* Stubs::do_loadsuperinitenv(MethodFrame*, MethodEnv* env) {
   return JitFriend::superInitEnv(env);
+}
+
+MethodEnv* Stubs::do_loadenv_env(avmplus::MethodFrame*, int method_id, avmplus::MethodEnv* env) {
+  return env->abcEnv()->getMethod(method_id);
 }
 
 ScriptObject* Stubs::do_newinstance(MethodFrame*, ClassClosure* c) {
@@ -681,6 +685,11 @@ BoolKind Stubs::do_atom2bool(MethodFrame*, Atom x) {
   return BoolKind(x == trueAtom);
 }
 
+Namespace* Stubs::do_atom2ns(MethodFrame*, Atom x) {
+  assert(AvmCore::isNamespace(x) || AvmCore::isNull(x));
+  return (Namespace*)atomPtr(x);
+}
+
 int Stubs::do_atom2int(MethodFrame*, Atom x) {
   return AvmCore::integer_i(x);
 }
@@ -755,83 +764,113 @@ Atom Stubs::do_getouterscope(MethodFrame*, int k, MethodEnv* env) {
 /// HM_deopt_safepoint and HM_deopt_finishcall.
 void Stubs::do_deopt_finish(MethodFrame*) {}
 
+// debugline: (Effect, Int) -> Effect
+void Stubs::do_debugline(MethodFrame*, int32_t line) {
+  (void)line;
+}
+  
+// debugfile: (Effect, String) -> Effect
+void Stubs::do_debugfile(MethodFrame*, String*) {}
+
 inline Atom abc_find(MethodEnv* env, const Multiname* name, Atom* scopes,
-                     int scope_count, bool strict) {
+                     int scope_count, bool strict, Atom* withbase) {
   // fixme: handle withbase
-  return env->findproperty(env->scope(), scopes, scope_count, name, strict, 0);
+  return env->findproperty(env->scope(), scopes, scope_count, name, strict, withbase);
 }
 
 inline Atom abc_findx(MethodEnv* env, const Multiname* name, Atom index,
-                      Atom* scopes, int scope_count, bool strict) {
+                      Atom* scopes, int scope_count, bool strict, Atom* withbase) {
   // fixme: handle withbase
   Multiname tempname;
   initnamex(env->core(), name, index, &tempname);
   return env->findproperty(env->scope(), scopes, scope_count, &tempname,
-                           strict, 0);
+                           strict, withbase);
 }
 
 inline Atom abc_findns(MethodEnv* env, const Multiname* name, Atom ns,
-                       Atom* scopes, int scope_count, bool strict) {
+                       Atom* scopes, int scope_count, bool strict, Atom* withbase) {
   // fixme: handle withbase
   Multiname tempname;
   initnamens(env, name, ns, &tempname);
   return env->findproperty(env->scope(), scopes, scope_count, &tempname,
-                           strict, 0);
+                           strict, withbase);
 }
 
 inline Atom abc_findnsx(MethodEnv* env, const Multiname* name, Atom ns,
-                       Atom index, Atom* scopes, int scope_count, bool strict) {
+                       Atom index, Atom* scopes, int scope_count, bool strict, Atom* withbase) {
   // fixme: handle withbase
   Multiname tempname;
   initnamensx(env, name, ns, index, &tempname);
   return env->findproperty(env->scope(), scopes, scope_count, &tempname,
-                           strict, 0);
+                           strict, withbase);
 }
 
 Atom Stubs::do_abc_findproperty(MethodFrame*, const Multiname* name,
-                                MethodEnv* env, int scope_count, Atom* scopes) {
-  return abc_find(env, name, scopes, scope_count, false);
+                                MethodEnv* env, int32_t withbase, int scope_count, Atom* scopes) {
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  return abc_find(env, name, scopes, scope_count, false, withbasep);
 }
 
 Atom Stubs::do_abc_findpropstrict(MethodFrame*, const Multiname* name,
-                                MethodEnv* env, int scope_count, Atom* scopes) {
-  return abc_find(env, name, scopes, scope_count, true);
+                                MethodEnv* env, int32_t withbase, int scope_count, Atom* scopes) {
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  return abc_find(env, name, scopes, scope_count, true, withbasep);
 }
 
 Atom Stubs::do_abc_findpropertyx(MethodFrame*, const Multiname* name,
-                                 MethodEnv* env, Atom index, int scope_count,
+                                 MethodEnv* env, int32_t withbase, Atom index, int scope_count,
                                  Atom* scopes) {
-  return abc_findx(env, name, index, scopes, scope_count, false);
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  return abc_findx(env, name, index, scopes, scope_count, false, withbasep);
 }
 
 Atom Stubs::do_abc_findpropstrictx(MethodFrame*, const Multiname* name,
-                                   MethodEnv* env, Atom index, int scope_count,
+                                   MethodEnv* env, int32_t withbase, Atom index, int scope_count,
                                    Atom* scopes) {
-  return abc_findx(env, name, index, scopes, scope_count, true);
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  return abc_findx(env, name, index, scopes, scope_count, true, withbasep);
 }
 
 Atom Stubs::do_abc_findpropertyns(MethodFrame*, const Multiname* name,
-                                  MethodEnv* env, Atom ns, int scope_count,
+                                  MethodEnv* env, int32_t withbase, Atom ns, int scope_count,
                                   Atom* scopes) {
-  return abc_findns(env, name, ns, scopes, scope_count, false);
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  return abc_findns(env, name, ns, scopes, scope_count, false, withbasep);
 }
 
 Atom Stubs::do_abc_findpropstrictns(MethodFrame*, const Multiname* name,
-                                    MethodEnv* env, Atom ns, int scope_count,
+                                    MethodEnv* env, int32_t withbase, Atom ns, int scope_count,
                                     Atom* scopes) {
-  return abc_findns(env, name, ns, scopes, scope_count, true);
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  return abc_findns(env, name, ns, scopes, scope_count, true, withbasep);
 }
 
 Atom Stubs::do_abc_findpropertynsx(MethodFrame*, const Multiname* name,
-                                   MethodEnv* env, Atom ns, Atom index,
+                                   MethodEnv* env, int32_t withbase, Atom ns,
                                    int scope_count, Atom* scopes) {
-  return abc_findnsx(env, name, ns, index, scopes, scope_count, false);
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  Atom index = *scopes;
+  scopes++;
+  scope_count--;
+  return abc_findnsx(env, name, ns, index, scopes, scope_count, false, withbasep);
 }
 
 Atom Stubs::do_abc_findpropstrictnsx(MethodFrame*, const Multiname* name,
-                                     MethodEnv* env, Atom ns, Atom index,
+                                     MethodEnv* env, int32_t withbase, Atom ns,
                                      int scope_count, Atom* scopes) {
-  return abc_findnsx(env, name, ns, index, scopes, scope_count, true);
+  assert(withbase >= -1 && withbase < scope_count);
+  Atom* withbasep = (withbase == -1) ? NULL : scopes + withbase;
+  Atom index = *scopes;
+  scopes++;
+  scope_count--;
+  return abc_findnsx(env, name, ns, index, scopes, scope_count, true, withbasep);
 }
 
 BoolKind Stubs::do_abc_strictequals(MethodFrame*, Atom x, Atom y) {
@@ -1282,7 +1321,10 @@ Atom Stubs::do_ckfilter(MethodFrame* f, Atom value) {
   return value;
 }
 
-ScriptObject* Stubs::do_newcatch(MethodFrame*, Traits*) { assert(false && "newcatch not implemented"); return 0; }
+Atom Stubs::do_newcatch(MethodFrame* f, Traits* traits) {
+  return env(f)->newcatch(traits)->atom();
+}
+
 Traits* Stubs::do_slottype(MethodFrame*, ScriptObject*, int) { assert(false && "slottype not implemented"); return 0; }
 int Stubs::do_toslot(MethodFrame*, ScriptObject*, const Multiname*) { assert(false && "toslot not implemented"); return 0; }
 void Stubs::do_never(MethodFrame*) { assert(false && "never not implemented"); }

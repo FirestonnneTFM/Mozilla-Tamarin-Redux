@@ -1,5 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -256,6 +256,10 @@ void SCCP::analyzeBranch(BlockEndInstr* end) {
       break;
     }
   }
+  if (end->catch_blocks != NULL) {
+    for (CatchBlockRange r(end); !r.empty();)
+      addBlock(r.popFront());
+  }
 }
 
 void SCCP::analyzeSSA(Instr* instr) {
@@ -278,8 +282,12 @@ void SCCP::analyzeSSA(Instr* instr) {
     assert(subtypeof(old_types[i], type(d.front())) && "illegal type narrowing");
     changed2 |= *type(d.front()) != *old_types[i];
   }
-  if (changed2)
+  if (changed2) {
+    if (enable_typecheck) {
+      printInstr(instr);
+    }
     addInstrUsers(instr);
+  }
 }
 
 /**

@@ -89,6 +89,8 @@ InstrKind toModelKind(const Type* val_type, const Type* use_type) {
       printf("unknown conversion %s -> %s\n", typeName(val_type),
              typeName(use_type));
       assert(false && "bad model");
+    case kModelNamespace:
+      return HR_atom2ns;
     case kModelAtom:
       return toModelAtom(val_type);
     case kModelScriptObject:
@@ -154,14 +156,16 @@ void ModelFixer::changeOps() {
  * need to use the same converted def, reuse the conversion instruction.
  */
 void ModelFixer::fixDefs() {
-  Def* converts[kModelMAX];  // space to memoize one conversion per ModelKind.
+  const int kConvertsMax = 4;
+  Def* converts[kConvertsMax];  // space to memoize one conversion per ModelKind.
+  InstrKind converts_kind[kConvertsMax];  // verify that the conversion is the same
   for (PostorderBlockRange b(ir_); !b.empty();) {
     for (InstrRange i(b.popFront()); !i.empty();) {
       Instr* instr = i.popBack();
       SigRange sr = outputSigRange(instr);
       for (ArrayRange<Def> dr = defRange(instr); !dr.empty(); sr.popFront()) {
         Def* d = &dr.popFront();
-        int have_mask = 0; // mask:  1 << ModelKind
+        int have_count = 0;
         const Type* def_type = type(d);
         const Type* sig_type = sr.front();
         if (isBottom(def_type))
@@ -170,16 +174,22 @@ void ModelFixer::fixDefs() {
           Use& use = u.popFront();
           const Type* constraint = getConstraint(use);
           if (!submodelof(def_type, constraint)) {
-            // need a conversion
-            ModelKind need = model(constraint);
-            if (!(have_mask & (1 << need))) {
-              InstrKind convert_kind = toModelKind(def_type, constraint);
+            // need a conversion.  The same model may require different conversions
+            InstrKind convert_kind = toModelKind(def_type, constraint);
+            int h = 0;
+            for (; h < have_count; h++) {
+              if (converts_kind[h] == convert_kind)
+                break;
+            }
+            if (h >= have_count) {
               UnaryExpr* expr = factory_.newUnaryExpr(convert_kind, d);
               ir_->addInstrAfter(instr, expr);
-              converts[need] = expr->value_out();
-              have_mask |= (1 << need);
+              converts[h] = expr->value_out();
+              converts_kind[h] = convert_kind;
+              have_count++;
+              assert(have_count <= kConvertsMax);
             }
-            use = converts[need];
+            use = converts[h];
           }
         }
       }
@@ -214,6 +224,7 @@ const Type* ModelFixer::getConstraint(const Use& u) {
       break;
     case HR_callinterface:
     case HR_callmethod:
+    case HR_callstatic:
       if (use_pos >= 2) {
         CallStmt2* call = cast<CallStmt2>(instr);
         const Type* env_type = type(call->param_in());
@@ -222,9 +233,6 @@ const Type* ModelFixer::getConstraint(const Use& u) {
           return ir_->lattice.makeParamType(use_pos - 2, sig);
         }
       }
-      break;
-    case HR_callstatic:
-      assert(false && "custom signature not implemented");
       break;
     case HR_return:
       if (use_pos == 1) {

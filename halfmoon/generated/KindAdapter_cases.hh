@@ -6,6 +6,8 @@ case HR_start:
   return a->do_start(cast<StartInstr>(instr));
 case HR_template: 
   return a->do_template(cast<StartInstr>(instr));
+case HR_catchblock: 
+  return a->do_catchblock(cast<CatchBlockInstr>(instr));
 case HR_return: 
   return a->do_return(cast<StopInstr>(instr));
 case HR_throw: 
@@ -78,6 +80,8 @@ case HR_loadinitenv:
   return a->do_loadinitenv(cast<UnaryExpr>(instr));
 case HR_loadsuperinitenv: 
   return a->do_loadsuperinitenv(cast<UnaryExpr>(instr));
+case HR_loadenv_env: 
+  return a->do_loadenv_env(cast<BinaryExpr>(instr));
 case HR_newobject: 
   return a->do_newobject(cast<NaryStmt0>(instr));
 case HR_newarray: 
@@ -179,19 +183,19 @@ case HR_newactivation:
 case HR_abc_finddef: 
   return a->do_abc_finddef(cast<BinaryStmt>(instr));
 case HR_abc_findpropstrict: 
-  return a->do_abc_findpropstrict(cast<NaryStmt2>(instr));
+  return a->do_abc_findpropstrict(cast<NaryStmt3>(instr));
 case HR_abc_findpropstrictx: 
-  return a->do_abc_findpropstrictx(cast<NaryStmt3>(instr));
+  return a->do_abc_findpropstrictx(cast<NaryStmt4>(instr));
 case HR_abc_findpropstrictns: 
-  return a->do_abc_findpropstrictns(cast<NaryStmt3>(instr));
+  return a->do_abc_findpropstrictns(cast<NaryStmt4>(instr));
 case HR_abc_findpropstrictnsx: 
   return a->do_abc_findpropstrictnsx(cast<NaryStmt4>(instr));
 case HR_abc_findproperty: 
-  return a->do_abc_findproperty(cast<NaryStmt2>(instr));
+  return a->do_abc_findproperty(cast<NaryStmt3>(instr));
 case HR_abc_findpropertyx: 
-  return a->do_abc_findpropertyx(cast<NaryStmt3>(instr));
+  return a->do_abc_findpropertyx(cast<NaryStmt4>(instr));
 case HR_abc_findpropertyns: 
-  return a->do_abc_findpropertyns(cast<NaryStmt3>(instr));
+  return a->do_abc_findpropertyns(cast<NaryStmt4>(instr));
 case HR_abc_findpropertynsx: 
   return a->do_abc_findpropertynsx(cast<NaryStmt4>(instr));
 case HR_newclass: 
@@ -274,6 +278,10 @@ case HR_deopt_finish:
   return a->do_deopt_finish(cast<DeoptFinishInstr>(instr));
 case HR_deopt_finishcall: 
   return a->do_deopt_finishcall(cast<DeoptFinishCallInstr>(instr));
+case HR_debugline: 
+  return a->do_debugline(cast<DebugInstr>(instr));
+case HR_debugfile: 
+  return a->do_debugfile(cast<DebugInstr>(instr));
 case HR_string2atom: 
   return a->do_string2atom(cast<UnaryExpr>(instr));
 case HR_double2atom: 
@@ -300,6 +308,8 @@ case HR_atom2uint:
   return a->do_atom2uint(cast<UnaryExpr>(instr));
 case HR_atom2scriptobject: 
   return a->do_atom2scriptobject(cast<UnaryExpr>(instr));
+case HR_atom2ns: 
+  return a->do_atom2ns(cast<UnaryExpr>(instr));
 case HR_i2d: 
   return a->do_i2d(cast<UnaryExpr>(instr));
 case HR_u2d: 

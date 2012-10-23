@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -39,8 +39,8 @@ public: // dispatch() adapter methods.
   Def* do_touint(UnaryStmt* i) { return coerceIdentity(i, lattice_->uint_type); }
   Def* do_toboolean(UnaryExpr* i) { return coerceIdentity(i, lattice_->boolean_type); }
   Def* do_doubletoint32(UnaryExpr* i) { return coerceIdentity(i, lattice_->int_type); }
-  Def* do_abc_findproperty(NaryStmt2* i) { return doFindStmt(i); }
-  Def* do_abc_findpropstrict(NaryStmt2* i) { return doFindStmt(i); }
+  Def* do_abc_findproperty(NaryStmt3* i) { return doFindStmt(i); }
+  Def* do_abc_findpropstrict(NaryStmt3* i) { return doFindStmt(i); }
   Def* do_atom2scriptobject(UnaryExpr* i) { return doModelChange(i, HR_scriptobject2atom); }
   Def* do_cast(BinaryStmt*);
   Def* do_cknull(UnaryStmt*);
@@ -51,13 +51,14 @@ public: // dispatch() adapter methods.
 private:
   /// Generic analyzer for lexical 'find' instructions.
   ///
-  Def* doFindStmt(NaryStmt2*);
+  Def* doFindStmt(NaryStmt3*);
 
   /// Helper method: return the appropriate identity def based on which
   /// use value_in is, and what def_ is pointing to.
   ///
   Def* identity(BinaryStmt*, Def* value_in);
   Def* identity(UnaryStmt*, Def* value_in);
+  Def* identity(NaryStmt3*, Def* value_in);
 
   /// Helper method: return UnaryStmt.effect_in or value_in based on
   /// what def_ is pointing to.

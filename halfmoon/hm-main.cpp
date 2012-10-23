@@ -1,5 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -27,7 +27,8 @@ int enable_printir = 0;
 int enable_profiler = 0;
 int enable_selftest = 0;
 int enable_trace = 0;
-int enable_try = 0;
+int enable_try = 1;
+int enable_framestate = 0;
 int enable_typecheck = 0;
 int enable_verbose = 0;
 int enable_vmstate = 0;
@@ -53,6 +54,7 @@ void init() {
   enable_selftest = parseEnv("SELFTEST", enable_selftest);
   enable_trace = parseEnv("TRACE", enable_trace);
   enable_try = parseEnv("TRY", enable_try);
+  enable_framestate = parseEnv("FRAMESTATE", enable_framestate);
   enable_typecheck = parseEnv("TYPECHECK", enable_typecheck);
   enable_verbose = parseEnv("VERBOSE", enable_verbose);
   enable_vmstate = parseEnv("VMSTATE", enable_vmstate);
@@ -144,12 +146,6 @@ void AbcRange::read() {
     next += 3 * (imm30b + 1);
 }
 
-bool hasWith(MethodInfo* m) {
-  AbcRange r(m);
-  AbcRange r2 = find(r, OP_pushwith);
-  return !r2.empty();
-}
-
 bool canCompile(MethodInfo* m) {
   init();
 
@@ -160,20 +156,22 @@ bool canCompile(MethodInfo* m) {
   if (m->pool()->core->debugger())
     return false; // Cannot compile debuggable functions.
 #endif
-  if (m->isNative())
+  if (m->isNative()) {
     return false;
+  }
   if (!enable_builtins && m->pool()->isBuiltin)
     return false; // Ignore builtin code.
   if (!enable_try && m->hasExceptions())
     return false; // Ignore methods with exceptions.
-  if (m->method_id() < 0)
+  if (m->method_id() < 0) {
     return false; // Ignore vm-created initializer methods.
-  if (m->needArguments())
+  }
+  if (m->needArguments()) {
     return false; // Only rest args supported yet.
-  if (!enable_optional && m->hasOptional())
+  }
+  if (!enable_optional && m->hasOptional()) {
     return false;
-  if (hasWith(m))
-    return false; // OP_pushwith not yet supported.
+  }
 
   if (enable_profiler) {
     MethodProfile* profile = JitManager::getProfile(m);
@@ -272,6 +270,7 @@ void computeIdentities(InstrGraph* ir) {
         if (k == HR_arm && d1 == d2)
           d2 = unsplit(cast<ArmInstr>(instr), d1, &marks);
         if (d1 != d2) {
+          assert(subtypeof(type(d2), type(d1)));
           copyUses(d1, d2);
           changed = true;
         }
@@ -502,14 +501,14 @@ void optimize(Context* cxt, InstrGraph* ir) {
  * finished blocks in list, so list ends up in reverse postorder.  Visit either
  * all edges or only normal edges, depending on visit_all param.
  */
-static void dfs(AbcBlock* b, int& post_id, SeqBuilder<AbcBlock*> &list,
-    bool visit_all) {
+static void dfs(AbcBlock* b, int& post_id, bool& has_reachable_exceptions, SeqBuilder<AbcBlock*> &list,
+                bool visit_all) {
   b->post_id = -1;
   // visit ordinary successors.
   for (int i = 0, n = b->num_succ_blocks; i < n; ++i) {
     AbcBlock* succ = b->succ_blocks[i];
     if (!succ->post_id)
-      dfs(succ, post_id, list, visit_all);
+      dfs(succ, post_id, has_reachable_exceptions, list, visit_all);
     else if (succ->post_id == -1)
       succ->dfs_loop = true;
   }
@@ -519,8 +518,11 @@ static void dfs(AbcBlock* b, int& post_id, SeqBuilder<AbcBlock*> &list,
       AbcBlock* succ = b->catch_blocks[i];
       if (!succ)
         continue;
+      if (succ->start_types == NULL)  // Unreachable catch block
+        continue;
+      has_reachable_exceptions = true;
       if (!succ->post_id)
-        dfs(succ, post_id, list, visit_all);
+        dfs(succ, post_id, has_reachable_exceptions, list, visit_all);
       else if (succ->post_id == -1)
         succ->dfs_loop = true;
     }
@@ -540,11 +542,12 @@ InstrGraph* parseAbc(MethodInfo* method, Lattice* lattice, InfoManager* infos,
   Allocator scratch;
   SeqBuilder<AbcBlock*> list(scratch);
   int post_id = 0;
-  dfs(abc->entry(), post_id, list, false);
+  bool has_reachable_exceptions = false;
+  dfs(abc->entry(), post_id, has_reachable_exceptions, list, true);
 
   // Then visit the AbcBlocks and build an InstrGraph.
   InstrFactory factory(ir_alloc, lattice, infos);
-  AbcBuilder builder(method, abc, &factory, toplevel, profiled_info);
+  AbcBuilder builder(method, abc, &factory, toplevel, profiled_info, has_reachable_exceptions);
   InstrGraph* ir = builder.visitBlocks(list.get());
 
 

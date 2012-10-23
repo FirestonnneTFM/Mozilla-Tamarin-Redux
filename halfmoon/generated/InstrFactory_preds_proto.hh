@@ -11,6 +11,9 @@ static bool isGotoInstr(InstrKind k);
 /// true if given InstrKind is instance of ArmInstr
 static bool isArmInstr(InstrKind k);
 
+/// true if given InstrKind is instance of CatchBlockInstr
+static bool isCatchBlockInstr(InstrKind k);
+
 /// true if given InstrKind is instance of LabelInstr
 static bool isLabelInstr(InstrKind k);
 
@@ -50,14 +53,17 @@ static bool isVoidStmt(InstrKind k);
 /// true if given InstrKind is instance of NaryStmt0
 static bool isNaryStmt0(InstrKind k);
 
+/// true if given InstrKind is instance of SafepointInstr
+static bool isSafepointInstr(InstrKind k);
+
+/// true if given InstrKind is instance of DebugInstr
+static bool isDebugInstr(InstrKind k);
+
 /// true if given InstrKind is instance of DeoptFinishCallInstr
 static bool isDeoptFinishCallInstr(InstrKind k);
 
 /// true if given InstrKind is instance of NaryStmt1
 static bool isNaryStmt1(InstrKind k);
-
-/// true if given InstrKind is instance of SafepointInstr
-static bool isSafepointInstr(InstrKind k);
 
 /// true if given InstrKind is instance of UnaryStmt
 static bool isUnaryStmt(InstrKind k);

@@ -204,6 +204,13 @@ class StubCaller {
         interp->getEnv(instr->use(0))));
   }
 
+  // loadenv_env: (Ord, Env) -> Env
+  static void do_loadenv_env(Interpreter* interp, BinaryExpr* instr) {
+    interp->resultVal(instr->value_out()) = Value(Stubs::do_loadenv_env(&interp->frame_,
+        interp->getOrdinal(instr->use(0)),
+        interp->getEnv(instr->use(1))));
+  }
+
   // newobject: (Effect, Atom) -> (Effect, ScriptObject~)
   static void do_newobject(Interpreter* interp, NaryStmt0* instr) {
     int argc = instr->arg_count();
@@ -506,8 +513,8 @@ class StubCaller {
         interp->getEnv(instr->use(2))));
   }
 
-  // abc_findpropstrict: (Effect, Name, Env, Atom~) -> (Effect, Atom~)
-  static void do_abc_findpropstrict(Interpreter* interp, NaryStmt2* instr) {
+  // abc_findpropstrict: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~)
+  static void do_abc_findpropstrict(Interpreter* interp, NaryStmt3* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
     Atom* args = (Atom*)interp->args_out_;
@@ -516,11 +523,12 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropstrict(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
+        interp->getOrdinal(instr->use(3)),
         argc, args));
   }
 
-  // abc_findpropstrictx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static void do_abc_findpropstrictx(Interpreter* interp, NaryStmt3* instr) {
+  // abc_findpropstrictx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static void do_abc_findpropstrictx(Interpreter* interp, NaryStmt4* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
     Atom* args = (Atom*)interp->args_out_;
@@ -529,12 +537,13 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropstrictx(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
-        interp->getAtom(instr->use(3)),
+        interp->getOrdinal(instr->use(3)),
+        interp->getAtom(instr->use(4)),
         argc, args));
   }
 
-  // abc_findpropstrictns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static void do_abc_findpropstrictns(Interpreter* interp, NaryStmt3* instr) {
+  // abc_findpropstrictns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static void do_abc_findpropstrictns(Interpreter* interp, NaryStmt4* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
     Atom* args = (Atom*)interp->args_out_;
@@ -543,11 +552,12 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropstrictns(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
-        interp->getAtom(instr->use(3)),
+        interp->getOrdinal(instr->use(3)),
+        interp->getAtom(instr->use(4)),
         argc, args));
   }
 
-  // abc_findpropstrictnsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~)
+  // abc_findpropstrictnsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
   static void do_abc_findpropstrictnsx(Interpreter* interp, NaryStmt4* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
@@ -557,13 +567,13 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropstrictnsx(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
-        interp->getAtom(instr->use(3)),
+        interp->getOrdinal(instr->use(3)),
         interp->getAtom(instr->use(4)),
         argc, args));
   }
 
-  // abc_findproperty: (Effect, Name, Env, Atom~) -> (Effect, Atom~)
-  static void do_abc_findproperty(Interpreter* interp, NaryStmt2* instr) {
+  // abc_findproperty: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~)
+  static void do_abc_findproperty(Interpreter* interp, NaryStmt3* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
     Atom* args = (Atom*)interp->args_out_;
@@ -572,11 +582,12 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findproperty(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
+        interp->getOrdinal(instr->use(3)),
         argc, args));
   }
 
-  // abc_findpropertyx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static void do_abc_findpropertyx(Interpreter* interp, NaryStmt3* instr) {
+  // abc_findpropertyx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static void do_abc_findpropertyx(Interpreter* interp, NaryStmt4* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
     Atom* args = (Atom*)interp->args_out_;
@@ -585,12 +596,13 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropertyx(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
-        interp->getAtom(instr->use(3)),
+        interp->getOrdinal(instr->use(3)),
+        interp->getAtom(instr->use(4)),
         argc, args));
   }
 
-  // abc_findpropertyns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static void do_abc_findpropertyns(Interpreter* interp, NaryStmt3* instr) {
+  // abc_findpropertyns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static void do_abc_findpropertyns(Interpreter* interp, NaryStmt4* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
     Atom* args = (Atom*)interp->args_out_;
@@ -599,11 +611,12 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropertyns(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
-        interp->getAtom(instr->use(3)),
+        interp->getOrdinal(instr->use(3)),
+        interp->getAtom(instr->use(4)),
         argc, args));
   }
 
-  // abc_findpropertynsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~)
+  // abc_findpropertynsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
   static void do_abc_findpropertynsx(Interpreter* interp, NaryStmt4* instr) {
     int argc = instr->arg_count();
     Use* arg_uses = instr->args();
@@ -613,7 +626,7 @@ class StubCaller {
     interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_abc_findpropertynsx(&interp->frame_,
         interp->getName(instr->use(1)),
         interp->getEnv(instr->use(2)),
-        interp->getAtom(instr->use(3)),
+        interp->getOrdinal(instr->use(3)),
         interp->getAtom(instr->use(4)),
         argc, args));
   }
@@ -915,9 +928,9 @@ class StubCaller {
         argc, args));
   }
 
-  // newcatch: (Effect, Traits~) -> (Effect, ScriptObject~)
+  // newcatch: (Effect, Traits~) -> (Effect, Atom~)
   static void do_newcatch(Interpreter* interp, UnaryStmt* instr) {
-    interp->resultVal(instr->value_out()) = Value(Stubs::do_newcatch(&interp->frame_,
+    interp->resultVal(instr->value_out()) = AtomValue(Stubs::do_newcatch(&interp->frame_,
         interp->getTraits(instr->use(1))));
   }
 
@@ -940,6 +953,20 @@ class StubCaller {
     Stubs::do_deopt_finish(&interp->frame_);
     (void)interp;
     (void)instr;
+  }
+
+  // debugline: (Effect, Int) -> Effect
+  static void do_debugline(Interpreter* interp, DebugInstr* instr) {
+    Stubs::do_debugline(&interp->frame_,
+        interp->getInt(instr->use(1)));
+    (void)interp;
+  }
+
+  // debugfile: (Effect, String) -> Effect
+  static void do_debugfile(Interpreter* interp, DebugInstr* instr) {
+    Stubs::do_debugfile(&interp->frame_,
+        interp->getString(instr->use(1)));
+    (void)interp;
   }
 
   // string2atom: String -> Atom
@@ -1017,6 +1044,12 @@ class StubCaller {
   // atom2scriptobject: Atom -> ScriptObject
   static void do_atom2scriptobject(Interpreter* interp, UnaryExpr* instr) {
     interp->resultVal(instr->value_out()) = Value(Stubs::do_atom2scriptobject(&interp->frame_,
+        interp->getAtom(instr->use(0))));
+  }
+
+  // atom2ns: Atom -> Namespace
+  static void do_atom2ns(Interpreter* interp, UnaryExpr* instr) {
+    interp->resultVal(instr->value_out()) = Value(Stubs::do_atom2ns(&interp->frame_,
         interp->getAtom(instr->use(0))));
   }
 
@@ -1728,6 +1761,7 @@ class StubCaller {
 const Interpreter::StubCall Interpreter::stub_table[] = {
   0, // start
   0, // template
+  0, // catchblock
   0, // return
   (StubCall)&StubCaller::do_throw,
   0, // goto
@@ -1764,6 +1798,7 @@ const Interpreter::StubCall Interpreter::stub_table[] = {
   (StubCall)&StubCaller::do_loadenv_atom,
   (StubCall)&StubCaller::do_loadinitenv,
   (StubCall)&StubCaller::do_loadsuperinitenv,
+  (StubCall)&StubCaller::do_loadenv_env,
   (StubCall)&StubCaller::do_newobject,
   (StubCall)&StubCaller::do_newarray,
   (StubCall)&StubCaller::do_applytype,
@@ -1862,6 +1897,8 @@ const Interpreter::StubCall Interpreter::stub_table[] = {
   0, // deopt_safepoint
   (StubCall)&StubCaller::do_deopt_finish,
   0, // deopt_finishcall
+  (StubCall)&StubCaller::do_debugline,
+  (StubCall)&StubCaller::do_debugfile,
   (StubCall)&StubCaller::do_string2atom,
   (StubCall)&StubCaller::do_double2atom,
   (StubCall)&StubCaller::do_int2atom,
@@ -1875,6 +1912,7 @@ const Interpreter::StubCall Interpreter::stub_table[] = {
   (StubCall)&StubCaller::do_atom2int,
   (StubCall)&StubCaller::do_atom2uint,
   (StubCall)&StubCaller::do_atom2scriptobject,
+  (StubCall)&StubCaller::do_atom2ns,
   (StubCall)&StubCaller::do_i2d,
   (StubCall)&StubCaller::do_u2d,
   (StubCall)&StubCaller::do_d2i,

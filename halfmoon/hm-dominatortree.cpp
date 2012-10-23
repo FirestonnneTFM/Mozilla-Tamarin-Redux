@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -120,6 +120,10 @@ public:
     explicit EdgeRange(BlockStartInstr* b)
     : ArrayRange<ArmInstr*>(armRange((CondInstr*)end(b))) {}
   };
+  class CatchEdgeRange: public CatchBlockRange {
+   public:
+    explicit CatchEdgeRange(BlockStartInstr* block): CatchBlockRange(block) {}
+  };
   class RootRange {
   public:
     explicit RootRange(InstrGraph* ir) : begin(ir->begin) {}
@@ -143,6 +147,9 @@ public:
     InstrKind k = kind(end(b));
     return k == HR_if || k == HR_switch;
   }
+  static bool hasCatchEdges(BlockStartInstr* b) {
+    return InstrGraph::blockEnd(b)->catch_blocks != NULL;
+  }
 private:
   static BlockEndInstr* end(BlockStartInstr* b) {
     return InstrGraph::blockEnd(b);
@@ -159,6 +166,16 @@ public:
     BlockStartInstr* popFront() { return start(r.popFront()); }
   private:
     PredRange r;
+  };
+  class CatchEdgeRange: public ExceptionEdgeRange {
+   public:
+    explicit CatchEdgeRange(BlockStartInstr* block): ExceptionEdgeRange(cast<CatchBlockInstr>(block)) {}
+    BlockStartInstr* front() {
+      return InstrGraph::blockStart(ExceptionEdgeRange::front()->from);
+    }
+    BlockStartInstr* popFront() {
+      return InstrGraph::blockStart(ExceptionEdgeRange::popFront()->from);
+    }
   };
   class RootRange {
   public:
@@ -185,6 +202,9 @@ public:
   }
   static bool manyEdges(BlockStartInstr* b) {
     return kind(b) == HR_label;
+  }
+  static bool hasCatchEdges(BlockStartInstr* b) {
+    return kind(b) == HR_catchblock;
   }
 private:
   static BlockStartInstr* start(BlockEndInstr* e) {
@@ -215,6 +235,10 @@ void CfgInfo::genericDfs(BlockStartInstr* block) {
     for (typename VIEW::EdgeRange s(block); !s.empty();)
       genericDfs<VIEW>(s.popFront());
   }
+  if (VIEW::hasCatchEdges(block)) {
+    for (typename VIEW::CatchEdgeRange s(block); !s.empty();)
+      genericDfs<VIEW>(s.popFront());
+  }
   int post_id = ++max_post_id;
   post_ids[blockid] = post_id;
   blocks[post_id].start = block;
@@ -240,8 +264,15 @@ void CfgInfo::computeGenericDoms() {
           if (pred_post_id)
             idom = intersect(idom, pred_post_id);
         }
-      } else {
+      } else if (!VIEW::hasCatchEdges(block)) {
         idom = max_post_id; // idom is root node
+      }
+      if (VIEW::hasCatchEdges(block)) {
+        for (typename VIEW::CatchEdgeRange e(block); !e.empty();) {
+          int pred_post_id = post_ids[e.popFront()->blockid];
+          if (pred_post_id)
+            idom = intersect(idom, pred_post_id);
+        }
       }
       if (blocks[i].idom != idom) {
         // save the newly computed dominator
@@ -278,9 +309,25 @@ void DominatorTree::computeGeneric(InstrGraph* ir) {
     BlockStartInstr* idom_instr = cfg.blocks[idom].start;
     info.idom = idom_instr;
     info.depth = idom_instr ? info_[idom_instr->blockid].depth + 1 : 1;
-    if (REV::manyEdges(block)) {
+    if (REV::manyEdges(block) || REV::hasCatchEdges(block)) {
       visited.clear();
+    }
+    if (REV::manyEdges(block)) {
       for (typename REV::EdgeRange r(block); !r.empty();) {
+        BlockStartInstr* next = r.popFront();
+        int next_post_id = cfg.post_ids[next->blockid];
+        if (!next_post_id)
+          continue; // block was not reachable
+        for (int n = next_post_id; n != idom; n = cfg.blocks[n].idom) {
+          if (visited.add(n)) {
+            Seq<BlockStartInstr*>* &df = info_[cfg.blocks[n].start->blockid].df;
+            df = cons(dom_alloc_, block, df);
+          }
+        }
+      }
+    }
+    if (REV::hasCatchEdges(block)) {
+      for (typename REV::CatchEdgeRange r(block); !r.empty();) {
         BlockStartInstr* next = r.popFront();
         int next_post_id = cfg.post_ids[next->blockid];
         if (!next_post_id)

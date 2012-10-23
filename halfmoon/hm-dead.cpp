@@ -1,5 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -28,6 +28,30 @@ void removeGoto(GotoInstr* go) {
   }
   go->next_goto = go->prev_goto = 0;
   go->target = 0;
+
+  if (go->catch_blocks != NULL) {
+    for (SeqRange<ExceptionEdge*> r(*go->catch_blocks); !r.empty(); r.popFront()) {
+      CatchBlockInstr* cblock = r.front()->to;
+
+      for (ExceptionEdgeRange p(cblock); !p.empty(); p.popFront()) {
+        ExceptionEdge* edge = p.front();
+        if (edge->from == go) {
+          // dead edge
+          if (edge->next_exception == edge) {
+            cblock->catch_preds = NULL;
+          } else {
+            ExceptionEdge* N = edge->next_exception;
+            ExceptionEdge* P = edge->prev_exception;
+            if (cblock->catch_preds == edge) {
+              cblock->catch_preds = N;
+            }
+            N->prev_exception = P;
+            P->next_exception = N;
+          }
+        }
+      }
+    }
+  }
 }
 
 /**

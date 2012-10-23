@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -42,6 +42,8 @@ public:
 
   NaryStmt4* newNaryStmt4(InstrKind kind, Def* effect, Def* param1, Def* param2,
                           Def* param3, Def* param4, int varargc, Def* varargs[]);
+  NaryStmt4* newNaryStmt4(InstrKind kind, Def* effect, Def* param1, Def* param2,
+                          Def* param3, Def* param4, Def* param5, int varargc, Def* varargs[]);
 
   // call stmt with multiname
   CallStmt2* newCallStmt2(InstrKind kind, Def* effect, Def* param,
@@ -95,6 +97,9 @@ public:
   StartInstr* newStartInstr(MethodInfo* method);
   StartInstr* newStartInstr(InstrKind kind, int num_params, const Type* param_types[]);
 
+  // catchblock instr
+  CatchBlockInstr* newCatchBlockInstr(int num_params);
+
   // if instr
   IfInstr* newIfInstr(Def* cond, int argc, Def* args[]);      // n-arg array
   IfInstr* newIfInstr(Def* cond, Def* arg);                   // single arg
@@ -113,12 +118,15 @@ public:
   StopInstr* newStopInstr(InstrKind k, Def* effect, int data_argc, Def* data_args[]);
 
   // safepoint instr
-  SafepointInstr* newSafepointInstr(Def* effect, Def* state);
+  SafepointInstr* newSafepointInstr(Def* effect, int argc, Def* args[]);
 
   // DEOPT: new-style safepoint instr
   DeoptSafepointInstr* newDeoptSafepointInstr(Def* effect, int argc, Def* args[]);
   DeoptFinishInstr* newDeoptFinishInstr(Def* effect);
   DeoptFinishCallInstr* newDeoptFinishCallInstr(Def* effect, Def* val);
+
+  // debugfile and debugline
+  DebugInstr* newDebugInstr(InstrKind kind, Def* effect, Def* val);
 
   // setlocal instr
   SetlocalInstr* newSetlocalInstr(int index, Def* state, Def* val);

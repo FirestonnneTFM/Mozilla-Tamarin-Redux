@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -57,12 +57,14 @@ public: // dispatch() adapter methods.
   void doTemplateInstr(Instr*);
   void do_start(StartInstr*) { } // has root defs only
   void do_template(StartInstr*) { } // has root defs only
+  void do_catchblock(CatchBlockInstr*) { } // has root defs only
   void do_label(LabelInstr*);
   void do_arm(ArmInstr*);
   void do_const(ConstantExpr*) { } // polymorphic constant
   void do_abc_finddef(BinaryStmt*);
   void do_callmethod(CallStmt2*);
   void do_callinterface(CallStmt2*);
+  void do_callstatic(CallStmt2*);
   void do_newinstance(UnaryExpr*);
   void do_toprimitive(UnaryStmt*);
   void do_string2atom(UnaryExpr* i) { doChangeModel(i, kModelAtom); }
@@ -73,6 +75,7 @@ public: // dispatch() adapter methods.
   void do_bool2atom(UnaryExpr* i) { doChangeModel(i, kModelAtom); }
   void do_ns2atom(UnaryExpr* i) { doChangeModel(i, kModelAtom); }
   void do_atom2scriptobject(UnaryExpr* i) { doChangeModel(i, kModelScriptObject); }
+  void do_atom2ns(UnaryExpr* i) { doChangeModel(i, kModelNamespace); }
   void do_atom2bool(UnaryExpr* i) { doChangeModel(i, kModelInt); }
   void do_atom2string(UnaryExpr* i) { doChangeModel(i, kModelString); }
   void do_i2d(UnaryExpr* i) { doChangeModel(i, kModelDouble); }
@@ -94,8 +97,8 @@ public: // dispatch() adapter methods.
   void do_slottype(BinaryExpr*);
   void do_coerce(BinaryStmt* i) { doCoerceInstr(i); }
   void do_cast(BinaryStmt* i) { doCoerceInstr(i); }
-  void do_abc_findproperty(NaryStmt2* i) { doFindInstr(i); }
-  void do_abc_findpropstrict(NaryStmt2* i) { doFindInstr(i); }
+  void do_abc_findproperty(NaryStmt3* i) { doFindInstr(i); }
+  void do_abc_findpropstrict(NaryStmt3* i) { doFindInstr(i); }
   void do_abc_add(BinaryStmt*);
   void do_abc_getprop(CallStmt2*);
   void do_abc_getpropx(CallStmt3*);
@@ -118,6 +121,7 @@ public: // dispatch() adapter methods.
   void do_loadenv_namespace(BinaryExpr* i) { do_loadenv(i); }
   void do_loadinitenv(UnaryExpr*);
   void do_loadsuperinitenv(UnaryExpr*);
+  void do_loadenv_env(BinaryExpr*);
 
   // constant folding
   void do_addi(BinaryExpr* i)  { fold(i, Stubs::do_addi); }
@@ -162,7 +166,7 @@ private:
   void doCoerceInstr(UnaryExpr*, const Type* to_type);
   void doCoerceInstr(UnaryStmt*, const Type* to_type);
   void doCoerceInstr(BinaryStmt*);
-  void doFindInstr(NaryStmt2*);
+  void doFindInstr(NaryStmt3*);
   void doChangeModel(UnaryExpr*, ModelKind);
   void coerceOutputModels(Instr*);
   void doGetpropertylate(BinaryStmt*);
