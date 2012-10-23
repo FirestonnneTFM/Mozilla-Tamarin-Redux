@@ -450,3 +450,15 @@ as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize default
 as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize internal class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
 as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize dynamic class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
 as3/Definitions/Classes/ClassDef/Bug118272Package : Trying to initialize final class identifier, asc1,, expectedfail, different runtime error #1074 instead of #1056
+
+###########
+# halfmoon
+###########
+
+as3/Definitions/FunctionAccessors/AccessorSpray,           (halfmoon), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
+as3/Vector/initializerLargeVector,           (Ojit.*halfmoon|halfmoon.*Ojit), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
+ecma3/Statements/eregress_74474_002,           (halfmoon), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
+ecma3/Statements/eregress_74474_003,           (halfmoon), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
+spidermonkey/js1_5/Regress/regress-111557,           (Ojit.*halfmoon|halfmoon.*Ojit), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
+spidermonkey/js1_5/Regress/regress-155081,   (Ojit.*halfmoon|halfmoon.*Ojit), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
+spidermonkey/js1_5/Regress/regress-155081-2, (Ojit.*halfmoon|halfmoon.*Ojit), , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=708944
