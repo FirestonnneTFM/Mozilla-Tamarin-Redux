@@ -331,6 +331,7 @@ regress/security/bug636565,     AOT ,, skip, attempts to load additional abc fil
 regress/vector_domain_bug,      AOT ,, skip, AOT does not support loadBytes()
 versioning/.*,                  AOT ,, skip, AOT does not support versioning yet
 
+
 ###########
 # MMgc
 ###########
@@ -367,4 +368,9 @@ generated/.* , .* , , skip , Not a test on its own
 as3/ByteArray/ByteArrayLzmaThirdParty , arm-android,, skip, reads helper files which are not deployed on Android see https://bugzilla.mozilla.org/show_bug.cgi?id=733051
 
 
-
+###########
+# halfmoon
+###########
+# these should be expected failures but there's no way to specify that particular swf versions fail
+as3/Vector/nonindexproperty,                 halfmoon, , skip, halfmoon acts like interpreter instead of JIT for early swf versions
+regress/bug_551587_2,                        halfmoon, , skip, halfmoon acts like interpreter instead of JIT for early swf versions
