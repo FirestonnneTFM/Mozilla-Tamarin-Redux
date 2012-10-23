@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -141,7 +141,7 @@ Def* matchUnaryExpr(const Use& v, InstrKind k) {
   return kind(i) == k ? def(cast<UnaryExpr>(i)->value_in()) : 0;
 }
 
-ScopeKind findScope(Lattice* lattice_, NaryStmt2* instr, int* index_) {
+ScopeKind findScope(Lattice* lattice_, NaryStmt3* instr, int* index_) {
   assert(kind(instr) == HR_abc_findproperty ||
          kind(instr) == HR_abc_findpropstrict);
   const Type* name_type = type(instr->name_in());
@@ -153,6 +153,12 @@ ScopeKind findScope(Lattice* lattice_, NaryStmt2* instr, int* index_) {
   PoolObject* pool = caller_method->pool();
   if (!nameVal(name_type)->isBinding())
     return kScopeNotFound; // not an ordinary known lexical name.
+
+  // Don't short circuit dynamic lookups
+  assert(isOrdinal(type(instr->index_in())));
+  int withbase = ordinalVal(type(instr->index_in()));
+  if (withbase != -1)
+    return kScopeNotFound;
 
   // Search local scopes.
   const ScopeTypeChain* scope = caller_method->declaringScope();
@@ -523,7 +529,11 @@ void Specializer::do_construct(CallStmt2* instr) {
   connectUsesToDef(*instr->effect_out(), call->effect_out());
 }
 
-void Specializer::doFindStmt(NaryStmt2* instr) {
+void Specializer::doFindStmt(NaryStmt3* instr) {
+  (void)instr;
+#if 0
+  // Can't in place replace an NaryStmt2 with a BinaryStmt, so just
+  // disable this for now.  It will be deleted anyway.
   int index;
   switch (findScope(lattice_, instr, &index)) {
     case kScopeOuter: {
@@ -537,6 +547,7 @@ void Specializer::doFindStmt(NaryStmt2* instr) {
       factory_.toBinaryStmt(HR_findprop2finddef, instr);
       break;
   }
+#endif
 }
 
 void Specializer::do_toint(UnaryStmt* instr) {
@@ -709,93 +720,6 @@ void Specializer::removeSpeculate(BinaryExpr* instr) {
     assert (isState(type(state)));
     assert (kind(definer(state)) == HR_safepoint);
     connectUsesToDef(*instr->value_out(), lhs);
-  }
-}
-
-/***
- * Is there a cleaner way to find out if an instr is a speculative use
- * other than a switch statement? Error prone to add a speculate_instr
- * and forget to modify this method. Otherwise, if we add a speculate_instr
- * and don't add this, the safepoint gets eliminated
- */
-bool Specializer::isSpeculate(Instr* instr) {
-  switch (kind(instr)) {
-  case HR_speculate_int:
-  case HR_speculate_number:
-  case HR_speculate_string:
-  case HR_speculate_object:
-  case HR_speculate_array:
-  case HR_speculate_bool:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool Specializer::haveSpeculateUses(SafepointInstr* instr) {
-  for (AllUsesRange u(instr); !u.empty(); u.popFront()) {
-    bool is_speculate = isSpeculate(user(u.front()));
-    if (is_speculate) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/***
- * DANGER DANGER DANGER:
- * We're assuming setlocal and safepoints are used ONLY BY SPECULATIVE
- * optimizations. We do not support exceptions.
- * Check if we're being used by a speculate opcode
- * if not, remove this safepoint
- * We assume we have no other reasons to see a set local or safepoint
- */
-void Specializer::do_safepoint(SafepointInstr* instr) {
-  if (!haveSpeculateUses(instr)) {
-    // We assume safepoints occur because abcbuilder emitted a setlocal
-    // for every stack slot, then this safepoint. eliminate this safepoint
-    connectUsesToDef(*instr->state_out(), def(instr->state_in()));
-    connectUsesToDef(*instr->effect_out(), def(instr->effect_in()));
-  }
-}
-
-/***
- * DANGER, READ DO_safepoint text
- * Check the previous state. If the setlocal in a previous state sets the local
- * to the same value, as us, delete us.
- * Only make a local decision, we don't check all possible paths at arms 
- * May need a global setlocal optimization if this isn't good enough
- */
-void Specializer::do_setlocal(SetlocalInstr* instr) {
-  Instr* state_in = definer(instr->state_in());
-  int original_index = instr->index;
-  bool have_safepoint = false;
-
-  while(kind(state_in) == HR_setlocal || kind(state_in) == HR_safepoint) {
-    if (kind(state_in) == HR_setlocal) {
-      SetlocalInstr* setlocal = cast<SetlocalInstr>(state_in);
-      state_in = definer(setlocal->state_in());
-
-      if (setlocal->index == original_index) {
-        if (def(setlocal->value_in()) == def(instr->value_in())) {
-          // instr setlocals the same value as a previous setlocal
-          connectUsesToDef(*instr->state_out(), def(instr->state_in()));
-        } else if (!have_safepoint) {
-          // instr setlocal to the same index as a previous setlocal
-          // without a safepoint in between. Delete the previous setlocal
-          // since it has no effect.
-          // DANGER: kind of ugly to delete a previous setlocal...
-          // further downstream rather than deleting it when visiting
-          // the previous setlocal.
-          connectUsesToDef(*setlocal->state_out(), def(setlocal->state_in()));
-        }
-      }
-    } else {
-      SafepointInstr* safepoint = cast<SafepointInstr>(state_in);
-      state_in = definer(safepoint->state_in());
-      have_safepoint = true;
-    }
   }
 }
 

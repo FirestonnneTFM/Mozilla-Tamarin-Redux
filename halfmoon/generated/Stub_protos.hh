@@ -5,7 +5,7 @@
 namespace halfmoon {
 using namespace avmplus;
 struct Stubs {
-  static const int stub_count = 240;
+  static const int stub_count = 245;
 
   // throw: (Effect, Atom) -> ()
   static void do_throw(MethodFrame*, Atom);
@@ -90,6 +90,9 @@ struct Stubs {
 
   // loadsuperinitenv: Env -> Env
   static MethodEnv* do_loadsuperinitenv(MethodFrame*, MethodEnv*);
+
+  // loadenv_env: (Ord, Env) -> Env
+  static MethodEnv* do_loadenv_env(MethodFrame*, int, MethodEnv*);
 
   // newobject: (Effect, Atom) -> (Effect, ScriptObject~)
   static ScriptObject* do_newobject(MethodFrame*, int, Atom*);
@@ -220,29 +223,29 @@ struct Stubs {
   // abc_finddef: (Effect, Name, Env) -> (Effect, ScriptObject~)
   static ScriptObject* do_abc_finddef(MethodFrame*, const Multiname*, MethodEnv*);
 
-  // abc_findpropstrict: (Effect, Name, Env, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropstrict(MethodFrame*, const Multiname*, MethodEnv*, int, Atom*);
+  // abc_findpropstrict: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropstrict(MethodFrame*, const Multiname*, MethodEnv*, int, int, Atom*);
 
-  // abc_findpropstrictx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropstrictx(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*);
+  // abc_findpropstrictx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropstrictx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*);
 
-  // abc_findpropstrictns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropstrictns(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*);
+  // abc_findpropstrictns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropstrictns(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*);
 
-  // abc_findpropstrictnsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropstrictnsx(MethodFrame*, const Multiname*, MethodEnv*, Atom, Atom, int, Atom*);
+  // abc_findpropstrictnsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropstrictnsx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*);
 
-  // abc_findproperty: (Effect, Name, Env, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findproperty(MethodFrame*, const Multiname*, MethodEnv*, int, Atom*);
+  // abc_findproperty: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findproperty(MethodFrame*, const Multiname*, MethodEnv*, int, int, Atom*);
 
-  // abc_findpropertyx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropertyx(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*);
+  // abc_findpropertyx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropertyx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*);
 
-  // abc_findpropertyns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropertyns(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*);
+  // abc_findpropertyns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropertyns(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*);
 
-  // abc_findpropertynsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~)
-  static Atom do_abc_findpropertynsx(MethodFrame*, const Multiname*, MethodEnv*, Atom, Atom, int, Atom*);
+  // abc_findpropertynsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~)
+  static Atom do_abc_findpropertynsx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*);
 
   // newclass: (Effect, Traits~, Class, Atom~) -> (Effect, Class~)
   static ClassClosure* do_newclass(MethodFrame*, Traits*, ClassClosure*, int, Atom*);
@@ -322,8 +325,8 @@ struct Stubs {
   // abc_callsupernsx: (Effect, Name, Atom, Atom, Atom~, Atom) -> (Effect, Atom)
   static Atom do_abc_callsupernsx(MethodFrame*, const Multiname*, Atom, Atom, int, Atom*);
 
-  // newcatch: (Effect, Traits~) -> (Effect, ScriptObject~)
-  static ScriptObject* do_newcatch(MethodFrame*, Traits*);
+  // newcatch: (Effect, Traits~) -> (Effect, Atom~)
+  static Atom do_newcatch(MethodFrame*, Traits*);
 
   // slottype: (ScriptObject~, Ord) -> Traits
   static Traits* do_slottype(MethodFrame*, ScriptObject*, int);
@@ -333,6 +336,12 @@ struct Stubs {
 
   // deopt_finish: Effect -> Effect
   static void do_deopt_finish(MethodFrame*);
+
+  // debugline: (Effect, Int) -> Effect
+  static void do_debugline(MethodFrame*, int32_t);
+
+  // debugfile: (Effect, String) -> Effect
+  static void do_debugfile(MethodFrame*, String*);
 
   // string2atom: String -> Atom
   static Atom do_string2atom(MethodFrame*, String*);
@@ -372,6 +381,9 @@ struct Stubs {
 
   // atom2scriptobject: Atom -> ScriptObject
   static ScriptObject* do_atom2scriptobject(MethodFrame*, Atom);
+
+  // atom2ns: Atom -> Namespace
+  static Namespace* do_atom2ns(MethodFrame*, Atom);
 
   // i2d: Int -> Number
   static double do_i2d(MethodFrame*, int32_t);
@@ -677,6 +689,7 @@ struct Stubs {
   MethodEnv* Stubs::do_loadenv_atom(MethodFrame*, int, Atom) { assert(false && "loadenv_atom not implemented"); return 0; }
   MethodEnv* Stubs::do_loadinitenv(MethodFrame*, ScriptObject*) { assert(false && "loadinitenv not implemented"); return 0; }
   MethodEnv* Stubs::do_loadsuperinitenv(MethodFrame*, MethodEnv*) { assert(false && "loadsuperinitenv not implemented"); return 0; }
+  MethodEnv* Stubs::do_loadenv_env(MethodFrame*, int, MethodEnv*) { assert(false && "loadenv_env not implemented"); return 0; }
   ScriptObject* Stubs::do_newobject(MethodFrame*, int, Atom*) { assert(false && "newobject not implemented"); return 0; }
   ArrayObject* Stubs::do_newarray(MethodFrame*, int, Atom*) { assert(false && "newarray not implemented"); return 0; }
   Atom Stubs::do_applytype(MethodFrame*, int, Atom*) { assert(false && "applytype not implemented"); return 0; }
@@ -720,14 +733,14 @@ struct Stubs {
   BoolKind Stubs::do_not(MethodFrame*, BoolKind) { assert(false && "not not implemented"); return 0; }
   ScriptObject* Stubs::do_newactivation(MethodFrame*, MethodEnv*) { assert(false && "newactivation not implemented"); return 0; }
   ScriptObject* Stubs::do_abc_finddef(MethodFrame*, const Multiname*, MethodEnv*) { assert(false && "abc_finddef not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropstrict(MethodFrame*, const Multiname*, MethodEnv*, int, Atom*) { assert(false && "abc_findpropstrict not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropstrictx(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*) { assert(false && "abc_findpropstrictx not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropstrictns(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*) { assert(false && "abc_findpropstrictns not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropstrictnsx(MethodFrame*, const Multiname*, MethodEnv*, Atom, Atom, int, Atom*) { assert(false && "abc_findpropstrictnsx not implemented"); return 0; }
-  Atom Stubs::do_abc_findproperty(MethodFrame*, const Multiname*, MethodEnv*, int, Atom*) { assert(false && "abc_findproperty not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropertyx(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*) { assert(false && "abc_findpropertyx not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropertyns(MethodFrame*, const Multiname*, MethodEnv*, Atom, int, Atom*) { assert(false && "abc_findpropertyns not implemented"); return 0; }
-  Atom Stubs::do_abc_findpropertynsx(MethodFrame*, const Multiname*, MethodEnv*, Atom, Atom, int, Atom*) { assert(false && "abc_findpropertynsx not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropstrict(MethodFrame*, const Multiname*, MethodEnv*, int, int, Atom*) { assert(false && "abc_findpropstrict not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropstrictx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*) { assert(false && "abc_findpropstrictx not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropstrictns(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*) { assert(false && "abc_findpropstrictns not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropstrictnsx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*) { assert(false && "abc_findpropstrictnsx not implemented"); return 0; }
+  Atom Stubs::do_abc_findproperty(MethodFrame*, const Multiname*, MethodEnv*, int, int, Atom*) { assert(false && "abc_findproperty not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropertyx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*) { assert(false && "abc_findpropertyx not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropertyns(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*) { assert(false && "abc_findpropertyns not implemented"); return 0; }
+  Atom Stubs::do_abc_findpropertynsx(MethodFrame*, const Multiname*, MethodEnv*, int, Atom, int, Atom*) { assert(false && "abc_findpropertynsx not implemented"); return 0; }
   ClassClosure* Stubs::do_newclass(MethodFrame*, Traits*, ClassClosure*, int, Atom*) { assert(false && "newclass not implemented"); return 0; }
   ClassClosure* Stubs::do_newfunction(MethodFrame*, MethodInfo*, int, Atom*) { assert(false && "newfunction not implemented"); return 0; }
   Atom Stubs::do_abc_getsuper(MethodFrame*, const Multiname*, Atom) { assert(false && "abc_getsuper not implemented"); return 0; }
@@ -754,10 +767,12 @@ struct Stubs {
   Atom Stubs::do_abc_callsuperx(MethodFrame*, const Multiname*, Atom, int, Atom*) { assert(false && "abc_callsuperx not implemented"); return 0; }
   Atom Stubs::do_abc_callsuperns(MethodFrame*, const Multiname*, Atom, int, Atom*) { assert(false && "abc_callsuperns not implemented"); return 0; }
   Atom Stubs::do_abc_callsupernsx(MethodFrame*, const Multiname*, Atom, Atom, int, Atom*) { assert(false && "abc_callsupernsx not implemented"); return 0; }
-  ScriptObject* Stubs::do_newcatch(MethodFrame*, Traits*) { assert(false && "newcatch not implemented"); return 0; }
+  Atom Stubs::do_newcatch(MethodFrame*, Traits*) { assert(false && "newcatch not implemented"); return 0; }
   Traits* Stubs::do_slottype(MethodFrame*, ScriptObject*, int) { assert(false && "slottype not implemented"); return 0; }
   Atom Stubs::do_getouterscope(MethodFrame*, int, MethodEnv*) { assert(false && "getouterscope not implemented"); return 0; }
   void Stubs::do_deopt_finish(MethodFrame*) { assert(false && "deopt_finish not implemented"); }
+  void Stubs::do_debugline(MethodFrame*, int32_t) { assert(false && "debugline not implemented"); }
+  void Stubs::do_debugfile(MethodFrame*, String*) { assert(false && "debugfile not implemented"); }
   Atom Stubs::do_string2atom(MethodFrame*, String*) { assert(false && "string2atom not implemented"); return 0; }
   Atom Stubs::do_double2atom(MethodFrame*, double) { assert(false && "double2atom not implemented"); return 0; }
   Atom Stubs::do_int2atom(MethodFrame*, int32_t) { assert(false && "int2atom not implemented"); return 0; }
@@ -771,6 +786,7 @@ struct Stubs {
   int32_t Stubs::do_atom2int(MethodFrame*, Atom) { assert(false && "atom2int not implemented"); return 0; }
   uint32_t Stubs::do_atom2uint(MethodFrame*, Atom) { assert(false && "atom2uint not implemented"); return 0; }
   ScriptObject* Stubs::do_atom2scriptobject(MethodFrame*, Atom) { assert(false && "atom2scriptobject not implemented"); return 0; }
+  Namespace* Stubs::do_atom2ns(MethodFrame*, Atom) { assert(false && "atom2ns not implemented"); return 0; }
   double Stubs::do_i2d(MethodFrame*, int32_t) { assert(false && "i2d not implemented"); return 0; }
   double Stubs::do_u2d(MethodFrame*, uint32_t) { assert(false && "u2d not implemented"); return 0; }
   int32_t Stubs::do_d2i(MethodFrame*, double) { assert(false && "d2i not implemented"); return 0; }

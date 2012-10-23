@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -220,8 +220,12 @@ bool TypeChecker::do_default(Instr* instr) {
       const Type* t = type(u.front());
       const Type* constraint = sig.front();
       if (!subtypeof(t, constraint)) {
+        avmplus::AvmCore* core = avmplus::AvmCore::getActiveCore();
+        printCompactInstr(core->console, instr, false);
         report(i, u.front(), constraint, "subtype of");
       } else if (check_model && !submodelof(t, constraint)) {
+        avmplus::AvmCore* core = avmplus::AvmCore::getActiveCore();
+        printCompactInstr(core->console, instr, false);
         report(i, u.front(), constraint, "submodel of");
       }
     }
@@ -280,6 +284,32 @@ bool checkPruned(InstrGraph* ir) {
     if (kind(instr) == HR_label)
       for (PredRange p(cast<LabelInstr>(instr)); !p.empty(); p.popFront())
         assert(marked.get(p.front()->id) && "goto not linked");
+    if (kind(instr) == HR_catchblock) {
+      CatchBlockInstr* cblock = cast<CatchBlockInstr>(instr);
+      for (ExceptionEdgeRange p(cblock); !p.empty(); p.popFront()) {
+        assert(p.front()->from->catch_blocks != NULL);
+        bool found = false;
+        for (CatchBlockRange r(p.front()->from); !r.empty(); r.popFront()) {
+          if (r.front() == cblock) found = true;
+        }
+        assert(found);
+      }
+    }
+    if (isBlockEnd(instr)) {
+      BlockEndInstr* end = (BlockEndInstr*)instr;
+      if (end->catch_blocks != NULL) {
+        for (CatchBlockRange r(end); !r.empty(); r.popFront()) {
+          bool found = false;
+          for (ExceptionEdgeRange p(r.front()); !p.empty(); p.popFront()) {
+            if (p.front()->from == end) found = true;
+          }
+          if (!found) {
+            printf("missing exception back edge: i%d -> i%d", end->id, r.front()->id);
+          }
+          assert(found);
+        }
+      }
+    }
   }
   if (ir->end)
     assert(marked.get(ir->end->id) && "end not linked");
@@ -703,19 +733,44 @@ public:
   }
 
   // Print the LIR Control Flow Graph.
-  void print() {
+  void print(AvmLogControl* logc) {
     if (!printer)
       return;
     for (LirBlock* b = first_block; b; b = b->next) {
       RefBuf rb1, rb2;
-      printf("B%d [%s - %s]", b->linear_id,
+      logc->printf("B%d [%s - %s]", b->linear_id,
              printer->formatRef(&rb1, b->first_ins, false),
              printer->formatRef(&rb2, b->last_ins, false));
       if (b->idom)
-        printf(" idom=B%d", b->idom->linear_id);
+        logc->printf(" idom=B%d", b->idom->linear_id);
       else if (!isReachable(b))
-        printf(" unreachable");
-      printf("\n");
+        logc->printf(" unreachable");
+
+      logc->printf(" preds [ ");
+      for (SeqRange<LirBlock*> i(b->preds); !i.empty(); i.popFront()) {
+        LirBlock* pred = i.front();
+        logc->printf(" B%d ", pred->linear_id);
+      }
+      logc->printf("]");
+      logc->printf(" succs [ ");
+      for (int s = 0; s < b->num_succs; s++) {
+        LirBlock* succ = b->succs[s];
+        logc->printf(" B%d ", succ->linear_id);
+      }
+      logc->printf("]");
+      logc->printf("\n");
+
+      LIns* last = b->last_ins;
+      LirReader r2(last);
+      ReverseLister rl(&r2, alloc, printer, logc, "Initial LIR");
+
+      // Scan each instruction and populate insmap.
+      LIns* ins;
+      do {
+        ins = rl.read();
+      } while (ins != b->first_ins);
+      rl.finish();
+
     }
   }
 
@@ -732,15 +787,14 @@ public:
 
 // fixme dont use halfmoon-specific enable_verbose
 // todo Test checkLir() on sanities, brightspot, past bugs.
-// todo use Nanojit log instead of printf.
 // todo move checkLir() to nanojit
-bool checkLir(Fragment* fragment) {
+bool checkLir(Fragment* fragment, AvmLogControl* logc) {
   Allocator scratch;
   LirCfg cfg(fragment);
   computeDoms(cfg.first_block);
 
   if (enable_verbose)
-    cfg.print();
+    cfg.print(logc);
 
   // Go through LIR instructions in reverse, checking each one.
   for (LirBlock* b = cfg.last_block; b; b = b->prev) {

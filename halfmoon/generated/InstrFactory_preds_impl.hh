@@ -17,6 +17,11 @@ bool InstrFactory::isArmInstr(InstrKind k) {
   return instr_attrs[k].shape == ARMINSTR_SHAPE;
 }
 
+/// true if given InstrKind is instance of CatchBlockInstr
+bool InstrFactory::isCatchBlockInstr(InstrKind k) {
+  return instr_attrs[k].shape == CATCHBLOCKINSTR_SHAPE;
+}
+
 /// true if given InstrKind is instance of LabelInstr
 bool InstrFactory::isLabelInstr(InstrKind k) {
   return instr_attrs[k].shape == LABELINSTR_SHAPE;
@@ -82,6 +87,16 @@ bool InstrFactory::isNaryStmt0(InstrKind k) {
   return instr_attrs[k].shape == NARYSTMT0_SHAPE;
 }
 
+/// true if given InstrKind is instance of SafepointInstr
+bool InstrFactory::isSafepointInstr(InstrKind k) {
+  return instr_attrs[k].shape == SAFEPOINTINSTR_SHAPE;
+}
+
+/// true if given InstrKind is instance of DebugInstr
+bool InstrFactory::isDebugInstr(InstrKind k) {
+  return instr_attrs[k].shape == DEBUGINSTR_SHAPE;
+}
+
 /// true if given InstrKind is instance of DeoptFinishCallInstr
 bool InstrFactory::isDeoptFinishCallInstr(InstrKind k) {
   return instr_attrs[k].shape == DEOPTFINISHCALLINSTR_SHAPE;
@@ -90,11 +105,6 @@ bool InstrFactory::isDeoptFinishCallInstr(InstrKind k) {
 /// true if given InstrKind is instance of NaryStmt1
 bool InstrFactory::isNaryStmt1(InstrKind k) {
   return instr_attrs[k].shape == NARYSTMT1_SHAPE;
-}
-
-/// true if given InstrKind is instance of SafepointInstr
-bool InstrFactory::isSafepointInstr(InstrKind k) {
-  return instr_attrs[k].shape == SAFEPOINTINSTR_SHAPE;
 }
 
 /// true if given InstrKind is instance of UnaryStmt

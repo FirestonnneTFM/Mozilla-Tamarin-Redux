@@ -7,6 +7,7 @@
 enum InstrKind {
   HR_start,                 // StartInstr 
   HR_template,              // StartInstr 
+  HR_catchblock,            // CatchBlockInstr 
   HR_return,                // StopInstr 
   HR_throw,                 // StopInstr 
   HR_goto,                  // GotoInstr 
@@ -43,6 +44,7 @@ enum InstrKind {
   HR_loadenv_atom,          // BinaryExpr 
   HR_loadinitenv,           // UnaryExpr 
   HR_loadsuperinitenv,      // UnaryExpr 
+  HR_loadenv_env,           // BinaryExpr 
   HR_newobject,             // NaryStmt0 
   HR_newarray,              // NaryStmt0 
   HR_applytype,             // NaryStmt0 
@@ -93,13 +95,13 @@ enum InstrKind {
   HR_not,                   // UnaryExpr 
   HR_newactivation,         // UnaryStmt 
   HR_abc_finddef,           // BinaryStmt 
-  HR_abc_findpropstrict,    // NaryStmt2 
-  HR_abc_findpropstrictx,   // NaryStmt3 
-  HR_abc_findpropstrictns,  // NaryStmt3 
+  HR_abc_findpropstrict,    // NaryStmt3 
+  HR_abc_findpropstrictx,   // NaryStmt4 
+  HR_abc_findpropstrictns,  // NaryStmt4 
   HR_abc_findpropstrictnsx, // NaryStmt4 
-  HR_abc_findproperty,      // NaryStmt2 
-  HR_abc_findpropertyx,     // NaryStmt3 
-  HR_abc_findpropertyns,    // NaryStmt3 
+  HR_abc_findproperty,      // NaryStmt3 
+  HR_abc_findpropertyx,     // NaryStmt4 
+  HR_abc_findpropertyns,    // NaryStmt4 
   HR_abc_findpropertynsx,   // NaryStmt4 
   HR_newclass,              // NaryStmt2 
   HR_newfunction,           // NaryStmt1 
@@ -141,6 +143,8 @@ enum InstrKind {
   HR_deopt_safepoint,       // DeoptSafepointInstr 
   HR_deopt_finish,          // DeoptFinishInstr 
   HR_deopt_finishcall,      // DeoptFinishCallInstr 
+  HR_debugline,             // DebugInstr 
+  HR_debugfile,             // DebugInstr 
   HR_string2atom,           // UnaryExpr 
   HR_double2atom,           // UnaryExpr 
   HR_int2atom,              // UnaryExpr 
@@ -154,6 +158,7 @@ enum InstrKind {
   HR_atom2int,              // UnaryExpr 
   HR_atom2uint,             // UnaryExpr 
   HR_atom2scriptobject,     // UnaryExpr 
+  HR_atom2ns,               // UnaryExpr 
   HR_i2d,                   // UnaryExpr 
   HR_u2d,                   // UnaryExpr 
   HR_d2i,                   // UnaryExpr 
@@ -375,31 +380,33 @@ struct ShapeRep {
 enum InstrShape {
   GOTOINSTR_SHAPE,          // 0, 0, kVarIn             1 instrs
   ARMINSTR_SHAPE,           // 0, 0, kVarOut            1 instrs
+  CATCHBLOCKINSTR_SHAPE,    // 0, 0, kVarOut            1 instrs
   LABELINSTR_SHAPE,         // 0, 0, kVarOut            1 instrs
   CONSTANTEXPR_SHAPE,       // 0, 1, kVarNone           3 instrs
   STARTINSTR_SHAPE,         // 0, 1, kVarOut            2 instrs
   IFINSTR_SHAPE,            // 1, 0, kVarIn             1 instrs
   SWITCHINSTR_SHAPE,        // 1, 0, kVarIn             1 instrs
-  UNARYEXPR_SHAPE,          // 1, 1, kVarNone           32 instrs
-  BINARYEXPR_SHAPE,         // 2, 1, kVarNone           56 instrs
+  UNARYEXPR_SHAPE,          // 1, 1, kVarNone           33 instrs
+  BINARYEXPR_SHAPE,         // 2, 1, kVarNone           57 instrs
   SETLOCALINSTR_SHAPE,      // 2, 1, kVarNone           1 instrs
   STOPINSTR_SHAPE,          // 1, 0, kVarIn             2 instrs
   DEOPTSAFEPOINTINSTR_SHAPE, // 1, 1, kVarIn             1 instrs
   DEOPTFINISHINSTR_SHAPE,   // 1, 1, kVarNone           1 instrs
   VOIDSTMT_SHAPE,           // 1, 1, kVarNone           0 instrs
   NARYSTMT0_SHAPE,          // 1, 2, kVarIn             3 instrs
+  SAFEPOINTINSTR_SHAPE,     // 1, 2, kVarIn             1 instrs
+  DEBUGINSTR_SHAPE,         // 2, 1, kVarNone           2 instrs
   DEOPTFINISHCALLINSTR_SHAPE, // 2, 1, kVarNone           1 instrs
   NARYSTMT1_SHAPE,          // 2, 2, kVarIn             3 instrs
-  SAFEPOINTINSTR_SHAPE,     // 2, 2, kVarNone           1 instrs
   UNARYSTMT_SHAPE,          // 2, 2, kVarNone           42 instrs
   CALLSTMT2_SHAPE,          // 3, 2, kVarIn             39 instrs
-  NARYSTMT2_SHAPE,          // 3, 2, kVarIn             3 instrs
+  NARYSTMT2_SHAPE,          // 3, 2, kVarIn             1 instrs
   BINARYSTMT_SHAPE,         // 3, 2, kVarNone           73 instrs
   HASNEXT2STMT_SHAPE,       // 3, 4, kVarNone           1 instrs
   CALLSTMT3_SHAPE,          // 4, 2, kVarIn             52 instrs
-  NARYSTMT3_SHAPE,          // 4, 2, kVarIn             4 instrs
+  NARYSTMT3_SHAPE,          // 4, 2, kVarIn             2 instrs
   CALLSTMT4_SHAPE,          // 5, 2, kVarIn             11 instrs
-  NARYSTMT4_SHAPE,          // 5, 2, kVarIn             2 instrs
+  NARYSTMT4_SHAPE,          // 5, 2, kVarIn             6 instrs
   SHAPE_MAX = NARYSTMT4_SHAPE + 1
 };
 

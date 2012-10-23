@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -27,7 +27,7 @@ class AbcBuilder {
   };
 
 public:
-  AbcBuilder(MethodInfo*, AbcGraph* abc, InstrFactory*, Toplevel*, ProfiledInformation* profiled_info);
+  AbcBuilder(MethodInfo*, AbcGraph* abc, InstrFactory*, Toplevel*, ProfiledInformation* profiled_info, bool has_reachable_exceptions);
   ~AbcBuilder();
   InstrGraph* visitBlocks(Seq<AbcBlock*>*);
 
@@ -76,6 +76,9 @@ private:
                  int extra_argc);
   Def* naryStmt4(InstrKind, Def* name, Def* obj, Def* ns, Def* index,
                  Def** args, int extra_argc);
+  // Build an NaryStmt4 with an extra fixed arg
+  Def* naryStmt4(InstrKind, Def* name, Def* obj, Def* ns, Def* index, Def* index2,
+                 Def** args, int extra_argc);
   Def* callStmt2(InstrKind, Def* name, Def* obj, Def** args, int extra_argc);
   Def* callStmt3(InstrKind, Def* name, Def* index, Def* obj, Def** args,
                  int extra_argc);
@@ -97,6 +100,7 @@ private:
   Def* coerceArgs(Def* obj, Def** args, int argc, MethodInfo* m);
   void stopStmt(InstrKind, Def*, LabelInstr**);
   Def* nullCheck(Def* ptr);
+  void debugInstr(InstrKind, Def* value);
 
   void ifStmt(bool sense, Def* cond);
   void addIf(bool sense, Def* cond);
@@ -106,6 +110,8 @@ private:
   void addSwitch(uint32_t num_cases, Def* index);
   void addGoto(AbcBlock* to);
   LabelInstr* ensureBlockLabel(AbcBlock* abc_block);
+  CatchBlockInstr* ensureCatchBlockLabel(AbcBlock* abc_block);
+  void linkExceptionEdge(BlockStartInstr* block, CatchBlockInstr* catch_block);
 
   void cktimeout();
   void jumpStmt();
@@ -117,6 +123,7 @@ private:
   Def* hasnext2Stmt(Def** obj, Def** ctr);
   void startBlock(AbcBlock*);
   void printStartState(AbcBlock*);
+  void printFrameState();
   Def** popArgs(int argc);
   Def* peekDef();
   Def* popDef();
@@ -134,6 +141,9 @@ private:
   void createSetLocalInstr(int i, Def* val);
   void setLocal(int i, Def* val);
   bool needAbcState();
+
+  bool handlerCoversPc(const uint8_t* pc);
+  bool pcIsHandler(const uint8_t* pc);
 
   // Profiler methods
   bool shouldSpeculate();
@@ -200,13 +210,17 @@ private:
   const int num_vars_; // framesize + effect + state
   const int effect_pos_; // position of effect within vars[] array
   const int state_pos_; // position of state within vars[] array
+  const int setlocal_pos_;
 
   int scopep_;
   int stackp_;
+  int withbase_;
   Def** const frame_; // most recent data results
   AbcBlock* abc_block_; // current block
 
   const uint8_t * const code_pos_;
+  const uint8_t * pc_;
+  bool has_reachable_exceptions_;
   LabelInstr* return_label_;
   LabelInstr* throw_label_;
   InstrFactory& factory_;

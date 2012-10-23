@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -163,7 +163,7 @@ void JitWriter::analyze(AbcOpcode abcop, const uint8_t* pc,
 #endif
     abc_->analyzeEnd(current_block_, pc);
     finishBlock(pc);
-    newBlock(pc);
+    newBlock(pc, frame);
   }
 }
 
@@ -172,17 +172,18 @@ void JitWriter::finishBlock(const uint8_t* nextpc) {
   current_block_ = 0;
 }
 
-void JitWriter::newBlock(const uint8_t* abc_pc) {
+void JitWriter::newBlock(const uint8_t* abc_pc, const FrameState* frame) {
   if (current_block_ && current_block_->start == abc_pc) {
     // we just started this block.  ignore.
     return;
   }
   current_block_ = abc_->newAbcBlock(abc_pc);
+  current_block_->start_withbase = frame->withBase;
   abc_->analyzeExceptions(current_block_);
 }
 
 void JitWriter::startBlock(const FrameState* frame) {
-  newBlock(frame->abc_pc);
+  newBlock(frame->abc_pc, frame);
   MethodSignaturep signature = method_->getMethodSignature();
   const Type** types = new (abc_->alloc0()) const Type*[signature->frame_size()];
   FrameRange<const FrameValue> from = range(&frame->value(0), frame, signature);
@@ -246,7 +247,7 @@ void JitWriter::writeOp1(const FrameState* frame, const uint8_t *pc,
     } else {
       abc_->analyzeBranch(current_block_, abcop, nextpc, offset);
       finishBlock(nextpc);
-      newBlock(nextpc);
+      newBlock(nextpc, frame);
     }
   }
 }

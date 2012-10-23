@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -39,6 +39,7 @@ void TypeAnalyzer::computeTypes(Instr* instr) {
   // in an instr's lifetime computeTypes() should be called.
   switch (kind(instr)) {
     case HR_goto:
+    case HR_catchblock:
     case HR_label:
     case HR_arm:
       break;
@@ -151,6 +152,16 @@ void TypeAnalyzer::do_callmethod(CallStmt2* instr) {
   return do_default(instr);
 }
 
+/// if we can resolve the called method, set
+/// data result type to the resolved method's
+/// return type.
+///
+void TypeAnalyzer::do_callstatic(CallStmt2* instr) {
+  MethodInfo* method = getMethod(type(instr->param_in()));
+  const Type* return_type = lattice_->makeType(method->getMethodSignature()->returnTraits());
+  return setStmtType(instr, return_type);
+}
+
 /// Always set the output type to the interface method signature
 void TypeAnalyzer::do_callinterface(CallStmt2* instr) {
   MethodInfo* method = getMethod(type(instr->param_in()));
@@ -203,6 +214,16 @@ void TypeAnalyzer::do_loadsuperinitenv(UnaryExpr* instr) {
     return setType(instr->value_out(), lattice_->makeEnvType(info_out));
   }
   do_default(instr);
+}
+
+void TypeAnalyzer::do_loadenv_env(BinaryExpr* instr) {
+  const Type* disp_id_type = type(instr->lhs_in());
+  assert(isConst(disp_id_type));
+  int disp_id = ordinalVal(disp_id_type);
+
+  MethodInfo* caller = getMethod(type(instr->rhs_in()));
+  MethodInfo* callee = caller->pool()->getMethodInfo(disp_id);
+  return setType(instr->value_out(), lattice_->makeEnvType(callee));
 }
 
 // adapters to convert C++ bool to BoolKind into and out of stubs
@@ -438,7 +459,7 @@ void TypeAnalyzer::do_slottype(BinaryExpr* instr) {
 /// if we find a local definition, set data result type
 /// to its type.
 ///
-void TypeAnalyzer::doFindInstr(NaryStmt2* instr) {
+void TypeAnalyzer::doFindInstr(NaryStmt3* instr) {
   int index;
   if (findScope(lattice_, instr, &index) == kScopeLocal)
     return setStmtType(instr, type(instr->vararg(index)));
@@ -543,7 +564,12 @@ void TypeAnalyzer::do_getouterscope(BinaryExpr* instr) {
 
 void TypeAnalyzer::do_cknull(UnaryStmt* instr) {
   const Type* value = type(instr->value_in());
-  return setStmtType(instr, lattice_->makeNotNull(value));
+  const Type* not_null = lattice_->makeNotNull(value);
+  if (isBottom(not_null)) {
+      // Don't allow this type to go to bottom, so make up something wide enough to hold it
+      return setStmtType(instr, lattice_->makeNotNull(lattice_->makeUnion(value, lattice_->atom_type[kTypeNullable])));
+  }
+  return setStmtType(instr, not_null);
 }
 
 void TypeAnalyzer::do_newactivation(UnaryStmt* instr) {

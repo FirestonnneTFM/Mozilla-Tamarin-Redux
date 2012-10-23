@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -20,7 +20,7 @@ InstrGraph::InstrGraph(InstrFactory* factory, InfoManager* infos)
 }
 
 Instr* finishAdding(InstrGraph* ir, Instr* instr) {
-  if (enable_typecheck && !enable_verbose)
+  if (enable_typecheck)
     printCompactInstr(ir->lattice.console(), instr, false);
   TypeAnalyzer(ir).computeTypes(instr);
   if (enable_verbose)
@@ -274,6 +274,61 @@ void InstrGraph::joinBlocks(BlockEndInstr* pred_end, BlockStartInstr* succ_start
     pred_end->args[i] = 0;
     copyUses(&succ_start->params[i], new_def);
   }
+
+  if (pred_end->catch_blocks != NULL) {
+    // Merge these into succ
+    BlockEndInstr* succ_end = blockEnd(succ_start);
+    if (succ_end->catch_blocks == NULL) {
+      // Successors didn't have any, so just transfer them
+      succ_end->catch_blocks = pred_end->catch_blocks;
+      for (SeqRange<ExceptionEdge*> r(*pred_end->catch_blocks); !r.empty(); r.popFront()) {
+        if (enable_verbose) {
+          lattice.console() << "adjusting exception edge from i" << r.front()->from->id << " -> i" << r.front()->to->id << "\n";
+        }
+        r.front()->from = succ_end;
+        if (enable_verbose) {
+          lattice.console() << "adjusting exception edge to i" << r.front()->from->id << " -> i" << r.front()->to->id << "\n";
+        }
+      }
+    } else {
+      // Merge the lists
+      for (CatchBlockRange succ_catch(succ_end); !succ_catch.empty();) {
+        CatchBlockInstr* catch_block = succ_catch.popFront();
+        for (CatchBlockRange pred_catch(pred_end); !pred_catch.empty();) {
+          if (catch_block == pred_catch.popFront()) {
+            catch_block = NULL;
+            break;
+          }
+        }
+        if (catch_block != NULL) {
+          ExceptionEdge* edge = new (alloc_) ExceptionEdge(succ_start, catch_block);
+          pred_end->catch_blocks->add(edge);
+
+          if (enable_verbose)
+            lattice.console() << "adding exception edge i" << succ_start->id << " -> i" << catch_block->id << "\n";
+          
+          ExceptionEdge* N = catch_block->catch_preds;
+          ExceptionEdge* P = N->prev_exception;
+          edge->next_exception = N;
+          edge->prev_exception = P;
+          N->prev_exception = edge;
+          P->next_exception = edge;
+        }
+      }
+      // Disconnect this block
+      for (SeqRange<ExceptionEdge*> r(*pred_end->catch_blocks); !r.empty();) {
+        ExceptionEdge* edge = r.popFront();
+        ExceptionEdge* N = edge->next_exception;
+        ExceptionEdge* P = edge->prev_exception;
+        if (edge->to->catch_preds == edge) {
+          edge->to->catch_preds = N;
+        }
+        N->prev_exception = P;
+        P->next_exception = N;
+      }
+    }
+  }
+
   InstrRange block(succ_start);
   block.unlinkFront(); // remove succ_start from its block
   replaceInstr(pred_end, block);
@@ -328,8 +383,12 @@ void InstrGraphBuilder::setPos(Instr* instr) {
 /// Create a const-generating instr of the given type if one does not already
 /// exist.  Since constants are only created once, link them immediately
 /// after ir->begin to ensure the constant dominates all uses.
+/// In the presence of exception edges this enforced sharing results
+/// problems in the register allocator, so treat them as normal
+/// instructions and let value numbering share them where it's possible locally.
 Def* InstrGraphBuilder::addConst(const Type* t) {
   assert(isConst(t));
+#if 0
   TypeKey k(t);
   Def* c = constants_.get(k);
   if (!c) {
@@ -338,6 +397,10 @@ Def* InstrGraphBuilder::addConst(const Type* t) {
     ir_->addInstrAfter(ir_->begin, instr);
   }
   return c;
+#endif
+  ConstantExpr* instr = factory_.newConstantExpr(HR_const, t);
+  addInstr(instr);
+  return instr->value();
 }
 
 /// Compute the types of i's defs.
@@ -410,6 +473,7 @@ int numDefs(const Instr* instr) {
   switch (kind(instr)) {
     case HR_start:
     case HR_template:
+    case HR_catchblock:
     case HR_label:
       return ((BlockHeaderInstr*)instr)->paramc;
     case HR_arm:
@@ -427,6 +491,7 @@ Def* getDefs(const Instr* instr) {
   switch (kind(instr)) {
     case HR_start:
     case HR_template:
+    case HR_catchblock:
     case HR_label:
     case HR_arm:
       return ((BlockStartInstr*)instr)->params;
@@ -534,6 +599,7 @@ bool isBlockStart(const Instr* instr) {
   switch (kind(instr)) {
     case HR_start:
     case HR_template:
+    case HR_catchblock:
     case HR_label:
     case HR_arm:
       return true;
@@ -574,7 +640,7 @@ bool isCond(const Instr* instr) {
 ///
 bool hasRootDefs(const Instr* instr) {
   InstrShape s = shape(instr);
-  return s == CONSTANTEXPR_SHAPE || s == STARTINSTR_SHAPE;
+  return s == CONSTANTEXPR_SHAPE || s == STARTINSTR_SHAPE || s == CATCHBLOCKINSTR_SHAPE;
 }
 
 /// true if end/start are a pair of related delimters, 
@@ -635,7 +701,7 @@ void EachBlock::dfs(BlockStartInstr* block, bool reverse) {
     return;
   visited.set(block->blockid);
   if (ir->hasBlockEnd(block)) {
-    Instr* end = ir->blockEnd(block);
+    BlockEndInstr* end = ir->blockEnd(block);
     InstrKind k = kind(end);
     // recurse into successors
     if (k == HR_goto) {
@@ -647,6 +713,10 @@ void EachBlock::dfs(BlockStartInstr* block, bool reverse) {
       // no successors
     } else {
         assert(false && "unsupported block-end opcode");
+    }
+    if (end->catch_blocks != NULL) {
+      for (CatchBlockRange r(end); !r.empty();)
+        dfs(r.popFront(), reverse);
     }
     // add to block list
     if (reverse)
@@ -680,6 +750,30 @@ void pruneGraph(InstrGraph* ir) {
             printf("prune: goto i%d ->i%d\n", go->id, instr->id);
           removeGoto(go);
         }
+      }
+    }
+    if (kind(instr) == HR_catchblock) {
+      CatchBlockInstr* cblock = cast<CatchBlockInstr>(instr);
+      ExceptionEdge* head = cblock->catch_preds;
+        
+      for (ExceptionEdge* edge = head; edge != NULL; ) {
+        ExceptionEdge* next = edge == cblock->catch_preds->prev_exception ? NULL : edge->next_exception;
+        if (!mark.get(edge->from->id)) {
+          if (enable_verbose)
+            printf("prune: eliminated exception edge i%d -> i%d\n", edge->from->id, cblock->id);
+          if (edge->next_exception == edge) {
+            cblock->catch_preds = NULL;
+          } else {
+            ExceptionEdge* N = edge->next_exception;
+            ExceptionEdge* P = edge->prev_exception;
+            if (cblock->catch_preds == edge) {
+              head = cblock->catch_preds = N;
+            }
+            N->prev_exception = P;
+            P->next_exception = N;
+          }
+        }
+        edge = next;
       }
     }
   }

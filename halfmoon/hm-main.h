@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -54,6 +54,7 @@ class DeoptFinishCallInstr;  // DEOPT
 class SetlocalInstr;
 class UnaryExpr;
 class UnaryStmt;
+class DebugInstr;
 
 // CFG-related Instrs
 class BlockStartInstr;
@@ -65,6 +66,7 @@ class     IfInstr;
 class     SwitchInstr;
 class   GotoInstr;
 class StartInstr;
+class CatchBlockInstr;
 class StopInstr;
 }
 
@@ -204,6 +206,7 @@ extern int enable_gml;        // Enable GML graph output.
 extern int enable_vmstate;    // Always generate Safepoint instructions.
 extern int enable_builtins;   // Optimize builtins too.
 extern int enable_try;        // Enable optimizing try/catch functions.
+extern int enable_framestate; // Print the frame state during parsing of abc
 extern int enable_printir;    // Enable printing of final IR
 extern int enable_mode;       // Which execution mode.
 extern int enable_trace;      // Enable execution trace.

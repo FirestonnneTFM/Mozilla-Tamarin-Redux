@@ -1642,6 +1642,13 @@ typedef void* (*decode_instructions_ftype) (void* start, void* end,
                 case LIR_retf4:
                     countlir_ret();
                     ins->oprnd1()->setResultLive();
+#ifdef VMCFG_HALFMOON
+                    // The halfmoon emitter may emit it's blocks in a different order which means
+                    // that a ret may be the last thing emitted, so a call to handleLoopCarriedExprs
+                    // is required here.  It's probably not a bad idea to emit it in general but
+                    // but it's ifdef'ed for now.
+                    handleLoopCarriedExprs(pending_lives, 0);
+#endif
                     asm_ret(ins);
                     break;
 

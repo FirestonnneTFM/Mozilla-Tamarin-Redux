@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -103,12 +103,14 @@ public: // ADAPTER impl
   void do_loadenv_interface(BinaryExpr*);
   void do_callmethod(CallStmt2*);
   void do_callinterface(CallStmt2*);
+  void do_callstatic(CallStmt2*);
   void do_newinstance(UnaryExpr*);
   void do_return(StopInstr*);
   void do_arm(ArmInstr*);
   void do_label(LabelInstr*);
   void do_goto(GotoInstr*);
   void do_if(IfInstr*);
+  void do_catchblock(CatchBlockInstr*);
   void do_setslot(CallStmt2*);
   void do_abc_setprop(CallStmt2*);
   void do_abc_callprop(CallStmt2*);
@@ -223,11 +225,12 @@ private:
   LIns* emitInterruptHandler();
   LIns* emitHandler(LIns** label, const CallInfo* call);
   LIns* emitLabel(BlockStartInstr*);
+  LIns* emitCatchLabel(CatchBlockInstr*);
   void emitHelperCall2(UnaryExpr*, const CallInfo* call);
   void emitLiveHints(Instr* target);
   void emitLive(Def*);
   void emitStackOverflowCheck();
-  void emitBegin();
+  void emitBegin(bool has_reachable_exceptions);
   void emitInitializers(Def* object);
   void emitStopFence(BlockStartInstr*);
 
@@ -243,6 +246,7 @@ private:
   bool isFallthruArm(ArmInstr*);
   bool isFallthruLabel(LabelInstr*);
   bool enableSSE();
+  void emitSetPc(DeoptSafepointInstr* instr);
 
 private:
   // helpers to access LIns* associated with each Def*
@@ -275,8 +279,6 @@ private:
   LIns* upe_label; // label to jump to for undefined pointer exceptions.
   LIns* interrupt_label; // label for interrupt checks.
   LIns* safepoint_space_; // space to store safepoint data.
-  LIns* safepoint_tags_;  // space to store safepoint tags
-  LIns* vpc_space_; // space to store abc pc
   CacheBuilder<GetCache> get_cache_builder;
   CacheBuilder<SetCache> set_cache_builder;
   CacheBuilder<CallCache> call_cache_builder;
@@ -285,11 +287,33 @@ private:
   SeqBuilder<LIns*> bailout_branches_;
   bool have_safepoints;
   bool have_loop_;
+  bool have_catchblocks_;
+  bool emittedBeginCatch;
 
+  LIns *_save_eip, *_ef;
+  const uint8_t* code_pos;
+
+  class CatchBlock {
+   public:
+    CatchBlockInstr* block;
+    LIns* jmp;
+    CatchBlock(CatchBlockInstr* b): block(b), jmp(NULL) {}
+  };
+
+  // This should really be int but gcc-4.2.1 on Mac sometimes screws
+  // up lookups when it's int.
+  HashMap<intptr_t, CatchBlock*> *catchLabels;
+
+  LIns* catch_branch;
+  int lastPcSave;
+    
 private:
   static bool haveStub(InstrKind);
   static const CallInfo lir_table[]; // callinfos for each stub
   static const int stub_fixc[];      // fixed arg count for each stub
+
+  void emitBeginCatch();
+  void emitBeginTry();
 };
 
 }

@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -69,6 +69,32 @@ public:
 
 private:
   E* const frame;
+  const int stack_base;
+  const int stackp;
+  const int scopep;
+  int i;
+};
+
+/**
+ * Range that accesses each active position in an ABC stack frame.
+ */
+class FrameIndexRange {
+public:
+  FrameIndexRange(int stackp, int scopep, int stack_base) :
+    stack_base(stack_base), stackp(stackp), scopep(scopep), i(0) {
+  }
+
+  bool empty() const {
+    return i > stackp;
+  }
+  int front() const {
+    return i;
+  }
+  void popFront() {
+    i = (i != scopep) ? i + 1 : stack_base;
+  }
+
+private:
   const int stack_base;
   const int stackp;
   const int scopep;

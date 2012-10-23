@@ -4,6 +4,7 @@
 
 RETURN_TYPE do_GotoInstr(GotoInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_ArmInstr(ArmInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
+RETURN_TYPE do_CatchBlockInstr(CatchBlockInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_LabelInstr(LabelInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_ConstantExpr(ConstantExpr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_StartInstr(StartInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
@@ -17,9 +18,10 @@ RETURN_TYPE do_DeoptSafepointInstr(DeoptSafepointInstr* i) { return static_cast<
 RETURN_TYPE do_DeoptFinishInstr(DeoptFinishInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_VoidStmt(VoidStmt* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_NaryStmt0(NaryStmt0* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
+RETURN_TYPE do_SafepointInstr(SafepointInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
+RETURN_TYPE do_DebugInstr(DebugInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_DeoptFinishCallInstr(DeoptFinishCallInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_NaryStmt1(NaryStmt1* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
-RETURN_TYPE do_SafepointInstr(SafepointInstr* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_UnaryStmt(UnaryStmt* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_CallStmt2(CallStmt2* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }
 RETURN_TYPE do_NaryStmt2(NaryStmt2* i) { return static_cast<SELF_CLASS*>(this)->do_default(i); }

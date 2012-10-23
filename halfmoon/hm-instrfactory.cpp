@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -188,9 +188,9 @@ NaryStmt3* InstrFactory::newNaryStmt3(InstrKind kind, Def* effect, Def* param1,
   NaryStmt3* stmt = new (alloc_, info->num_uses, sizeof(Use)) NaryStmt3(info);
   // placement new to initialize Uses
   new (&stmt->effect_in()) Use(stmt, effect);
-  new (&stmt->name_in()) Use(stmt, param1);
-  new (&stmt->env_in()) Use(stmt, param2);
-  new (&stmt->index_in()) Use(stmt, param3);
+  new (&stmt->uses()[1]) Use(stmt, param1);
+  new (&stmt->uses()[2]) Use(stmt, param2);
+  new (&stmt->uses()[3]) Use(stmt, param3);
   for (int i = 0; i < varargc; ++i)
     new (&stmt->vararg(i)) Use(stmt, varargs[i]);
   // placement new to initialize Defs
@@ -209,12 +209,36 @@ NaryStmt4* InstrFactory::newNaryStmt4(InstrKind kind, Def* effect, Def* param1,
   NaryStmt4* stmt = new (alloc_, info->num_uses, sizeof(Use)) NaryStmt4(info);
   // placement new to initialize Uses
   new (&stmt->effect_in()) Use(stmt, effect);
-  new (&stmt->name_in()) Use(stmt, param1);
-  new (&stmt->env_in()) Use(stmt, param2);
-  new (&stmt->ns_in()) Use(stmt, param3);
-  new (&stmt->index_in()) Use(stmt, param4);
+  new (&stmt->uses()[1]) Use(stmt, param1);
+  new (&stmt->uses()[2]) Use(stmt, param2);
+  new (&stmt->uses()[3]) Use(stmt, param3);
+  new (&stmt->uses()[4]) Use(stmt, param4);
   for (int i = 0; i < varargc; ++i)
     new (&stmt->vararg(i)) Use(stmt, varargs[i]);
+  // placement new to initialize Defs
+  new (stmt->effect_out()) Def(stmt);
+  new (stmt->value_out()) Def(stmt);
+  return stmt;
+}
+
+/// Create an nary5 statement with the given inputs.
+///
+NaryStmt4* InstrFactory::newNaryStmt4(InstrKind kind, Def* effect, Def* param1,
+                                      Def* param2, Def* param3, Def* param4, Def* param5,
+                                      int varargc, Def* varargs[]) {
+  assert(isNaryStmt4(kind) && "invalid opcode");
+  varargc++;
+  InstrInfo* info = infos_.get<NaryStmt4>(kind, varargc, this);
+  NaryStmt4* stmt = new (alloc_, info->num_uses, sizeof(Use)) NaryStmt4(info);
+  // placement new to initialize Uses
+  new (&stmt->effect_in()) Use(stmt, effect);
+  new (&stmt->uses()[1]) Use(stmt, param1);
+  new (&stmt->uses()[2]) Use(stmt, param2);
+  new (&stmt->uses()[3]) Use(stmt, param3);
+  new (&stmt->uses()[4]) Use(stmt, param4);
+  new (&stmt->vararg(0)) Use(stmt, param5);
+  for (int i = 1; i < varargc; ++i)
+    new (&stmt->vararg(i)) Use(stmt, varargs[i - 1]);
   // placement new to initialize Defs
   new (stmt->effect_out()) Def(stmt);
   new (stmt->value_out()) Def(stmt);
@@ -509,6 +533,15 @@ StartInstr* InstrFactory::newStartInstr(MethodInfo* method) {
   return start;
 }
 
+/// Create CatchBlock instruction with given param types
+///
+CatchBlockInstr* InstrFactory::newCatchBlockInstr(int paramc) {
+  Def* params = new (alloc_) Def[paramc];
+  CatchBlockInstr* start = new (alloc_) CatchBlockInstr(infos_.get<CatchBlockInstr>(HR_catchblock, this),
+                                                        paramc, params);
+  return start;
+}
+
 /// private helper: initialize an ArmInstr within a given owner
 /// NOTE: static, takes an allocator so it can be called by Info::clone()
 /// TODO: refactor so clone just calls a helper in here for the whole CondInstr
@@ -695,14 +728,18 @@ StopInstr* InstrFactory::newStopInstr(InstrKind k, Def* effect,
 
 /// create a new safepoint instr with the given inputs
 ///
-SafepointInstr* InstrFactory::newSafepointInstr(Def* effect, Def* state) {
-  SafepointInstr* instr = new (alloc_)
-      SafepointInstr(infos_.get<SafepointInstr>(HR_safepoint, this));
-  new (&instr->effect_in()) Use(instr, effect);
-  new (&instr->state_in()) Use(instr, state);
-  new (instr->effect_out()) Def(instr);
-  new (instr->state_out()) Def(instr);
-  return instr;
+SafepointInstr* InstrFactory::newSafepointInstr(Def* effect, int argc, Def* args[]) {
+  InstrInfo* info = infos_.get<SafepointInstr>(HR_safepoint, argc, this);
+  SafepointInstr* stmt =
+    new (alloc_, info->num_uses, sizeof(Use)) SafepointInstr(info);
+  // placement new to initialize uses.
+  new (&stmt->effect_in()) Use(stmt, effect);
+  for (int i = 0; i < argc; ++i)
+      new (&stmt->vararg(i)) Use(stmt, args[i]); // placement new
+  // placement new to initialize defs.
+  new (stmt->effect_out()) Def(stmt);
+  new (stmt->state_out()) Def(stmt);
+  return stmt;
 }
 
 /// create a new setlocal instr with the given tuple index,
@@ -757,6 +794,17 @@ DeoptFinishInstr* InstrFactory::newDeoptFinishInstr(Def* effect) {
   new (&stmt->effect_in()) Use(stmt, effect);
   new (stmt->effect_out()) Def(stmt);
   return stmt;
+}
+
+DebugInstr* InstrFactory::newDebugInstr(InstrKind kind, Def* effect, Def* val) {
+  DebugInstr* debuginstr = new (alloc_)
+      DebugInstr(infos_.get<DebugInstr>(kind, this));
+  // placement new to initialize uses
+  new (&debuginstr->effect_in()) Use(debuginstr, effect);
+  new (&debuginstr->value_in()) Use(debuginstr, val);
+  // placement new to initialize defs
+  new (debuginstr->effect_out()) Def(debuginstr);
+  return debuginstr;
 }
 
 /// create a new InstrGraph, using our infos and lattice

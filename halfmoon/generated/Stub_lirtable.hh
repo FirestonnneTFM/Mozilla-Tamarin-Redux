@@ -6,6 +6,7 @@ namespace halfmoon {
 const nanojit::CallInfo LirEmitter::lir_table[] = {
   { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "start")},
   { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "template")},
+  { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "catchblock")},
   { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "return")},
   { (uintptr_t)&Stubs::do_throw, CallInfo::typeSig2(ARGTYPE_V, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "throw")},
   { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "goto")},
@@ -42,6 +43,7 @@ const nanojit::CallInfo LirEmitter::lir_table[] = {
   { (uintptr_t)&Stubs::do_loadenv_atom, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "loadenv_atom")},
   { (uintptr_t)&Stubs::do_loadinitenv, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "loadinitenv")},
   { (uintptr_t)&Stubs::do_loadsuperinitenv, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "loadsuperinitenv")},
+  { (uintptr_t)&Stubs::do_loadenv_env, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "loadenv_env")},
   { (uintptr_t)&Stubs::do_newobject, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "newobject")},
   { (uintptr_t)&Stubs::do_newarray, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "newarray")},
   { (uintptr_t)&Stubs::do_applytype, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "applytype")},
@@ -92,14 +94,14 @@ const nanojit::CallInfo LirEmitter::lir_table[] = {
   { (uintptr_t)&Stubs::do_not, CallInfo::typeSig2(ARGTYPE_I, ARGTYPE_P, ARGTYPE_I), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "not")},
   { (uintptr_t)&Stubs::do_newactivation, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "newactivation")},
   { (uintptr_t)&Stubs::do_abc_finddef, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_finddef")},
-  { (uintptr_t)&Stubs::do_abc_findpropstrict, CallInfo::typeSig5(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrict")},
-  { (uintptr_t)&Stubs::do_abc_findpropstrictx, CallInfo::typeSig6(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrictx")},
-  { (uintptr_t)&Stubs::do_abc_findpropstrictns, CallInfo::typeSig6(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrictns")},
-  { (uintptr_t)&Stubs::do_abc_findpropstrictnsx, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrictnsx")},
-  { (uintptr_t)&Stubs::do_abc_findproperty, CallInfo::typeSig5(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findproperty")},
-  { (uintptr_t)&Stubs::do_abc_findpropertyx, CallInfo::typeSig6(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropertyx")},
-  { (uintptr_t)&Stubs::do_abc_findpropertyns, CallInfo::typeSig6(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropertyns")},
-  { (uintptr_t)&Stubs::do_abc_findpropertynsx, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropertynsx")},
+  { (uintptr_t)&Stubs::do_abc_findpropstrict, CallInfo::typeSig6(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrict")},
+  { (uintptr_t)&Stubs::do_abc_findpropstrictx, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrictx")},
+  { (uintptr_t)&Stubs::do_abc_findpropstrictns, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrictns")},
+  { (uintptr_t)&Stubs::do_abc_findpropstrictnsx, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropstrictnsx")},
+  { (uintptr_t)&Stubs::do_abc_findproperty, CallInfo::typeSig6(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findproperty")},
+  { (uintptr_t)&Stubs::do_abc_findpropertyx, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropertyx")},
+  { (uintptr_t)&Stubs::do_abc_findpropertyns, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropertyns")},
+  { (uintptr_t)&Stubs::do_abc_findpropertynsx, CallInfo::typeSig7(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_findpropertynsx")},
   { (uintptr_t)&Stubs::do_newclass, CallInfo::typeSig5(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "newclass")},
   { (uintptr_t)&Stubs::do_newfunction, CallInfo::typeSig4(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_I, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "newfunction")},
   { (uintptr_t)&Stubs::do_abc_getsuper, CallInfo::typeSig3(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "abc_getsuper")},
@@ -140,6 +142,8 @@ const nanojit::CallInfo LirEmitter::lir_table[] = {
   { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "deopt_safepoint")},
   { (uintptr_t)&Stubs::do_deopt_finish, CallInfo::typeSig1(ARGTYPE_V, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "deopt_finish")},
   { 0, 0, ABI_CDECL, 0, ACCSET_NONE verbose_only(, "deopt_finishcall")},
+  { (uintptr_t)&Stubs::do_debugline, CallInfo::typeSig2(ARGTYPE_V, ARGTYPE_P, ARGTYPE_I), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "debugline")},
+  { (uintptr_t)&Stubs::do_debugfile, CallInfo::typeSig2(ARGTYPE_V, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 0, ACCSET_ALL verbose_only(, "debugfile")},
   { (uintptr_t)&Stubs::do_string2atom, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "string2atom")},
   { (uintptr_t)&Stubs::do_double2atom, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_D), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "double2atom")},
   { (uintptr_t)&Stubs::do_int2atom, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_I), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "int2atom")},
@@ -153,6 +157,7 @@ const nanojit::CallInfo LirEmitter::lir_table[] = {
   { (uintptr_t)&Stubs::do_atom2int, CallInfo::typeSig2(ARGTYPE_I, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "atom2int")},
   { (uintptr_t)&Stubs::do_atom2uint, CallInfo::typeSig2(ARGTYPE_UI, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "atom2uint")},
   { (uintptr_t)&Stubs::do_atom2scriptobject, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "atom2scriptobject")},
+  { (uintptr_t)&Stubs::do_atom2ns, CallInfo::typeSig2(ARGTYPE_P, ARGTYPE_P, ARGTYPE_P), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "atom2ns")},
   { (uintptr_t)&Stubs::do_i2d, CallInfo::typeSig2(ARGTYPE_D, ARGTYPE_P, ARGTYPE_I), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "i2d")},
   { (uintptr_t)&Stubs::do_u2d, CallInfo::typeSig2(ARGTYPE_D, ARGTYPE_P, ARGTYPE_UI), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "u2d")},
   { (uintptr_t)&Stubs::do_d2i, CallInfo::typeSig2(ARGTYPE_I, ARGTYPE_P, ARGTYPE_D), ABI_CDECL, 1, ACCSET_NONE verbose_only(, "d2i")},
@@ -249,6 +254,7 @@ const nanojit::CallInfo LirEmitter::lir_table[] = {
 const int LirEmitter::stub_fixc[] = {
   -1, // start
   -1, // template
+  -1, // catchblock
   0, // return
   -1, // throw
   0, // goto
@@ -285,6 +291,7 @@ const int LirEmitter::stub_fixc[] = {
   -1, // loadenv_atom
   -1, // loadinitenv
   -1, // loadsuperinitenv
+  -1, // loadenv_env
   0, // newobject
   0, // newarray
   0, // applytype
@@ -335,13 +342,13 @@ const int LirEmitter::stub_fixc[] = {
   -1, // not
   -1, // newactivation
   -1, // abc_finddef
-  2, // abc_findpropstrict
-  3, // abc_findpropstrictx
-  3, // abc_findpropstrictns
+  3, // abc_findpropstrict
+  4, // abc_findpropstrictx
+  4, // abc_findpropstrictns
   4, // abc_findpropstrictnsx
-  2, // abc_findproperty
-  3, // abc_findpropertyx
-  3, // abc_findpropertyns
+  3, // abc_findproperty
+  4, // abc_findpropertyx
+  4, // abc_findpropertyns
   4, // abc_findpropertynsx
   2, // newclass
   1, // newfunction
@@ -377,12 +384,14 @@ const int LirEmitter::stub_fixc[] = {
   -1, // getslot
   -1, // slottype
   -1, // getouterscope
-  -1, // safepoint
+  0, // safepoint
   -1, // setlocal
   -1, // newstate
   0, // deopt_safepoint
   -1, // deopt_finish
   -1, // deopt_finishcall
+  -1, // debugline
+  -1, // debugfile
   -1, // string2atom
   -1, // double2atom
   -1, // int2atom
@@ -396,6 +405,7 @@ const int LirEmitter::stub_fixc[] = {
   -1, // atom2int
   -1, // atom2uint
   -1, // atom2scriptobject
+  -1, // atom2ns
   -1, // i2d
   -1, // u2d
   -1, // d2i

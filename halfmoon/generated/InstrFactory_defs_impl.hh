@@ -8,6 +8,7 @@
 extern const ShapeRep shape_reps[SHAPE_MAX] = {
   { 0, 0, kVarIn },     // GOTOINSTR_SHAPE
   { 0, 0, kVarOut },    // ARMINSTR_SHAPE
+  { 0, 0, kVarOut },    // CATCHBLOCKINSTR_SHAPE
   { 0, 0, kVarOut },    // LABELINSTR_SHAPE
   { 0, 1, kVarNone },   // CONSTANTEXPR_SHAPE
   { 0, 1, kVarOut },    // STARTINSTR_SHAPE
@@ -21,9 +22,10 @@ extern const ShapeRep shape_reps[SHAPE_MAX] = {
   { 1, 1, kVarNone },   // DEOPTFINISHINSTR_SHAPE
   { 1, 1, kVarNone },   // VOIDSTMT_SHAPE
   { 1, 2, kVarIn },     // NARYSTMT0_SHAPE
+  { 1, 2, kVarIn },     // SAFEPOINTINSTR_SHAPE
+  { 2, 1, kVarNone },   // DEBUGINSTR_SHAPE
   { 2, 1, kVarNone },   // DEOPTFINISHCALLINSTR_SHAPE
   { 2, 2, kVarIn },     // NARYSTMT1_SHAPE
-  { 2, 2, kVarNone },   // SAFEPOINTINSTR_SHAPE
   { 2, 2, kVarNone },   // UNARYSTMT_SHAPE
   { 3, 2, kVarIn },     // CALLSTMT2_SHAPE
   { 3, 2, kVarIn },     // NARYSTMT2_SHAPE
@@ -40,6 +42,7 @@ extern const ShapeRep shape_reps[SHAPE_MAX] = {
 extern const InstrAttrs instr_attrs[HR_MAX] = {
   { "start",                 STARTINSTR_SHAPE, false },
   { "template",              STARTINSTR_SHAPE, false },
+  { "catchblock",            CATCHBLOCKINSTR_SHAPE, false },
   { "return",                STOPINSTR_SHAPE, false },
   { "throw",                 STOPINSTR_SHAPE, false },
   { "goto",                  GOTOINSTR_SHAPE, false },
@@ -76,6 +79,7 @@ extern const InstrAttrs instr_attrs[HR_MAX] = {
   { "loadenv_atom",          BINARYEXPR_SHAPE, false },
   { "loadinitenv",           UNARYEXPR_SHAPE, false },
   { "loadsuperinitenv",      UNARYEXPR_SHAPE, false },
+  { "loadenv_env",           BINARYEXPR_SHAPE, false },
   { "newobject",             NARYSTMT0_SHAPE, false },
   { "newarray",              NARYSTMT0_SHAPE, false },
   { "applytype",             NARYSTMT0_SHAPE, false },
@@ -126,13 +130,13 @@ extern const InstrAttrs instr_attrs[HR_MAX] = {
   { "not",                   UNARYEXPR_SHAPE, false },
   { "newactivation",         UNARYSTMT_SHAPE, false },
   { "abc_finddef",           BINARYSTMT_SHAPE, false },
-  { "abc_findpropstrict",    NARYSTMT2_SHAPE, false },
-  { "abc_findpropstrictx",   NARYSTMT3_SHAPE, false },
-  { "abc_findpropstrictns",  NARYSTMT3_SHAPE, false },
+  { "abc_findpropstrict",    NARYSTMT3_SHAPE, false },
+  { "abc_findpropstrictx",   NARYSTMT4_SHAPE, false },
+  { "abc_findpropstrictns",  NARYSTMT4_SHAPE, false },
   { "abc_findpropstrictnsx", NARYSTMT4_SHAPE, false },
-  { "abc_findproperty",      NARYSTMT2_SHAPE, false },
-  { "abc_findpropertyx",     NARYSTMT3_SHAPE, false },
-  { "abc_findpropertyns",    NARYSTMT3_SHAPE, false },
+  { "abc_findproperty",      NARYSTMT3_SHAPE, false },
+  { "abc_findpropertyx",     NARYSTMT4_SHAPE, false },
+  { "abc_findpropertyns",    NARYSTMT4_SHAPE, false },
   { "abc_findpropertynsx",   NARYSTMT4_SHAPE, false },
   { "newclass",              NARYSTMT2_SHAPE, false },
   { "newfunction",           NARYSTMT1_SHAPE, false },
@@ -174,6 +178,8 @@ extern const InstrAttrs instr_attrs[HR_MAX] = {
   { "deopt_safepoint",       DEOPTSAFEPOINTINSTR_SHAPE, false },
   { "deopt_finish",          DEOPTFINISHINSTR_SHAPE, false },
   { "deopt_finishcall",      DEOPTFINISHCALLINSTR_SHAPE, false },
+  { "debugline",             DEBUGINSTR_SHAPE, false },
+  { "debugfile",             DEBUGINSTR_SHAPE, false },
   { "string2atom",           UNARYEXPR_SHAPE, false },
   { "double2atom",           UNARYEXPR_SHAPE, false },
   { "int2atom",              UNARYEXPR_SHAPE, false },
@@ -187,6 +193,7 @@ extern const InstrAttrs instr_attrs[HR_MAX] = {
   { "atom2int",              UNARYEXPR_SHAPE, false },
   { "atom2uint",             UNARYEXPR_SHAPE, false },
   { "atom2scriptobject",     UNARYEXPR_SHAPE, false },
+  { "atom2ns",               UNARYEXPR_SHAPE, false },
   { "i2d",                   UNARYEXPR_SHAPE, false },
   { "u2d",                   UNARYEXPR_SHAPE, false },
   { "d2i",                   UNARYEXPR_SHAPE, false },

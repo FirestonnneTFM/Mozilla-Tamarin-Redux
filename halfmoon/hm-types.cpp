@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -222,13 +222,20 @@ const Type* SimpleDataType<SELF_CLASS, TYPE_KIND, MODEL_KIND, VALUE_REP>
 
   if (isDataType(t)) {
     // if we're null, reverse the test so we only need to handle the other-is-null case
-    if (isNull())
+    if (isNull() && halfmoon::kind(this) != kTypeVoid) {
       return t.makeUnion(*this, lat);
+    }
 
     bool union_nullable = is_nullable || t.is_nullable;
     Traits* union_traits = Verifier::findCommonBase(traits, getTraits(&t));
     switch (builtinType(union_traits)) {
     case BUILTIN_any:
+      if (union_traits == NULL) {
+        // null unioned with t just returns a nullable t, except for void
+        if (builtinType(getTraits(&t)) == BUILTIN_null  && builtinType(traits) != BUILTIN_void) {
+          return lat.makeType(SELF_CLASS(model, traits, true, false, (VALUE_REP)0));
+        }
+      }
       return lat.makeType(AnyType(union_traits, union_nullable));
     case BUILTIN_object:
       return lat.makeType(ObjectType(union_traits, union_nullable));
@@ -272,7 +279,7 @@ ObjectType::ObjectType(Traits* traits, bool is_nullable) :
 
 VoidType::VoidType(Traits* traits) :
   SimpleDataType<VoidType, kTypeVoid, kModelAtom, Atom>
-    (traits, kModelAtom, false, true, undefinedAtom) {
+    (traits, kModelAtom, true, true, undefinedAtom) {
   assert(builtinType(traits) == BUILTIN_void);
 }
 

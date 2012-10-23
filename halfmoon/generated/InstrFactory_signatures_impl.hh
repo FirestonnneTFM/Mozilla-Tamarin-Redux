@@ -14,6 +14,10 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
     /* template: () -> (Effect, Top) */
     return NULL;
   }
+  case HR_catchblock: {
+    /* catchblock: () -> Top */
+    return NULL;
+  }
   case HR_return: {
     /* return: (Effect, Top) -> () */
     const Type* input_sig[] = { EFFECT, TOP };
@@ -183,6 +187,11 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
   case HR_loadsuperinitenv: {
     /* loadsuperinitenv: Env -> Env */
     return copySig(ENV);
+  }
+  case HR_loadenv_env: {
+    /* loadenv_env: (Ord, Env) -> Env */
+    const Type* input_sig[] = { ORDINAL, ENV };
+    return copySig(2, input_sig);
   }
   case HR_newobject: {
     /* newobject: (Effect, Atom) -> (Effect, ScriptObject~) */
@@ -428,43 +437,43 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
     return copySig(3, input_sig);
   }
   case HR_abc_findpropstrict: {
-    /* abc_findpropstrict: (Effect, Name, Env, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNotNull] };
-    return copySig(4, input_sig);
+    /* abc_findpropstrict: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNotNull] };
+    return copySig(5, input_sig);
   }
   case HR_abc_findpropstrictx: {
-    /* abc_findpropstrictx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
-    return copySig(5, input_sig);
+    /* abc_findpropstrictx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
+    return copySig(6, input_sig);
   }
   case HR_abc_findpropstrictns: {
-    /* abc_findpropstrictns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
-    return copySig(5, input_sig);
+    /* abc_findpropstrictns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
+    return copySig(6, input_sig);
   }
   case HR_abc_findpropstrictnsx: {
-    /* abc_findpropstrictnsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
+    /* abc_findpropstrictnsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
     return copySig(6, input_sig);
   }
   case HR_abc_findproperty: {
-    /* abc_findproperty: (Effect, Name, Env, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNotNull] };
-    return copySig(4, input_sig);
+    /* abc_findproperty: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNotNull] };
+    return copySig(5, input_sig);
   }
   case HR_abc_findpropertyx: {
-    /* abc_findpropertyx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
-    return copySig(5, input_sig);
+    /* abc_findpropertyx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
+    return copySig(6, input_sig);
   }
   case HR_abc_findpropertyns: {
-    /* abc_findpropertyns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
-    return copySig(5, input_sig);
+    /* abc_findpropertyns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
+    return copySig(6, input_sig);
   }
   case HR_abc_findpropertynsx: {
-    /* abc_findpropertynsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~) */
-    const Type* input_sig[] = { EFFECT, NAME, ENV, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
+    /* abc_findpropertynsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
+    const Type* input_sig[] = { EFFECT, NAME, ENV, ORDINAL, lattice_.atom_type[kTypeNullable], lattice_.atom_type[kTypeNotNull] };
     return copySig(6, input_sig);
   }
   case HR_newclass: {
@@ -598,8 +607,8 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
     return copySig(6, input_sig);
   }
   case HR_callstatic: {
-    /* callstatic: (Effect, Ord, TopData, TopData) -> (Effect, TopData) */
-    const Type* input_sig[] = { EFFECT, ORDINAL, TOPDATA, TOPDATA };
+    /* callstatic: (Effect, Env, TopData, TopData) -> (Effect, TopData) */
+    const Type* input_sig[] = { EFFECT, ENV, TOPDATA, TOPDATA };
     return copySig(4, input_sig);
   }
   case HR_callmethod: {
@@ -613,7 +622,7 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
     return copySig(4, input_sig);
   }
   case HR_newcatch: {
-    /* newcatch: (Effect, Traits~) -> (Effect, ScriptObject~) */
+    /* newcatch: (Effect, Traits~) -> (Effect, Atom~) */
     const Type* input_sig[] = { EFFECT, TRAITS };
     return copySig(2, input_sig);
   }
@@ -643,8 +652,8 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
     return copySig(2, input_sig);
   }
   case HR_setlocal: {
-    /* setlocal: (State, TopData) -> State */
-    const Type* input_sig[] = { STATE, TOPDATA };
+    /* setlocal: (State, Atom) -> State */
+    const Type* input_sig[] = { STATE, lattice_.atom_type[kTypeNullable] };
     return copySig(2, input_sig);
   }
   case HR_newstate: {
@@ -663,6 +672,16 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
   case HR_deopt_finishcall: {
     /* deopt_finishcall: (Effect, TopData) -> Effect */
     const Type* input_sig[] = { EFFECT, TOPDATA };
+    return copySig(2, input_sig);
+  }
+  case HR_debugline: {
+    /* debugline: (Effect, Int) -> Effect */
+    const Type* input_sig[] = { EFFECT, lattice_.int_type };
+    return copySig(2, input_sig);
+  }
+  case HR_debugfile: {
+    /* debugfile: (Effect, String) -> Effect */
+    const Type* input_sig[] = { EFFECT, lattice_.string_type[kTypeNullable] };
     return copySig(2, input_sig);
   }
   case HR_string2atom: {
@@ -715,6 +734,10 @@ const Type** InstrFactory::buildInputSignature(InstrKind kind) {
   }
   case HR_atom2scriptobject: {
     /* atom2scriptobject: Atom -> ScriptObject */
+    return copySig(lattice_.atom_type[kTypeNullable]);
+  }
+  case HR_atom2ns: {
+    /* atom2ns: Atom -> Namespace */
     return copySig(lattice_.atom_type[kTypeNullable]);
   }
   case HR_i2d: {
@@ -1676,6 +1699,10 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
     const Type* output_sig[] = { EFFECT, TOP };
     return copySig(2, output_sig);
   }
+  case HR_catchblock: {
+    /* catchblock: () -> Top */
+    return copySig(TOP);
+  }
   case HR_return: {
     /* return: (Effect, Top) -> () */
     return NULL;
@@ -1833,6 +1860,10 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
   }
   case HR_loadsuperinitenv: {
     /* loadsuperinitenv: Env -> Env */
+    return copySig(ENV);
+  }
+  case HR_loadenv_env: {
+    /* loadenv_env: (Ord, Env) -> Env */
     return copySig(ENV);
   }
   case HR_newobject: {
@@ -2052,42 +2083,42 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
     return copySig(2, output_sig);
   }
   case HR_abc_findpropstrict: {
-    /* abc_findpropstrict: (Effect, Name, Env, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropstrict: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findpropstrictx: {
-    /* abc_findpropstrictx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropstrictx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findpropstrictns: {
-    /* abc_findpropstrictns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropstrictns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findpropstrictnsx: {
-    /* abc_findpropstrictnsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropstrictnsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findproperty: {
-    /* abc_findproperty: (Effect, Name, Env, Atom~) -> (Effect, Atom~) */
+    /* abc_findproperty: (Effect, Name, Env, Ord, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findpropertyx: {
-    /* abc_findpropertyx: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropertyx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findpropertyns: {
-    /* abc_findpropertyns: (Effect, Name, Env, Atom, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropertyns: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_abc_findpropertynsx: {
-    /* abc_findpropertynsx: (Effect, Name, Env, Atom, Atom, Atom~) -> (Effect, Atom~) */
+    /* abc_findpropertynsx: (Effect, Name, Env, Ord, Atom, Atom~) -> (Effect, Atom~) */
     const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
@@ -2222,7 +2253,7 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
     return copySig(2, output_sig);
   }
   case HR_callstatic: {
-    /* callstatic: (Effect, Ord, TopData, TopData) -> (Effect, TopData) */
+    /* callstatic: (Effect, Env, TopData, TopData) -> (Effect, TopData) */
     const Type* output_sig[] = { EFFECT, TOPDATA };
     return copySig(2, output_sig);
   }
@@ -2237,8 +2268,8 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
     return copySig(2, output_sig);
   }
   case HR_newcatch: {
-    /* newcatch: (Effect, Traits~) -> (Effect, ScriptObject~) */
-    const Type* output_sig[] = { EFFECT, lattice_.scriptobject_type[kTypeNotNull] };
+    /* newcatch: (Effect, Traits~) -> (Effect, Atom~) */
+    const Type* output_sig[] = { EFFECT, lattice_.atom_type[kTypeNotNull] };
     return copySig(2, output_sig);
   }
   case HR_setslot: {
@@ -2265,7 +2296,7 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
     return copySig(2, output_sig);
   }
   case HR_setlocal: {
-    /* setlocal: (State, TopData) -> State */
+    /* setlocal: (State, Atom) -> State */
     return copySig(STATE);
   }
   case HR_newstate: {
@@ -2282,6 +2313,14 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
   }
   case HR_deopt_finishcall: {
     /* deopt_finishcall: (Effect, TopData) -> Effect */
+    return copySig(EFFECT);
+  }
+  case HR_debugline: {
+    /* debugline: (Effect, Int) -> Effect */
+    return copySig(EFFECT);
+  }
+  case HR_debugfile: {
+    /* debugfile: (Effect, String) -> Effect */
     return copySig(EFFECT);
   }
   case HR_string2atom: {
@@ -2335,6 +2374,10 @@ const Type** InstrFactory::buildOutputSignature(InstrKind kind) {
   case HR_atom2scriptobject: {
     /* atom2scriptobject: Atom -> ScriptObject */
     return copySig(lattice_.scriptobject_type[kTypeNullable]);
+  }
+  case HR_atom2ns: {
+    /* atom2ns: Atom -> Namespace */
+    return copySig(lattice_.namespace_type[kTypeNullable]);
   }
   case HR_i2d: {
     /* i2d: Int -> Number */

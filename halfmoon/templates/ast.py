@@ -322,6 +322,7 @@ binarystmt = RepInfo("BinaryStmt", shape(1, 2, 1, 1, NONE), gen = True)
 hasnext2stmt = RepInfo("Hasnext2Stmt", shape(1, 2, 1, 3, NONE))
 voidstmt = RepInfo("VoidStmt", shape(1, 0, 1, 0, NONE))
 constantexpr = RepInfo("ConstantExpr", shape(0, 0, 0, 1, NONE))
+debuginstr = RepInfo("DebugInstr", shape(1, 1, 1, 0, NONE))
 
 # this list is used to populate reps, a map of shapes to reps
 # used to choose representations for instrs. Not all shapes
@@ -341,7 +342,8 @@ replist = [
   binarystmt,
   hasnext2stmt,
   voidstmt,
-  constantexpr
+  constantexpr,
+  debuginstr
 ]
 
 # shape -> rep, used to pick reps for instrs
@@ -355,6 +357,7 @@ reps = dict([(rep.shape, rep) for rep in replist])
 # via reps() by ordinary instructions.
 #
 startinstr = RepInfo("StartInstr", shape(0, 0, 1, 0, DATA_OUT))
+catchblockinstr = RepInfo("CatchBlockInstr", shape(0, 0, 1, 0, DATA_OUT))
 stopinstr = RepInfo("StopInstr", shape(1, 0, 0, 0, DATA_IN))
 
 # some instrs are made to use a non-default rep,
@@ -367,13 +370,16 @@ instr_rep_overrides = {
   # these overrides allow a custom C++ class to 
   # store extra information.
   #
-  "safepoint": RepInfo("SafepointInstr", shape(1, 1, 1, 1, NONE)),
+  "safepoint": RepInfo("SafepointInstr", shape(1, 0, 2, 0, DATA_IN)),
   "setlocal": RepInfo("SetlocalInstr", shape(0, 2, 0, 1, NONE)),
   # DEOPT: I think I need this because deopt_safepoint has
   # extra fields for vpc, scopep, sp, etc.
   "deopt_safepoint": RepInfo("DeoptSafepointInstr", shape(1, 0, 1, 0, DATA_IN)),
   "deopt_finish": RepInfo("DeoptFinishInstr", shape(1, 0, 1, 0, NONE)),
   "deopt_finishcall": RepInfo("DeoptFinishCallInstr", shape(1, 1, 1, 0, NONE)),
+
+  "debugline": debuginstr,
+  "debugfile": debuginstr,
   
   # we select IR5 (block delimiter) reps exclusively by
   # override. this lets us keep the IR5 reps out of the
@@ -390,6 +396,7 @@ instr_rep_overrides = {
   "throw": stopinstr,
   "start": startinstr,
   "template": startinstr,
+  "catchblock": RepInfo("CatchBlockInstr", shape(0, 0, 0, 0, DATA_OUT)),
 
   #
   # fixed-arg instructions for which we want to use a
@@ -399,13 +406,13 @@ instr_rep_overrides = {
   "newfunction": narystmt1,
   "newclass": narystmt2,
 
-  "abc_findproperty": narystmt2,
-  "abc_findpropertyx": narystmt3,
-  "abc_findpropertyns": narystmt3,
+  "abc_findproperty": narystmt3,
+  "abc_findpropertyx": narystmt4,
+  "abc_findpropertyns": narystmt4,
   "abc_findpropertynsx": narystmt4,
-  "abc_findpropstrict": narystmt2,
-  "abc_findpropstrictx": narystmt3,
-  "abc_findpropstrictns": narystmt3,
+  "abc_findpropstrict": narystmt3,
+  "abc_findpropstrictx": narystmt4,
+  "abc_findpropstrictns": narystmt4,
   "abc_findpropstrictnsx": narystmt4,
   "findprop2getouter": narystmt1,
   "findprop2finddef": narystmt1,

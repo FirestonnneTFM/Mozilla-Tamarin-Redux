@@ -41,6 +41,7 @@ hrdefs = '''
 
 (start (-> Effect [Top])) ; start's defs include effect, state, env, and data
 (template (-> Effect [Top]))
+(catchblock (-> [Top]))
 
 (return (Effect [Top] -> )) ; some templates may return vm types
 (throw (Effect Atom -> )) ; throw only wants 1 data value even tho StopInstr allows N.
@@ -104,6 +105,7 @@ hrdefs = '''
 (loadenv_atom (Ord Atom~ -> Env)) ; load MethodEnv from toVTable(obj)->methods[disp_id]
 (loadinitenv (ScriptObject~ -> Env)) ; load MethodEnv from ScriptObject->vtable->init
 (loadsuperinitenv (Env -> Env)) ; load MethodEnv from env->vtable->base->init
+(loadenv_env (Ord Env -> Env)) ; load MethodEnv from toVTable(obj)->methods[disp_id]
 
 (newobject (Effect [Atom] -> Effect ScriptObject~)) ;;; TODO: result should be final with Object traits
 (newarray (Effect [Atom] -> Effect Array~))   ;;; TODO: Array~ should be final, dense
@@ -175,14 +177,14 @@ hrdefs = '''
 (newactivation (Effect Env -> Effect ScriptObject~))
 
 (abc_finddef (Effect Name Env -> Effect ScriptObject~))
-(abc_findpropstrict (Effect Name Env [Atom~] -> Effect Atom~))
-(abc_findpropstrictx (Effect Name Env Atom [Atom~] -> Effect Atom~))
-(abc_findpropstrictns (Effect Name Env Atom [Atom~] -> Effect Atom~))
-(abc_findpropstrictnsx (Effect Name Env Atom Atom [Atom~] -> Effect Atom~))
-(abc_findproperty (Effect Name Env [Atom~] -> Effect Atom~))
-(abc_findpropertyx (Effect Name Env Atom [Atom~] -> Effect Atom~))
-(abc_findpropertyns (Effect Name Env Atom [Atom~] -> Effect Atom~))
-(abc_findpropertynsx (Effect Name Env Atom Atom [Atom~] -> Effect Atom~))
+(abc_findpropstrict (Effect Name Env Ord [Atom~] -> Effect Atom~))
+(abc_findpropstrictx (Effect Name Env Ord Atom [Atom~] -> Effect Atom~))
+(abc_findpropstrictns (Effect Name Env Ord Atom [Atom~] -> Effect Atom~))
+(abc_findpropstrictnsx (Effect Name Env Ord Atom [Atom~] -> Effect Atom~))
+(abc_findproperty (Effect Name Env Ord [Atom~] -> Effect Atom~))
+(abc_findpropertyx (Effect Name Env Ord Atom [Atom~] -> Effect Atom~))
+(abc_findpropertyns (Effect Name Env Ord Atom [Atom~] -> Effect Atom~))
+(abc_findpropertynsx (Effect Name Env Ord Atom [Atom~] -> Effect Atom~))
 
 (newclass (Effect Traits~ Class [Atom~] -> Effect Class~))  ; TODO vararg is list of Scope, need type
 (newfunction (Effect Method [Atom~] -> Effect Function~))
@@ -219,11 +221,11 @@ hrdefs = '''
 
 ;; these are natively bound calls, they take TopData because
 ;; the real signature comes from the callee.
-(callstatic (Effect Ord TopData [TopData] -> Effect TopData)) 
+(callstatic (Effect Env TopData [TopData] -> Effect TopData)) 
 (callmethod (Effect Env TopData [TopData] -> Effect TopData))
 (callinterface (Effect Env TopData [TopData] -> Effect TopData))
 
-(newcatch (Effect Traits~ -> Effect ScriptObject~))                 ; same as newactivation
+(newcatch (Effect Traits~ -> Effect Atom~))
  
 (setslot (Effect Ord ScriptObject~ TopData -> Effect Bot)) ; actual arg type is slot type
 (getslot (Effect Ord ScriptObject~ -> Effect TopData))    ; actual result type is slot type
@@ -232,9 +234,9 @@ hrdefs = '''
 (getouterscope (Ord Env -> Atom~)) 
 
 
-(safepoint (Effect State -> Effect State))
+(safepoint (Effect [State] -> Effect State))
 
-(setlocal (State TopData -> State))  ; TopData allows safepoints to handle unboxed values.
+(setlocal (State Atom -> State))  ; setlocal is only used to store state for exception edges, which require Atom
 
 (newstate (-> State))                   ; create abstract VM state value
 
@@ -242,6 +244,10 @@ hrdefs = '''
 (deopt_safepoint (Effect [TopData] -> Effect))
 (deopt_finish (Effect -> Effect))
 (deopt_finishcall (Effect TopData -> Effect))
+
+; debug
+(debugline (Effect Int -> Effect))
+(debugfile (Effect String -> Effect))
 
 ; conversions to atom
 (string2atom (String -> Atom))
@@ -259,6 +265,7 @@ hrdefs = '''
 (atom2int (Atom -> Int))
 (atom2uint (Atom -> Uint))
 (atom2scriptobject (Atom -> ScriptObject))
+(atom2ns (Atom -> Namespace))
 
 ; additional numeric conversions
 (i2d (Int -> Number))

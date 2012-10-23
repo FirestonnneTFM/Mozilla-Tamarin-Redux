@@ -1,5 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -21,7 +21,7 @@ enum ScopeKind {
  * search for a binding, then return a ScopeKind result and parameter depending
  * on the kind.
  */
-ScopeKind findScope(Lattice*, NaryStmt2*, int* index);
+ScopeKind findScope(Lattice*, NaryStmt3*, int* index);
 
 /// Analyze property bindings.
 ///
@@ -48,8 +48,8 @@ public:
 
 public: // dispatch() adapter methods.
   void do_default(Instr*) { }
-  void do_abc_findproperty(NaryStmt2* i) { return doFindStmt(i); }
-  void do_abc_findpropstrict(NaryStmt2* i) { return doFindStmt(i); }
+  void do_abc_findproperty(NaryStmt3* i) { return doFindStmt(i); }
+  void do_abc_findpropstrict(NaryStmt3* i) { return doFindStmt(i); }
   void do_toint(UnaryStmt*);
   void do_touint(UnaryStmt*);
   void do_toboolean(UnaryExpr*);
@@ -79,13 +79,11 @@ public: // dispatch() adapter methods.
   void do_speculate_string(BinaryExpr* i) { removeSpeculate(i); }
   void do_speculate_numeric(BinaryExpr* i) { removeSpeculate(i); }
   void do_speculate_bool(BinaryExpr* i) { removeSpeculate(i); }
-  void do_setlocal(SetlocalInstr*);
-  void do_safepoint(SafepointInstr*);
 
 private:
   void doCompare(BinaryExpr*, InstrKind int_kind, InstrKind uint_kind,
                  InstrKind double_kind);
-  void doFindStmt(NaryStmt2*);
+  void doFindStmt(NaryStmt3*);
   bool specializeArithmetic(InstrKind k1, InstrKind k2, UnaryExpr* instr);
   InstrKind getLoadEnvKind(const Type* object, bool is_interface = false);
   bool specializeSlotCallProp(CallStmt2* instr, CallAnalyzer* call_analyzer);

@@ -1,5 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 2; indent-tabs-mode: nil; tab-width: 2 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* vi: set ts=2 sw=2 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -540,6 +540,21 @@ void printTerseInstrList(InstrRange list, InstrGraph *ir, const char *title) {
   console << "]\n";
 }
 
+PrintWriter& printUsers(PrintWriter& console, Instr* instr) {
+  printInstr(console, instr);
+
+  // Print instructions that use any def of this instruction.
+  for (AllUsesRange uses(instr); !uses.empty(); uses.popFront()) {
+    printInstr(console, user(uses.front()));
+  }
+  return console;
+}
+
+void printUsers(Instr* instr) {
+  printUsers(avmplus::AvmCore::getActiveCore()->console, instr);
+}
+
+
 PrintWriter& printInstr(PrintWriter& console, Instr* instr) {
   char namebuf[80];
   sprintf(namebuf, "    %s%-3d %-18.18s  ", kInstrPrefix, instr->id, name(instr));
@@ -571,6 +586,26 @@ PrintWriter& printInstr(PrintWriter& console, Instr* instr) {
   return console << "\n";
 }
 
+void printInstr(Instr* instr) {
+  printInstr(avmplus::AvmCore::getActiveCore()->console, instr);
+}
+
+PrintWriter& printPhi(PrintWriter& console, LabelInstr* label, int index) {
+  Def* d = &label->params[index];
+  for (LabelArgRange r(label, index); !r.empty(); r.popFront()) {
+    if (def(r.front()) != d) { // ignore self. 
+      printDef(def(r.front())); console << " ";
+      printInstr(user(r.front())); console << "\n";
+    }
+  }
+  printInstr(label);
+  return console;
+}
+
+void printPhi(LabelInstr* label, int index) {
+  printPhi(avmplus::AvmCore::getActiveCore()->console, label, index);
+}
+
 PrintWriter& printCompactInstr(PrintWriter& console, Instr* instr,
                                bool print_defs) {
   char namebuf[80];
@@ -594,6 +629,12 @@ PrintWriter& printCompactInstr(PrintWriter& console, Instr* instr,
   }
   return console << "\n";
 }
+
+void printCompactInstr(Instr* instr,
+                       bool print_defs) {
+  printCompactInstr(avmplus::AvmCore::getActiveCore()->console, instr, print_defs);
+}
+
 
 const char* label(BlockStartInstr* b) {
   return kind(b) == HR_label ? kJoinPrefix : kBlockPrefix;
@@ -627,6 +668,10 @@ void listCfg(PrintWriter& console, InstrGraph* ir) {
     for (SeqRange<BlockStartInstr*> r(rdoms->df(block)); !r.empty(); r.popFront())
       console << label(r.front()) << r.front()->blockid << delim(r);
     console << "}\n";
+    if (kind(block) == HR_catchblock) {
+      ((CatchBlockInstr*)block)->printCatchPreds();
+    }
+
     for (InstrRange j(block); !j.empty(); j.popFront(), ++instr_count)
       printInstr(console, j.front());
   }
@@ -675,6 +720,11 @@ void printAbcInstr(MethodInfo* m, PrintWriter& console, const uint8_t* pc) {
 void printDef(PrintWriter& out, const Def* d) {
   out << kDefPrefix << definerId(d);
   printDef(out, *d);
+}
+
+void printDef(const Def* d) {
+  printDef(avmplus::AvmCore::getActiveCore()->console, d);
+  fflush(stdout);
 }
 
 class PrintAdapter: public ShapeAdapter<PrintAdapter, void> {
@@ -741,7 +791,8 @@ class PrintDefAdapter: public ShapeAdapter<PrintDefAdapter, void> {
   void do_CallStmt2(CallStmt2*) { doStmt(); }
   void do_CallStmt3(CallStmt3*) { doStmt(); }
   void do_CallStmt4(CallStmt4*) { doStmt(); }
-  void do_NaryStmt(NaryStmt0*) { doStmt(); }
+  void do_NaryStmt0(NaryStmt0*) { doStmt(); }
+  void do_NaryStmt2(NaryStmt2*) { doStmt(); }
 
   void do_Hasnext2Stmt(Hasnext2Stmt*) {
     static const char* names[] = { "effect", "value", "counter", "object" };
@@ -767,6 +818,10 @@ class PrintDefAdapter: public ShapeAdapter<PrintDefAdapter, void> {
 void printDef(PrintWriter& out, const Def& d) {
   PrintDefAdapter a(out, d);
   do_shape(&a, definer(d));
+}
+
+void printDef(const Def& d) {
+  printDef(avmplus::AvmCore::getActiveCore()->console, d);
 }
 
 const char* name(Instr* instr) {
@@ -805,6 +860,33 @@ void printLirCfg(MethodInfo* method, Fragment* frag) {
   lister.printGmlCfg(f, frag->lirbuf->printer, &ignore);
   fclose(f);
 }
+
+
+  void printString(Stringp string) {
+    StUTF8String buf(string);
+    fputs(buf.c_str(), stdout);
+    // flush in case debugger output is interleaved with process output
+    fflush(stdout);
+  }
+
+  void printAtom(Atom atom) {
+    StringBuffer buf(avmplus::AvmCore::getActiveCore());
+    buf.writeAtom(atom);
+    fputs(buf.c_str(), stdout);
+    // flush in case debugger output is interleaved with process output
+    fflush(stdout);
+  }
+  
+  void printMethod(MethodInfo* info) {
+    String* name = info->getMethodName();
+    if (!name) return;
+    StUTF8String buf(info->getMethodName());
+    fputs(buf.c_str(), stdout);
+    // flush in case debugger output is interleaved with process output
+    fflush(stdout);
+  }
+
+
 
 #endif
 
