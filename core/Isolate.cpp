@@ -789,6 +789,7 @@ throw_terminated_error:
 				{
 					// continueWait can only be true iff a wait has occurred.
 					result = true;
+                    continueWait = false;
 				}
             }
 
