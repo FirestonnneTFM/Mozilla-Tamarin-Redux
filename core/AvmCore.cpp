@@ -1599,14 +1599,24 @@ return the result of the comparison ToPrimitive(x) == y.
         // Send the exception info along with the stack trace over telemetry
         if (!(exception->flags & Exception::SUPPRESS_ERROR_REPORT) && getTelemetry() && getTelemetry()->IsActive()) {
             StringBuffer exceptionStringBuffer(this);
-            ScriptObject *so = atomToScriptObject(exception->atom);
-            if (so) {
-                // get the full class name including the namespace
-                so->traits()->print(exceptionStringBuffer, true);
-            } else {
+
+            bool wroteErrString = false;
+
+            if (atomKind(exception->atom) == kObjectType) {
+                // string() is not very explanatory for most Error objects.
+                // Get the full class name including the namespace instead.
+                ScriptObject *so = atomToScriptObject(exception->atom);
+                if (so) {
+                    so->traits()->print(exceptionStringBuffer, true);
+                    wroteErrString = true;
+                }
+            }
+
+            if (!wroteErrString) {
                 // backup, just convert atom to a string, it will say "Error"
                 exceptionStringBuffer << StUTF8String(string(exception->atom)).c_str();
             }
+
             exceptionStringBuffer << '\n';
 
             // Get the stack trace
