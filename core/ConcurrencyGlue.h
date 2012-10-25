@@ -14,7 +14,6 @@
 
 namespace avmplus {
 
-
 #if defined(DEBUG_CONDITION_MUTEX)
     #define DEBUG_STATE(_x_) do { AvmLog _x_; } while(0)
 #else

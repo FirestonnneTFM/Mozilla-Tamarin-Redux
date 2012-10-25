@@ -58,7 +58,6 @@ namespace avmplus
 
         if (isolate) {
             setIsolate(isolate);
-		    self()->toplevel()->addWorker(self());
         }
     }
 
@@ -145,7 +144,7 @@ namespace avmplus
             Aggregate* aggregate = m_isolate->getAggregate();
             Isolate::State code = aggregate->queryState(m_isolate);
             AvmAssert(code >= Isolate::NEW && code <= Isolate::EXCEPTION);
-            if (code == Isolate::STARTING)
+            if (code == Isolate::CANSTART || code == Isolate::STARTING)
             {
                 code = Isolate::NEW;
             }

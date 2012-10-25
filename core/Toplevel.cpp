@@ -1715,10 +1715,4 @@ namespace avmplus
 			return AvmCore::atomToScriptObject(value);
         }
 	}
-
-	void Toplevel::addWorker (GCRef<ScriptObject> worker)
-	{
-		_workerList.add(worker);
-	}
-
 }

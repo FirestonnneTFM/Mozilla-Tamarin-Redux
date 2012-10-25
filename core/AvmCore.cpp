@@ -543,13 +543,14 @@ namespace avmplus
 
         workerStates[0] = internConstantStringLatin1("none");
         workerStates[1] = internConstantStringLatin1("new");
-        workerStates[2] = internConstantStringLatin1("starting");
-        workerStates[3] = internConstantStringLatin1("running");
-        workerStates[4] = internConstantStringLatin1("finishing");
-        workerStates[5] = internConstantStringLatin1("terminated");
-        workerStates[6] = internConstantStringLatin1("failed");
-        workerStates[7] = internConstantStringLatin1("aborted");
-        workerStates[8] = internConstantStringLatin1("exception");
+        workerStates[2] = internConstantStringLatin1("canstart");
+        workerStates[3] = internConstantStringLatin1("starting");
+        workerStates[4] = internConstantStringLatin1("running");
+        workerStates[5] = internConstantStringLatin1("finishing");
+        workerStates[6] = internConstantStringLatin1("terminated");
+        workerStates[7] = internConstantStringLatin1("failed");
+        workerStates[8] = internConstantStringLatin1("aborted");
+        workerStates[9] = internConstantStringLatin1("exception");
 
 
         booleanStrings[0] = kfalse;
@@ -5613,6 +5614,11 @@ return the result of the comparison ToPrimitive(x) == y.
     }
 
 #endif // VMCFG_EPOC_EMULATOR
+
+    void AvmCore::clearInterrupt()
+    {
+        interrupted = NotInterrupted;
+    }
 
     void AvmCore::raiseInterrupt(InterruptReason reason)
     {

@@ -41,13 +41,17 @@ namespace avmplus {
         if (isolate) {
             Isolate::InterruptibleState::WaitRecord record;
             Isolate::InterruptibleState::Enter state(record, &m_interruptibleState, isolate);
-            while (state.waitListHead() != &record || VMPI_recursiveMutexTryLock(&m_mutex) == false)
-            {
-                state.wait();
-                if (state.interrupted) {
-                    goto process_interrupt;
-                }
-            }
+			
+			if (m_ownerThreadID != VMPI_currentThread())
+			{
+				while (state.waitListHead() != &record || VMPI_recursiveMutexTryLock(&m_mutex) == false)
+				{
+					state.wait();
+					if (state.interrupted) {
+						goto process_interrupt;
+					}
+				}
+			}
             lockAcquired();
         }
         return;
@@ -57,6 +61,7 @@ process_interrupt:
         // destroy the RAII object 
         isolate->getAggregate()->processWorkerInterrupt(toplevel);
     }
+	
 
     bool MutexObject::State::tryLock()
     {
@@ -92,13 +97,13 @@ process_interrupt:
 
         if (m_recursionCount == 0) {
             m_ownerThreadID = VMPI_nullThread(); 
-        } 
+			  // unlock the mutex *first* otherwise any waking thread
+			// will try the lock and go back to waiting even though 
+			// it should have acquired the lock
+			VMPI_recursiveMutexUnlock(&m_mutex); 
+			m_interruptibleState.notifyAll();  
+		} 
 
-        // unlock the mutex *first* otherwise any waking thread
-        // will try the lock and go back to waiting even though 
-        // it should have acquired the lock
-        VMPI_recursiveMutexUnlock(&m_mutex); 
-        m_interruptibleState.notifyAll();
         return true;
     }
 
@@ -126,26 +131,34 @@ process_interrupt:
     //    var mutex:Mutex = new Mutex();
     //    worker.setSharedProperty("foo", mutex) === worker.getSharedProperty("foo") // always true
     //
-    void MutexObject::ctor() 
+    void MutexObject::ctor()
     {
         m_state = mmfx_new(MutexObject::State());
-        if (!m_state->m_isValid || (core()->getIsolate() == NULL)) {
-            toplevel()->throwError(kMutexCannotBeInitialized);
+        
+        Toplevel* top = toplevel();
+        if (!(MutexClass::getMutexSupported( top ) && m_state->m_isValid)) 
+        {
+            top->throwError(kMutexCannotBeInitialized);
         }
 
-        AvmAssert(toplevel()->getInternedObject(m_state) == NULL);
-        toplevel()->internObject(m_state, this);
+        AvmAssert(top->getInternedObject(m_state) == NULL);
+        top->internObject(m_state, this);
     }
 
     MutexObject::~MutexObject() 
     {
-        // if we hold the lock we should unlock
-        bool cont = m_state->unlock();
-        while(m_state->m_recursionCount && cont)
+        // if OOM occured during ctor() mmfx_new long jumps
+        // and m_state will still be null
+        if (m_state)
         {
-            cont = m_state->unlock();
-        };
-        m_state = NULL;
+            // if we hold the lock we should unlock
+            bool cont = m_state->unlock();
+            while(m_state->m_recursionCount && cont)
+            {
+                cont = m_state->unlock();
+            };
+            m_state = NULL;
+        }
     }
   
     void MutexObject::lock()
@@ -282,20 +295,23 @@ process_interrupt:
                 }
             }
 
-            TRY(toplevel->core(), kCatchAction_Rethrow)
             {
                 // re-acquire the public mutex 
-                m_mutexState->lock(toplevel);
+				Isolate::InterruptibleState::WaitRecord record;
+				Isolate::InterruptibleState::Enter state(record, &m_mutexState->m_interruptibleState, isolate);
+			
+				while (state.waitListHead() != &record || VMPI_recursiveMutexTryLock(&m_mutexState->m_mutex) == false)
+				{
+					state.wait();
+					if (state.interrupted) {
+						goto process_interrupt;
+					}
+				}
+				m_mutexState->lockAcquired();
+
                 DEBUG_STATE(("thread %d Condition(%d) re-acquired Mutex(%d)\n", VMPI_currentThread(), m_interruptibleState.gid, m_mutexState->m_interruptibleState.gid));
                 m_mutexState->m_recursionCount = saved_recursionCount;
             }
-            CATCH(Exception* e)
-            {
-                m_mutexState->m_recursionCount = saved_recursionCount;
-                toplevel->core()->throwException(e);
-            }
-            END_TRY;
-            END_CATCH;
         }
         return result;
 
@@ -329,7 +345,10 @@ process_interrupt:
     //
     void ConditionObject::ctor(GCRef<MutexObject> mutex)
     {
-        if (mutex == NULL) {
+		if (!MutexClass::getMutexSupported( toplevel() ))
+			toplevel()->throwError(kConditionCannotBeInitialized);
+
+		if (mutex == NULL) {
             toplevel()->throwArgumentError(kNullPointerError, core()->newStringLatin1("mutex"));
         }
 

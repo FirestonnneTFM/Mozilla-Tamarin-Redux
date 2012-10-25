@@ -5811,12 +5811,13 @@ void ST_workers_Promise::test0() {
 verifyPass(main!=NULL, "main!=NULL", __FILE__, __LINE__);
     uint32_t state=main->getAggregate()->queryState(main);
     // verify state == RUNNING
-// line 22 "ST_workers_Promise.st"
-verifyPass(state==3, "state==3", __FILE__, __LINE__);
+    //printf("state=%d\n",state);
+// line 23 "ST_workers_Promise.st"
+verifyPass(state==4, "state==4", __FILE__, __LINE__);
 
-// line 24 "ST_workers_Promise.st"
-verifyPass(main->getAvmCore() == core, "main->getAvmCore() == core", __FILE__, __LINE__);
 // line 25 "ST_workers_Promise.st"
+verifyPass(main->getAvmCore() == core, "main->getAvmCore() == core", __FILE__, __LINE__);
+// line 26 "ST_workers_Promise.st"
 verifyPass(main->isParentOf(main) == false, "main->isParentOf(main) == false", __FILE__, __LINE__);
 
 

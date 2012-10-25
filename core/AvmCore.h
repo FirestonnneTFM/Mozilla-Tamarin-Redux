@@ -909,7 +909,7 @@ const int kBufferPadding = 16;
         Atom kFltMinusOne;              // needed for decrement
         Atom kFlt4NaN;
 #endif
-        GCMember<String> workerStates[9];
+        GCMember<String> workerStates[10];
         
         GCMember<String> kExecPolicy;   // execution policy attribute
         GCMember<String> kOSR;          //    OSR threshold
@@ -1725,6 +1725,11 @@ const int kBufferPadding = 16;
          * MUST NOT RETURN; the caller expects a thrown exception.
          */
         virtual void interrupt(Toplevel *env, InterruptReason) = 0;
+
+        /**
+         * called by host if the current interrupt should be cleared
+         */
+        void clearInterrupt();
 
         /**
          * called by the host to raise the AS3 interrupt exception.

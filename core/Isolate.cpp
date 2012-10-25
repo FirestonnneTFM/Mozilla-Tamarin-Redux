@@ -70,7 +70,7 @@ namespace avmplus
         mmfx_delete(this);
     }
     
-    void Aggregate::outOfMemoryShutdown()
+    void Aggregate::signalOutOfMemoryShutdown()
     {
         requestAggregateExit();
 		vmbase::SafepointRecord::cleanupAfterOOM();
@@ -87,25 +87,25 @@ namespace avmplus
                 return false; 
             }
 
-            if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING) {
+            // if the isolate is in CANSTART, STARTING or RUNNING state it should be interrupted
+            if (isolate->m_state > Isolate::NEW && isolate->m_state <= Isolate::RUNNING) {
                 isolate->interrupt();
             }
             result = true;
 
             // if the isolate has not been started i.e. it is still
-            // in the NEW state then leave it in the table,
+            // in the NEW or CANSTART state then leave it in the table,
             // it will then be properly disposed of during aggregate exit.
-            if (isolate->m_state != Isolate::NEW) {
+            if (isolate->m_state > Isolate::CANSTART) {
                 SCOPE_LOCK(m_globals.m_isolateMap.m_lock) { 
 				    m_globals.orphanFor(desc);
                     m_globals.m_isolateMap.RemoveItem(desc);
                 }
             }
 
-            
-            // if the isolate is in a NEW, FAILED, ABORTED, TERMINATED, 
+            // if the isolate is in a NEW, CANSTART, FAILED, ABORTED, TERMINATED, 
             // or EXCEPTION state then we can just exit here
-            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::FINISHING) {
+            if (isolate->m_state <= Isolate::CANSTART || isolate->m_state > Isolate::FINISHING) {
                 return false;
             }
 
@@ -145,7 +145,7 @@ throw_terminated_error:
                 {
                     if (m_aggregate == isolate->m_aggregate && !isolate->isInterrupted())
 					{
-						if (isolate->m_state == Isolate::NEW) {
+                        if (isolate->m_state <= Isolate::CANSTART) {
 							m_aggregate->stateTransition(isolate, Isolate::TERMINATED);
 						}
 						else {
@@ -219,7 +219,7 @@ throw_terminated_error:
             throwWorkerTerminatedException(currentToplevel);
         }
         else {
-            core->raiseInterrupt(AvmCore::NotInterrupted); // clear existing interrupt before throwing
+            core->clearInterrupt(); // clear existing interrupt before throwing
             core->interrupt(currentToplevel, AvmCore::ScriptTimeout);
         }
     }
@@ -242,31 +242,15 @@ throw_terminated_error:
     {
         SCOPE_LOCK_NAMED(locker, m_globals.m_lock) {
             enum Isolate::State from = isolate->m_state;
-            bool verbose = false;
-            if (verbose) {
-                
-                static const char* state_names[] = {
-                    "NONE",
-                    "NEW",
-                    "STARTING",
-                    "RUNNING",
-                    "FINISHING",
-                    "TERMINATED",
-                    "FAILED",
-                    "ABORTED",
-                    "EXCEPTION"
-                };
-
-                AvmAssert(from != to);
-                fprintf(stderr, "%d: %s->%s\n", isolate->getDesc(), state_names[from], state_names[to]);
-            }
             isolate->m_state = to;
 #ifdef _DEBUG
             vmbase::VMThread* t = NULL;
 #endif // _DEBUG
             bool isolateInactive = false;
-            if (to == Isolate::STARTING) {
+            if (to == Isolate::CANSTART) {
                 AvmAssert(from == Isolate::NEW);
+            } else if (to == Isolate::STARTING) {
+                AvmAssert(from == Isolate::CANSTART);
             } else if (to == Isolate::RUNNING) {
                 AvmAssert(from < to); // FIXME this can be violated (?)
                 AvmAssert(isolate->getDesc() == m_primordialGiid || m_activeIsolateThreadMap.LookupItem(isolate->getDesc(), &t) == true); 
@@ -281,7 +265,7 @@ throw_terminated_error:
                 isolate->m_failed = true;
                 isolateInactive = true;
             } else if (to == Isolate::FINISHING) {
-                AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING);
+                AvmAssert(from == Isolate::CANSTART || from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING);
                 AvmAssert(isolate->getDesc() == m_primordialGiid || m_activeIsolateThreadMap.LookupItem(isolate->getDesc(), &t) == true); 
 				if (from != Isolate::FINISHING)
 				{
@@ -298,6 +282,8 @@ throw_terminated_error:
                 m_activeIsolateCount--;
                 locker.notifyAll();
             }
+            
+            isolate->stateChanged(to);
         }
     }
 
@@ -599,7 +585,15 @@ throw_terminated_error:
     {
         // Make sure the isolate survives for the duration of the doRun() call by keeping a ref to it.
         FixedHeapRef<Isolate> handle(this);
-		doRun();
+
+        // don't run if interrupted
+        if (m_interrupted) {
+            m_aggregate->stateTransition(this, Isolate::TERMINATED);
+        }
+        else {
+            m_aggregate->stateTransition(this, Isolate::STARTING);
+		    doRun();
+        }
     }
 
     Isolate::~Isolate()
@@ -884,7 +878,7 @@ throw_terminated_error:
             // in progress wait until it is completed and then
             // start a new one.
             while (m_signaledWaiters > 0) {
-                cond.wait(1);
+                cond.wait(0);
             }
             
             if (m_waiterCount > 0) {
@@ -909,7 +903,7 @@ throw_terminated_error:
             // wait until the current signal cycle completes
             // if there is one.
             while (m_signaledWaiters > 0) {
-                cond.wait(1);
+                cond.wait(0);
             }
             DEBUG_STATE(("thread %d is calling notify on (%d)\n", VMPI_currentThread(), gid));
             cond.notify();
@@ -922,7 +916,7 @@ throw_terminated_error:
             // wait until the current signal cycle completes
             // if there is one.
             while (m_signaledWaiters > 0) {
-                cond.wait(1);
+                cond.wait(0);
             }
 
             DEBUG_STATE(("thread %d is calling notifyAll on (%d)\n", VMPI_currentThread(), gid));
@@ -975,13 +969,12 @@ throw_terminated_error:
             AvmAssert(m_activeIsolateThreadMap.LookupItem(isolate->getDesc(), &t) == false);
             vmbase::VMThread* thread = mmfx_new(vmbase::VMThread(isolate));
             if (thread->start()) {
-				stateTransition(isolate, Isolate::STARTING);
+                stateTransition(isolate, Isolate::CANSTART);
 				m_activeIsolateThreadMap.InsertItem(isolate->getDesc(), thread);
 				result = true;
             } else {
                 // We will never try to spawn this isolate again.
 				stateTransition(isolate, Isolate::FAILED);
-					
 				mmfx_delete(thread);
                 result = false;
             }

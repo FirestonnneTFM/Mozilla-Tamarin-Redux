@@ -110,12 +110,20 @@ namespace avmshell
               initializeLogging(instance->settings.numfiles > 0 ? instance->settings.filenames[0] : "AVMLOG");
 
 #ifdef VMCFG_WORKERTHREADS
-            if (instance->settings.numworkers == 1 && instance->settings.numthreads == 1 && instance->settings.repeats == 1)
-                instance->newIsolate(NULL)->run();
+            if (instance->settings.numworkers == 1 && instance->settings.numthreads == 1 && instance->settings.repeats == 1) 
+            {
+                avmplus::Isolate* isolate = instance->newIsolate(NULL); 
+                instance->stateTransition(isolate, avmplus::Isolate::CANSTART);
+                isolate->run();
+            }
             else
+            {
                 instance->multiWorker(instance->settings);
+            }
 #else
-			instance->newIsolate(NULL)->run();
+            avmplus::Isolate* isolate = instance->newIsolate(NULL); 
+            instance->stateTransition(isolate, avmplus::Isolate::CANSTART);
+			isolate->run();
 #endif
             instance->waitUntilNoIsolates();
             // Shell is refcounted now
@@ -267,7 +275,6 @@ namespace avmshell
             this->initialize(shell);
 
             avmplus::EnterSafepointManager enterSafepointManager(shell);
-            aggregate->stateTransition(this, avmplus::Isolate::STARTING);
 
             ShellToplevel* toplevel = shell->setup(settings);
             // inlined singleWorkerHelper

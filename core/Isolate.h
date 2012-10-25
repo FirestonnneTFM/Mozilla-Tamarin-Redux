@@ -63,10 +63,10 @@ namespace avmplus
         }
 
         virtual void copyByteCode(ByteArrayObject* array);
-        
+
         // WorkerObject type depends on the overiding class.
         virtual ScriptObject* newWorkerObject(Toplevel* toplevel) =  0;
-
+        
         bool interrupt();				// false if already interrupted
         bool isInterrupted() const;
         bool hasFailed() const;
@@ -78,14 +78,15 @@ namespace avmplus
         
         enum State {
             NONE = 0, // sentinel
-            NEW = 1, 
-            STARTING = 2, 
-            RUNNING = 3, 
-            FINISHING = 4, 
-            TERMINATED = 5, 
-            FAILED = 6, 
-            ABORTED = 7, 
-            EXCEPTION = 8
+            NEW = 1,
+            CANSTART = 2,
+            STARTING = 3, 
+            RUNNING = 4, 
+            FINISHING = 5, 
+            TERMINATED = 6, 
+            FAILED = 7, 
+            ABORTED = 8, 
+            EXCEPTION = 9
         };
 
     protected:
@@ -106,10 +107,10 @@ namespace avmplus
 		descriptor_t getDesc() const { return m_desc; }
 		descriptor_t getParentDesc() const { return m_parentDesc; }
 		void resetParent() { m_parentDesc = INVALID_DESC; }
-		
+
     protected:
         typedef FixedHeapArray<char>* SharedPropertyNamep;
-		
+
         class SharedPropertyMap: public FixedHeapHashTable<SharedPropertyNamep, ChannelItem*>
         {
         public:
@@ -120,10 +121,11 @@ namespace avmplus
             virtual bool KeysEqual(SharedPropertyNamep key1, const SharedPropertyNamep key2) const;
             virtual void DestroyItem(SharedPropertyNamep key, ChannelItem* value);
         };
-		
+
         FixedHeapArray< FixedHeapArray<uint8_t> > m_code;
         
     private:
+        virtual void stateChanged(Isolate::State from) { (void)from; }
 		descriptor_t m_desc;
         descriptor_t m_parentDesc;
 
@@ -164,16 +166,16 @@ namespace avmplus
                 WaitRecord() 
                     : next(NULL)
                     , signaled(false)
-    #ifdef DEBUG_CONDITION_MUTEX
+#ifdef DEBUG_CONDITION_MUTEX
                     , threadID(VMPI_currentThread())
-    #endif // DEBUG_CONDITION_MUTEX
+#endif // DEBUG_CONDITION_MUTEX
                 {}
 
                 WaitRecord* next;
                 bool signaled;
-    #ifdef DEBUG_CONDITION_MUTEX
+#ifdef DEBUG_CONDITION_MUTEX
                 vmpi_thread_t threadID;
-    #endif // DEBUG_CONDITION_MUTEX
+#endif // DEBUG_CONDITION_MUTEX
             };
 
             InterruptibleState();
@@ -225,9 +227,9 @@ namespace avmplus
                     Isolate* getIsolate() const;
 
 
-        #ifdef DEBUG_INTERRUPTIBLE_STATE
-			        Isolate::descriptor_t gid;
-        #endif // DEBUG_INTERRUPTIBLE_STATE
+#if defined(DEBUG_INTERRUPTIBLE_STATE) || defined(DEBUG_CONDITION_MUTEX)
+		            Isolate::descriptor_t gid;
+#endif // DEBUG_INTERRUPTIBLE_STATE
                 private:
 
                     Isolate* m_isolate;
@@ -248,8 +250,8 @@ namespace avmplus
 
             vmbase::WaitNotifyMonitor& getMonitor() { return m_condition; }
 
-#ifdef DEBUG_INTERRUPTIBLE_STATE
-             int32_t gid;
+#if defined (DEBUG_INTERRUPTIBLE_STATE) || defined (DEBUG_CONDITION_MUTEX)
+            int32_t gid;
 #endif // DEBUG_INTERRUPTIBLE_STATE
 
         private:
@@ -263,7 +265,7 @@ namespace avmplus
             // when a signal is requested it must first check that 
             // a signal has not already been requested and wait until
             // it is complete.
-            vmbase::WaitNotifyMonitor m_condition;
+        vmbase::WaitNotifyMonitor m_condition;
             volatile int32_t m_waiterCount;
             uint32_t m_signaledWaiters;
             // list of threads waiting on this state, in FIFO order
@@ -318,7 +320,7 @@ namespace avmplus
  				  , m_idsWrapped(false)
                   , m_isolateMap(16)
             {}
-			
+
 			Isolate::descriptor_t getNewID()
 			{
 				Isolate::descriptor_t newID = m_nextGlobalIsolateId;
@@ -332,23 +334,23 @@ namespace avmplus
 					
 					FixedHeapRef<Isolate> isolateRef(NULL);
 					while (m_isolateMap.LookupItem(m_nextGlobalIsolateId, &isolateRef)) 
-					{
+            {
 						m_nextGlobalIsolateId++;
 					}
 					newID = m_nextGlobalIsolateId;
-				}
-				
+            }
+
 				m_nextGlobalIsolateId++;
 				return newID;
 			}
-			
+
 			void orphanFor(Isolate::descriptor_t giid)
 			{
 				class Orphanize: public Globals::IsolateMap::Iterator
 				{
-				private:
+                private:
 					const Isolate::descriptor_t m_TargetID;
-					
+
 				public:
 					Orphanize(Isolate::descriptor_t target)
 					: m_TargetID(target)
@@ -400,13 +402,13 @@ namespace avmplus
 			ActiveIsolateThreadMap(int initialSize);
 			void cleanup();
 		};
-		
+
     public:
         Aggregate();
         virtual ~Aggregate();
         virtual void destroy();
 
-        void outOfMemoryShutdown();
+        void signalOutOfMemoryShutdown();
         bool isPrimordial(Isolate::descriptor_t giid) const;
 
         // If parent == NULL, the primordial isolate will be created.
@@ -445,7 +447,7 @@ namespace avmplus
         {
             return m_inShutdown;
         }
-		
+
     private:
         void setIsolateAsInterrupted(Isolate* isolate);
 
