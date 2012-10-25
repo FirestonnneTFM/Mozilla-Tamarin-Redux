@@ -110,23 +110,30 @@ bool VMPI_condVarTimedWaitInternal(vmpi_condvar_t* condvar, vmpi_mutex_t* mutex,
 
     // Add the calling thread to the condition variable's list of waiting threads.
     // Note that the linked list is implicitly guarded by the mutex paired with the conditional variable.
+    int32_t timeout = infinite ? INFINITE : timeout_millis;
     WaitingThread thisThread;
     thisThread.threadID = GetCurrentThreadId();
-    thisThread.notified = false;
+    thisThread.notified = timeout == 0;
     thisThread.next = NULL;
-    if (condvar->head == NULL) {
-        condvar->head = &thisThread;
-    } else {
-        condvar->tail->next = &thisThread;
+    if (timeout != 0) {
+        if (condvar->head == NULL) {
+            condvar->head = &thisThread;
+        } else {
+            condvar->tail->next = &thisThread;
+        }
+        condvar->tail = &thisThread;
     }
-    condvar->tail = &thisThread;
-
     // Unlock the mutex and then sleep until we are notified or timeout.
     // Note that there should be *no* lost wakeups between the unlock and the sleep, as all notifies are
     // queued as APCs.
     LeaveCriticalSection(mutex);
-    const DWORD rtn = SleepEx(infinite ? INFINITE : timeout_millis, true);
-
+    DWORD rtn = 0;
+    if (timeout == 0) {
+        SwitchToThread();
+    }
+    else  {
+        rtn = SleepEx(timeout, true);
+    }
     // As per pthread condition variable semantics, we block until we can re-acquire the mutex we released.
     EnterCriticalSection(mutex);
 

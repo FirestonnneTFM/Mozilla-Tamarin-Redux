@@ -19,7 +19,8 @@
     %%verify main!=NULL
     uint32_t state=main->getAggregate()->queryState(main);
     // verify state == RUNNING
-    %%verify state==3
+    //printf("state=%d\n",state);
+    %%verify state==4
 
     %%verify main->getAvmCore() == core
     %%verify main->isParentOf(main) == false
