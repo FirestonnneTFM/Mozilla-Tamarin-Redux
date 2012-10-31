@@ -364,6 +364,7 @@ as3/ByteArray/ByteArray:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.c
 as3/ByteArray/ByteArrayLzma:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153294
 as3/ShellClasses/toplevel:queue a gc collection,      AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3156533
 regress/bug_515935,                             arm-AOT,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+ecma3/Statements/edowhile_00(6|7),              AOT.*-asc2,, skip , http://watsonexp.corp.adobe.com/#bug=3348356
 
 ####################
 # Float
@@ -421,7 +422,7 @@ regress/security/bug_689243b:Correct exception thrown , (x86|arm)-.*-Dinterp , ,
 ####################
 # Workers
 ####################
-regress/.*243b,(x86-lnx-asc[0-9]+-release-Dinterp|arm-android-asc[0-9]+-release-Dinterp|arm-android-asc[0-9]+-release-Dinterp|x86-win-asc[0-9]+-release-Dinterp), , expectedfail, bug 
+regress/.*243b:Correct exception thrown ,(arm-lnx-asc[0-9]+-release-Dinterp|arm-android-asc[0-9]+-release-Dinterp|x86-win-asc[0-9]+-release-Dinterp), , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=689243 
 regress/.*243a,.*,, skip, bug
 as3/ShellClasses/toplevel:exitcode, arm-lnx,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698855 System.exit(n) always exits 1 linux arm does not support exitcode
 as3/Workers/(ByteArrayWorkersLzma|WorkerDomain|Worker|WorkerErrors|regress/bug774294|regress/bug774302), (android|arm-) ,, skip, ARM platforms not supported https://bugzilla.mozilla.org/show_bug.cgi?id=755345
