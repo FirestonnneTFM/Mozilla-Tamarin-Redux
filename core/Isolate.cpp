@@ -585,6 +585,7 @@ throw_terminated_error:
     {
         // Make sure the isolate survives for the duration of the doRun() call by keeping a ref to it.
         FixedHeapRef<Isolate> handle(this);
+		DecrementRef();		// Let go of the hand-over-hand-safety-ref set by spawnIsolateThread() now that handle is valid.
 
         // don't run if interrupted
         if (m_interrupted) {
@@ -969,11 +970,17 @@ throw_terminated_error:
 
             AvmAssert(m_activeIsolateThreadMap.LookupItem(isolate->getDesc(), &t) == false);
             vmbase::VMThread* thread = mmfx_new(vmbase::VMThread(isolate));
+			// increment the refcount on the isolate as a hand-over-hand-safety measure to ensure that 
+			// when the thread spins up the isolate will still be around for the thread to 
+			// take a ref to the isolate.
+ 			isolate->IncrementRef();		// run() is responsible for dec ref
+
             if (thread->start()) {
                 stateTransition(isolate, Isolate::CANSTART);
 				m_activeIsolateThreadMap.InsertItem(isolate->getDesc(), thread);
 				result = true;
             } else {
+				isolate->DecrementRef();	// thread will not start, so undo the increments
                 // We will never try to spawn this isolate again.
 				stateTransition(isolate, Isolate::FAILED);
 				mmfx_delete(thread);
