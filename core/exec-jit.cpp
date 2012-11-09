@@ -525,6 +525,7 @@ ImtEntry* BaseExecMgr::buildImtEntries(VTable* vtable, uint32_t slot, uint32_t& 
                 if (cBinding == BIND_NONE)
                     cBinding = tb->findBinding(name, ns);
                 AvmAssert(cBinding != BIND_NONE);
+                AvmAssert((1 << AvmCore::bindingKind(cBinding)) & ((1<<BKIND_METHOD)|(1<<BKIND_GET)|(1<<BKIND_GETSET)));
                 map = new (gc) ImtEntry(map, ImtHolder::getIID(v0), getRawDispID(cBinding));
                 ++count;
             }
@@ -536,6 +537,7 @@ ImtEntry* BaseExecMgr::buildImtEntries(VTable* vtable, uint32_t slot, uint32_t& 
                 if (cBinding == BIND_NONE)
                     cBinding = tb->findBinding(name, ns);
                 AvmAssert(cBinding != BIND_NONE);
+                AvmAssert((1 << AvmCore::bindingKind(cBinding)) & ((1<<BKIND_SET)|(1<<BKIND_GETSET)));
                 map = new (gc) ImtEntry(map, ImtHolder::getIID(v1), getRawDispID(cBinding)+1);
                 ++count;
             }
