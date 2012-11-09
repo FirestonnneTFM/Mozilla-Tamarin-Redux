@@ -114,6 +114,7 @@ namespace avmshell
             {
                 avmplus::Isolate* isolate = instance->newIsolate(NULL); 
                 instance->stateTransition(isolate, avmplus::Isolate::CANSTART);
+				isolate->IncrementRef();
                 isolate->run();
             }
             else
@@ -123,6 +124,7 @@ namespace avmshell
 #else
             avmplus::Isolate* isolate = instance->newIsolate(NULL); 
             instance->stateTransition(isolate, avmplus::Isolate::CANSTART);
+			isolate->IncrementRef();
 			isolate->run();
 #endif
             instance->waitUntilNoIsolates();
