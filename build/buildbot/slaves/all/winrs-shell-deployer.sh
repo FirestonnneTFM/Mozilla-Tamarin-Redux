@@ -74,7 +74,14 @@ do
     res=$?
     if [ "$res" == "0" ]
     then
-        break     # skip deploying since the host already is setup        
+        echo "host: ${WINRS_SHELL_REMOTE_HOST} already setup, skipping"
+        # increment the counter, check if we are finished looping
+        count=$[count+1]
+        if [ "$count" = "$threadcount" ]
+        then
+            break
+        fi
+        continue     # skip deploying since the host already is setup
     else
         already_deployed="$WINRS_SHELL_REMOTE_HOST $already_deployed"  # add host to deploy list
     fi
