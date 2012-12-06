@@ -52,14 +52,24 @@ function try_command () {
         # is the only form that will work with quoted arguments containing spaces
         # see http://www.tldp.org/LDP/abs/html/internalvariables.html#APPREF2
         # for details
-        "$@" 2> ./stderr$id
+        "$@" 2>./stderr$id 1>./stdout_tmp$id
         ec=$?
-        if [ "$ec" -eq "$expectedExitCode" ]; then
+        # Either $ec is non-zero or there should be something in stdout
+        if [[ "$ec" -eq "0" && "`cat ./stdout_tmp$id`" == "" ]]; then
+            echo "stdout is empty and exitcode is $ec"
+            echo "Exit Code: $ec"
+            echo "Try $count of $MAX_RETRIES"
+            sleep 3
+        elif [ "$ec" -eq "$expectedExitCode" ]; then
             # command executed with expected exit code
             # Put captured stderr back into stderr so that it is handled properly by the test runner
             if [ -s ./stderr$id ]; then
                 echo "`cat ./stderr$id`" >&2
                 rm -f ./stderr$id
+            fi
+            if [ -s ./stdout_tmp$id ]; then
+                echo "`cat ./stdout_tmp$id`" >&1
+                rm -f ./stdout_tmp$id
             fi
             return 0
         else
@@ -77,6 +87,10 @@ function try_command () {
     if [ -s ./stderr$id ]; then
         echo "`cat ./stderr$id`" >&2
         rm -f ./stderr$id
+    fi
+    if [ -s ./stdout_tmp$id ]; then
+        echo "`cat ./stdout_tmp$id`" >&1
+        rm -f ./stdout_tmp$id
     fi
     exit $ec
 }
