@@ -97,24 +97,26 @@ do
     echo""
     echo "Installing $filename on $WINRS_SHELL_REMOTE_HOST to $WINRS_SHELL_REMOTE_BASEDIR"
     # Setup the ftp script to get the acceptance media
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo open ${ftp_host} \> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo user \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo lcd ${WINRS_SHELL_REMOTE_BASEDIR} \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo cd ${branch}/${change}/windows \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo get ${filename} avmshell.exe \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo get winrs-shell-runner.bat \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo close \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo quit \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
+    export  WINRSSERVEREXPECTNOOUTPUT=True
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo open ${ftp_host} > ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo user >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo lcd ${WINRS_SHELL_REMOTE_BASEDIR} >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo cd ${branch}/${change}/windows >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo get ${filename} avmshell.exe >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo get winrs-shell-runner.bat >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo close >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo quit >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    unset WINRSSERVEREXPECTNOOUTPUT
 
     echo ""
     echo "Get the ${filename} from ftp server"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "ftp -n -s:${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "ftp -n -s:${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
 
     echo ""
-    echo "verify the deployed shell version if correct"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "${WINRS_SHELL_REMOTE_BASEDIR}\\\\winrs-shell-runner.bat" > /tmp/stdout
+    echo "verify the deployed shell version is correct"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "${WINRS_SHELL_REMOTE_BASEDIR}\\winrs-shell-runner.bat" > /tmp/stdout
     deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $NF}'`
     if [ "$change_for_validation" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ];
     then
@@ -131,24 +133,26 @@ do
     fi
 
     # Setup the ftp script to get the acceptance media
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo open ${ftp_host} \> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo user \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo lcd ${WINRS_SHELL_REMOTE_BASEDIR} \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo cd ${branch}/${change} \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo get acceptance-tests-abcs.zip \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo close \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo quit \>\> ${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
+    export  WINRSSERVEREXPECTNOOUTPUT=True
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo open ${ftp_host} > ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo user >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo ftp >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo lcd ${WINRS_SHELL_REMOTE_BASEDIR} >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo cd ${branch}/${change} >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo get acceptance-tests-abcs.zip >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo close >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "echo quit >> ${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
+    unset WINRSSERVEREXPECTNOOUTPUT
 
     echo ""
     echo "Get the acceptance media from ftp server"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "ftp -n -s:${WINRS_SHELL_REMOTE_BASEDIR}\\\\ftp_script"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "ftp -n -s:${WINRS_SHELL_REMOTE_BASEDIR}\\ftp_script"
 
     echo "unzipping acceptance-tests-abcs.zip..."
     echo ""
     echo "Unzip the acceptance media"
-    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "cscript c:\\\\tamarin-tools\\\\unzip.vbs ${WINRS_SHELL_REMOTE_BASEDIR}\\\\acceptance-tests-abcs.zip ${WINRS_SHELL_REMOTE_BASEDIR}"
+    ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "cscript c:\\tamarin-tools\\unzip.vbs ${WINRS_SHELL_REMOTE_BASEDIR}\\acceptance-tests-abcs.zip ${WINRS_SHELL_REMOTE_BASEDIR}"
 
     # increment the counter, check if we are finished looping
     count=$[count+1]
