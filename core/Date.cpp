@@ -7,6 +7,11 @@
 
 #include "avmplus.h"
 
+#if defined(PEPPER_PLUGIN)
+// TODO(vtl): Move stuff to a "glue" file, so that avmplus doesn't potentially depend on Flash core.
+#include "flash/platform/pepper/pep_datetime.h"
+#endif
+
 namespace avmplus
 {
 #ifdef FIX_RECIPROCAL_BUG
@@ -167,6 +172,18 @@ namespace avmplus
     /* This needs to be publicly available, for Mac edge code. (srj) */
     double UTC(double t)
     {
+#if defined(PEPPER_PLUGIN)
+        // TODO(vtl): This is just a clone of the code below; we should probably provide our own
+        // implementations of |VMPI_...()|.
+        double adj = pepper::GetTimeZoneAdjustment();
+        double dstAdjust = pepper::GetDaylightSavingTimeAdjustmentForTime(t - adj);
+        if (dstAdjust != 0) {
+            double dst2 = pepper::GetDaylightSavingTimeAdjustmentForTime(t - adj - kMsecPerHour);
+            if (dst2 == 0)
+                t += kMsecPerHour;
+        }
+        return (t - adj - dstAdjust);
+#else
         double adj = VMPI_getLocalTimeOffset();
 
         // If DST is in effect, and our time value is in a "gap" period
@@ -182,11 +199,19 @@ namespace avmplus
         }
 
         return (t - adj - dstAdjust);
+#endif
     }
 
     static double LocalTime(double t)
     {
+#if defined(PEPPER_PLUGIN)
+        // TODO(vtl): This is just a clone of the code below; we should probably provide our own
+        // implementations of |VMPI_...()|.
+        return t + pepper::GetTimeZoneAdjustment() +
+                pepper::GetDaylightSavingTimeAdjustmentForTime(t);
+#else
         return (t + VMPI_getLocalTimeOffset() + VMPI_getDaylightSavingsTA(t));
+#endif
     }
 
     // this needs to be publicly available, for data paraser

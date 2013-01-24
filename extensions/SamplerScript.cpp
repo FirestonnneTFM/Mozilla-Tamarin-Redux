@@ -11,6 +11,7 @@
 #include "avmshell.h"
 #else
 // player
+#include "platformbuild.h"
 #include "avmplayer-classes.h"
 #include "SamplerScript.h"
 #endif
