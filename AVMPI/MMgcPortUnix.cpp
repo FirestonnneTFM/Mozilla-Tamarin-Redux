@@ -146,7 +146,7 @@ void AVMPI_releaseAlignedMemory(void* address)
 
 // Note: the linux #define provided by the compiler.
 
-#ifdef linux
+#if defined(linux) && !defined(PEPPER_PLUGIN)
 
 size_t AVMPI_getPrivateResidentPageCount()
 {
@@ -299,8 +299,27 @@ uintptr_t AVMPI_getThreadStackBase()
 
 pthread_key_t stackTopKey = 0;
 
+#if defined(PEPPER_PLUGIN) && !defined(__APPLE__)
+namespace {
+// In the Linux Pepper plugin we count on the constructor being run before the sandbox is imposed.
+// TODO(vtl): This is super-hacky, fragile, and ugly. We really should do something better.
+class MainThreadInfoGetter {
+  public:
+    MainThreadInfoGetter() {
+        // This will set the TLS value for the main thread if necessary.
+        AVMPI_getThreadStackBase();
+    }
+} g_only_for_construction;
+}  // namespace
+#endif
+
 uintptr_t AVMPI_getThreadStackBase()
 {
+// For Pepper, we currently compile using this file instead of MMgcPortMac.cpp (which would have
+// other issues). Our Mac version is taken verbatim from MMgcPortMac.cpp.
+#if defined(PEPPER_PLUGIN) && defined(__APPLE__)
+    return (uintptr_t)pthread_get_stackaddr_np(pthread_self());
+#else
     // FIXME: race condition
     if(stackTopKey == 0)
     {
@@ -340,6 +359,7 @@ uintptr_t AVMPI_getThreadStackBase()
     pthread_setspecific(stackTopKey, stackTop);
     return (uintptr_t)stackTop;
 
+#endif
 }
 
 #elif defined(linux) && defined(MMGC_ARM)

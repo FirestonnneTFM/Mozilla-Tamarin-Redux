@@ -2590,7 +2590,10 @@ namespace MMgc
             if (ef->m_heap != NULL)
             {
                 ef->UnwindAllObjects();
+// longjmps are incorrect in C++ code, and will break the Pepper plugin.
+#if !defined(PEPPER_PLUGIN)
                 VMPI_longjmpNoUnwind(ef->jmpbuf, 1);
+#endif
             }
         }
         GCAssertMsg(false, "MMGC_ENTER missing or we allocated more memory trying to shutdown");
