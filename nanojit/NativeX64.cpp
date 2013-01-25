@@ -1616,27 +1616,38 @@ namespace nanojit
         POPR(R15);
         ADDQRI(RSP, 32);
     }
-    
-    void Assembler::asm_savepc()
+
+    void Assembler::asm_brsavpc_impl(LIns* flag, NIns* target)
     {
-        emit(X64_call);
-        SUBQRI(RSP, 8);
-        //0xD8F7400000000003LL
-        //emit(0xCC00000000000001LL);
+        Register r = findRegFor(flag, GpRegs);
+        underrunProtect(20);
+    
+        // discard pc
+        ADDQRI(RSP, 16);  
+        
+        // handle interrupt call
+        JNE(0, target);  
+        
+        // save pc
+        emit(X64_call);  
+        
+        CMPQRI(r, 0);   
+        SUBQRI(RSP, 8); 
     }
 
     void Assembler::asm_restorepc()
     {
+        underrunProtect(9);
         // jmp dword ptr [rsp]
-        //0xD8F7400000000003LL
-        emit(0x2424FF0000000003LL); //TODO
+        emit(0x2424FF0000000003LL);
+        // add qword ptr [rsp],6
+        emit(0x0600244483480006LL);
     }
 
-    void Assembler::asm_discardpc()
-    {
-        ADDQRI(RSP, 16);
-    }
-
+	void Assembler::asm_memfence()
+	{
+		// no fencing necessary on x64
+	}
 
     void Assembler::asm_cmp(LIns *cond) {
       if (isCmpF4Opcode(cond->opcode()))

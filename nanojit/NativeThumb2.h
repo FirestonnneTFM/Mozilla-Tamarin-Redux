@@ -55,6 +55,7 @@ namespace nanojit
 #define NJ_F2I_SUPPORTED                1
 #define NJ_SOFTFLOAT_SUPPORTED          1
 #define NJ_DIVI_SUPPORTED               0
+#define NJ_SAFEPOINT_POLLING_SUPPORTED  1
 
 #define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs
 
@@ -405,9 +406,9 @@ verbose_only( extern const char* shiftNames[]; )
     void        asm_stkarg(LIns* p, int stkd);                                                                    \
     void        asm_pushstate();                                                                                  \
     void        asm_popstate();                                                                                   \
-    void        asm_savepc();                                                                                     \
+    void        asm_memfence();                                                                                   \
+    void        asm_brsavpc_impl(LIns* flag, NIns* targ);                                                         \
     void        asm_restorepc();                                                                                  \
-    void        asm_discardpc();                                                                                  \
     void        asm_cmpi(Register, int32_t imm);                                                                  \
     void        asm_ldr(Register d, Register b, int32_t off);                                                     \
     int32_t     asm_str(Register rt, Register rr, int32_t off);                                                   \

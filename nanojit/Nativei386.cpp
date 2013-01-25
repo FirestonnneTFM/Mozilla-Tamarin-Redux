@@ -3527,28 +3527,50 @@ namespace nanojit
         OPCODE(0x61);
     }
 
-    void Assembler::asm_savepc()
-    {
-        underrunProtect(5);
+	void Assembler::asm_brsavpc_impl(LIns* flag, NIns* target)
+	{
+        Register r = findRegFor(flag, GpRegs);
+		underrunProtect(20);
+
+		// discard pc
+        ADDi(rESP, 16);
+
+		/// branch
+        const intptr_t tt = (intptr_t)target - (intptr_t)_nIns;
+
+		// JNE(tt) long form. -- generates 6 bytes of instr.
+        count_jcc();
+        IMM32(tt);
+        OPCODE(0x80 | 0x05);
+        OPCODE(JCC32);
+
+		// save pc
         IMM32(0);
-        OPCODE(0xE8);
-        SUBi(rESP, 12);
-    }
+        OPCODE(0xE8);		// CALL 0
+
+		TEST(r, r);
+
+		SUBi(rESP, 12);		// maintain 16 byte alignment for ABI
+	}
 
     void Assembler::asm_restorepc()
     {
-        underrunProtect(3);
-	// TODO probably use MODRM or something
+		underrunProtect(7);
 	// jmp dword ptr [esp]
         OPCODE(0x24);
         OPCODE(0x24);
         OPCODE(0xff);
+	// add dword ptr [esp],6
+        OPCODE(0x06);
+        OPCODE(0x24);
+        OPCODE(0x04);
+        OPCODE(0x83);
     }
 
-    void Assembler::asm_discardpc()
-    {
-        ADDi(rESP, 16);
-    }
+	void Assembler::asm_memfence()
+	{
+		// no fencing necessary on i386
+	}
 
     // WARNING: This function cannot generate any code that will affect the
     // condition codes prior to the generation of the

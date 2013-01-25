@@ -358,6 +358,7 @@ namespace avmplus
         LIns* localGetf4Addr(int i);  // Aborts if float not enabled
         LIns* localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
+		void branchAndSavePC(LIns *flag, CodegenLabel& label);
         LIns* branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);
         void branchToAbcPos(LOpcode op, LIns *cond, const uint8_t* target);
         LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);

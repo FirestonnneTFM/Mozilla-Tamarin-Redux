@@ -114,6 +114,7 @@ namespace nanojit
 
     // Support the extended load/store opcodes.
 #define NJ_EXPANDED_LOADSTORE_SUPPORTED 1
+#define NJ_SAFEPOINT_POLLING_SUPPORTED  0
 
     // Maximum size in bytes of a FP64 load, keep in sync' with asm_immd_nochk().
 #define SH4_IMMD_NOCHK_SIZE (9 * sizeof(NIns) + 2 * sizeof(uint32_t))

@@ -2564,20 +2564,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
         // Always poll for safepoints, regardless of config settings.
 		if (state->targetOfBackwardsBranch) {
-            Ins(LIR_savepc);
+			AvmAssert(AvmCore::NotInterrupted == 0);
             LIns* interrupted = loadIns(LIR_ldi, offsetof(AvmCore,interrupted), coreAddr, ACCSET_OTHER, LOAD_VOLATILE);
-            LIns* cond = binaryIns(LIR_eqi, interrupted, InsConst(AvmCore::NotInterrupted));
-            branchToLabel(LIR_jf, cond, interrupt_label);
 
-          /*
-            CodegenLabel not_interrupt_label;
-            branchToLabel(LIR_jt, cond, not_interrupt_label);
-            branchToLabel(LIR_j, NULL, interrupt_label);
-            emitLabel(not_interrupt_label);
-          */
-            Ins(LIR_discardpc);
+			branchAndSavePC(interrupted, interrupt_label);
         }
-#else 
+#else
         if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch) {
             LIns* interrupted = loadIns(LIR_ldi, offsetof(AvmCore,interrupted),
                     coreAddr, ACCSET_OTHER, LOAD_VOLATILE);
@@ -6025,6 +6017,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = localGet(index);
                 const MopsInfo& mi = kMopsLoadInfo[opcode-OP_lix8];
+				Ins(LIR_memfence);
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
@@ -6043,6 +6036,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = localGet(index);
                 const MopsInfo& mi = kMopsLoadInfo[opcode-OP_lix8];
+				Ins(LIR_memfence);
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
@@ -6057,6 +6051,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
             case OP_lf32x4:
             {
+				Ins(LIR_memfence);
                 // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = binaryIns(LIR_andi, localGet(index), InsConst(~15U));
@@ -6076,7 +6071,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* svalue = localGet(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
-            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
+ 				Ins(LIR_memfence);
+           #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
                 lirout->insStore(mi.op, svalue, realAddr, disp, ACCSET_OTHER);
@@ -6094,7 +6090,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* svalue = singlePrecision ? localGetf(sp-1) : localGetd(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
-            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
+ 				Ins(LIR_memfence);
+           #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
                 lirout->insStore(mi.op, svalue, realAddr, disp, ACCSET_OTHER);
@@ -6107,7 +6104,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
             case OP_sf32x4:
             {
-                // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
+ 				Ins(LIR_memfence);
+               // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
                 LIns* svalue = localGetf4Addr(sp-1);
                 LIns* mopAddr = binaryIns(LIR_andi, localGet(sp), InsConst(~15U));
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, sizeof(float4_t), NULL);
@@ -8211,6 +8209,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         } else {
             // branch was optimized away.  do nothing.
         }
+    }
+
+    void CodegenLIR::branchAndSavePC(LIns *flag, CodegenLabel& label) {
+        LIns* labelIns = label.labelIns;
+		LIns* br = lirout->insBranch(LIR_brsavpc, flag, labelIns);
+		AvmAssert(br != NULL && labelIns == NULL);
+        label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), label.unpatchedEdges);
+        varTracker->trackForwardEdge(label);
     }
 
     LIns* CodegenLIR::branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label) {

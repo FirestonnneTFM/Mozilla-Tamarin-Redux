@@ -364,6 +364,7 @@ as3/ByteArray/ByteArray:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.c
 as3/ByteArray/ByteArrayLzma:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153294
 as3/ShellClasses/toplevel:queue a gc collection,      AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3156533
 regress/bug_515935,                             arm-AOT,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+regress/bug_557275,                             AOT.*-asc2,, skip , http://watsonexp.corp.adobe.com/#bug=3364513
 ecma3/Statements/edowhile_00(6|7),              AOT.*-asc2,, skip , http://watsonexp.corp.adobe.com/#bug=3348356
 
 ####################

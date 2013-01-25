@@ -656,7 +656,7 @@ namespace nanojit
     LIns* LirBufWriter::insBranch(LOpcode op, LIns* condition, LIns* toLabel)
     {
         NanoAssert((op == LIR_j && !condition) ||
-                   ((op == LIR_jf || op == LIR_jt) && condition));
+                   ((op == LIR_jf || op == LIR_jt || op == LIR_brsavpc) && condition));
         return ins2(op, condition, toLabel);
     }
 
@@ -1907,8 +1907,7 @@ namespace nanojit
                 case LIR_regfence:
                 case LIR_pushstate:
                 case LIR_popstate:
-                case LIR_savepc:
-                case LIR_discardpc:
+                case LIR_memfence:
                 case LIR_restorepc:
                 case LIR_paramp:
                 case LIR_x:
@@ -1949,6 +1948,7 @@ namespace nanojit
                 case LIR_xf:
                 case LIR_jt:
                 case LIR_jf:
+				case LIR_brsavpc:
                 case LIR_jtbl:
                 case LIR_negi:
                 case LIR_noti:
@@ -2383,10 +2383,9 @@ namespace nanojit
 
             case LIR_start:
             case LIR_regfence:
-            case LIR_savepc:
 	        case LIR_pushstate:
 	        case LIR_popstate:
-            case LIR_discardpc:
+            case LIR_memfence:
             case LIR_restorepc:
                 VMPI_snprintf(s, n, "%s", lirNames[op]);
                 break;
@@ -2456,6 +2455,7 @@ namespace nanojit
 
             case LIR_jt:
             case LIR_jf:
+			case LIR_brsavpc:
                 VMPI_snprintf(s, n, "%s %s -> %s", lirNames[op], formatRef(&b1, i->oprnd1()),
                     i->oprnd2() ? formatRef(&b2, i->oprnd2()) : "unpatched");
                 break;
@@ -4215,9 +4215,8 @@ namespace nanojit
         case LIR_label:
         case LIR_pushstate:
         case LIR_popstate:
-        case LIR_savepc:
+        case LIR_memfence:
         case LIR_restorepc:
-        case LIR_discardpc:
             break;
         default:
             NanoAssert(0);
@@ -4685,6 +4684,12 @@ namespace nanojit
         case LIR_jt:
         case LIR_jf:
             checkLInsIsACondOrConst(op, 1, cond);
+            nArgs = 1;
+            formals[0] = LTy_I;
+            args[0] = cond;
+            break;
+
+	case LIR_brsavpc:
             nArgs = 1;
             formals[0] = LTy_I;
             args[0] = cond;

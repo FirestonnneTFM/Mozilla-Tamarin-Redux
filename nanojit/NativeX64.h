@@ -37,6 +37,7 @@ namespace nanojit
 #define NJ_DIVI_SUPPORTED               1
 #define RA_PREFERS_LSREG                1
 #define NJ_USES_IMMF4_POOL              1   // Note: doesn't use IMMD pool!
+#define NJ_SAFEPOINT_POLLING_SUPPORTED  1
 
 // exclude R12 because ESP and R12 cannot be used as an index
 // (index=100 in SIB means "none")
@@ -432,9 +433,9 @@ namespace nanojit
         void dis(NIns *p, int bytes);\
         void asm_pushstate(); \
         void asm_popstate(); \
-        void asm_savepc(); \
+        void asm_memfence(); \
+        void asm_brsavpc_impl(LIns* flag, NIns* targ);\
         void asm_restorepc(); \
-        void asm_discardpc(); \
         void asm_cmp(LIns*);\
         void asm_cmpi(LIns*);\
         void asm_cmpi_imm(LIns*);\

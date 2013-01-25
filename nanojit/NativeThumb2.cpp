@@ -1089,7 +1089,7 @@ Assembler::POPr(Register r)
     NanoAssert(r != SP);
     underrunProtect(4);
     // A8.8.131 T3
-    emitT32(0xE85D0B04 | r << 12);
+    emitT32(0xF85D0B04 | r << 12);
     asm_output("pop %s", gpn(r));
 }
 
@@ -1114,7 +1114,7 @@ Assembler::POP_mask(RegisterMask mask)
 // processor, but it can be useful as a marker when debugging emitted code.
 // There is no 32-bit Thumb2 encoding of BKPT, so we generate a 16-bit
 // encoding followed by a 16-bit NOP to keep everything 32-bit aligned.
-#define BKPT_insn(id)  ((NIns32)(0xBE00BF04 | (id & 0xff) << 16))
+#define BKPT_insn(id)  ((NIns32)(0xBE00BF00 | (id & 0xff) << 16))
 
 inline void
 Assembler::BKPT(uint32_t id)
@@ -2369,34 +2369,74 @@ Assembler::asm_stkarg(LIns* arg, int stkd)
     }
 }
 
+const RegisterMask cPushPopStateMask = rmask(FP) | rmask(R0) | 
+		rmask(R1) | rmask(R2) |
+		rmask(R3) | rmask(R4) | 
+		rmask(R5) | rmask(R6) | 
+		rmask(R7) | rmask(R8) |
+		rmask(R9) | rmask(R10)|
+		rmask(LR) | rmask(IP);
+
 void 
 Assembler::asm_pushstate()
 {
-    NanoAssert(false);
+	PUSH_mask(cPushPopStateMask);
 }
 
 void 
 Assembler::asm_popstate()
 {
-    NanoAssert(false);
+	POP_mask(cPushPopStateMask);
 }
 
-void 
-Assembler::asm_savepc()
+void
+Assembler::asm_brsavpc_impl(LIns* flag, NIns* target)
 {
-    NanoAssert(false);
+	Register r = findRegFor(flag, GpRegs);
+    intptr_t offs = PC_OFFSET_FROM(target, _nIns-2);
+
+	NIns* skipTarget = _nIns;
+
+    if (isS21(offs)) {
+        underrunProtect(4*4);	// speculative size of short branch code
+        // Recalculate the offset, because underrunProtect may have
+        // moved _nIns to a new page.  Unfortunately, Bcc may no longer
+        // be applicable, so we have to check again.
+        offs = PC_OFFSET_FROM(target, _nIns - 2);
+    }
+
+    if (isS21(offs)) {
+        ReserveContiguousSpace(this, 4*4);
+		BNE(target);
+		CMPi(r, 0);
+        ADDi(IP, IP, 4*3);		// offset PC for the next 3 instructions
+ 		emitT16((NIns)0xbf00);	// NOP	-- maintain 32 bit alignment for instructions.
+		emitT16((NIns)0x46FC);  // MOV IP, PC  ; encoding A8.8.103 T1
+    } else {
+        ReserveContiguousSpace(this, 4*4+LDR_PC_size);
+        LDR_PC_longbranch(target);
+        ADDi(IP, IP, LDR_PC_size+4);
+ 		emitT16((NIns)0xbf00);	// NOP	-- maintain 32 bit alignment for instructions.
+		emitT16((NIns)0x46FC);  // MOV IP, PC  ; encoding A8.8.103 T1
+        BEQ(skipTarget);
+		CMPi(r, 0);
+    }
 }
 
 void 
 Assembler::asm_restorepc()
 {
-    NanoAssert(false);
+	ReserveContiguousSpace(this, 4);
+	emitT16((NIns)0xbf00); // NOP
+	emitT16((NIns)0x46E7);  // MOV PC, IP  ; encoding A8.8.103 T1
 }
 
-void 
-Assembler::asm_discardpc()
+void
+Assembler::asm_memfence()
 {
-    NanoAssert(false);
+	ReserveContiguousSpace(this, 4);
+	// DMB (SY)  ; encoding A8.8.43 T1
+	emitT32((NIns32)0xf3bf8f5f);
 }
 
 void
@@ -4273,7 +4313,7 @@ Assembler::asm_load32(LIns* ins)
 
     Register rt = prepareResultReg(ins, GpRegs);
     // Try to re-use the result register for the base pointer.
-    Register rn = base->isInReg() ? base->getReg() : rt;
+	Register rn =  base->isInReg() ? base->getReg() : rt;
 
     // TODO: The x86 back-end has a special case where the base address is
     // given by LIR_addp. The same technique may be useful here to take

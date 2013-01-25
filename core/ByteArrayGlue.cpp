@@ -1496,12 +1496,20 @@ namespace avmplus
 
     int32_t ByteArray::CAS(uint32_t index, int32_t expected, int32_t next)
     {
-		if (m_buffer->length == 0)
-			m_toplevel->throwRangeError(kInvalidRangeError);
-        if (index > (m_buffer->length - sizeof(int32_t))) // Handle the race. 
+        if (m_buffer->length == 0) {
             m_toplevel->throwRangeError(kInvalidRangeError);
-        if (index % sizeof(expected) != 0) // require word alignment
+        }
+
+        const size_t minLength = sizeof(int32_t);
+        if ((m_buffer->length < minLength) || (index > (m_buffer->length - minLength))) {
             m_toplevel->throwRangeError(kInvalidRangeError);
+        }
+
+        // require word alignment
+        if (index % sizeof(expected) != 0) {
+            m_toplevel->throwRangeError(kInvalidRangeError);
+        }
+
         uint8_t* wordptr = &m_buffer->array[index];
         return vmbase::AtomicOps::compareAndSwap32WithBarrierPrev(expected, next, (int32_t*)wordptr);
     }
