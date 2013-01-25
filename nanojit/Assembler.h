@@ -457,6 +457,9 @@ namespace nanojit
             void        asm_mmq(Register rd, int dd, Register rs, int ds);
             void        asm_jmp(LIns* ins, InsList& pending_lives);
             void        asm_jcc(LIns* ins, InsList& pending_lives);
+#if NJ_SAFEPOINT_POLLING_SUPPORTED
+			void        asm_brsavpc(LIns* ins);
+#endif
             void        asm_jov(LIns* ins, InsList& pending_lives);
             void        asm_x(LIns* ins);
             void        asm_xcc(LIns* ins);

@@ -36,6 +36,7 @@ namespace nanojit
 #endif
 #define NJ_SOFTFLOAT_SUPPORTED          0
 #define NJ_DIVI_SUPPORTED               0
+#define NJ_SAFEPOINT_POLLING_SUPPORTED  0
 #define firstAvailableReg(i,c,m)   nRegisterAllocFromSet(m)
 
 #define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs

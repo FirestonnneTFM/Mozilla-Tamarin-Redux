@@ -59,6 +59,7 @@ namespace nanojit
 #define NJ_DIVI_SUPPORTED               0
 
 #define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs
+#define NJ_SAFEPOINT_POLLING_SUPPORTED  0
 
 #define RA_REGISTERS_OVERLAP            1
 #define firstAvailableReg               getAvailableReg
@@ -330,11 +331,6 @@ verbose_only( extern const char* shiftNames[]; )
     void        asm_immd_nochk(Register, int32_t, int32_t);                     \
     void        asm_regarg(ArgType, LIns*, Register);                           \
     void        asm_stkarg(LIns* p, int stkd);                                  \
-    void        asm_pushstate();                                                \
-    void        asm_popstate();                                                 \
-    void        asm_savepc();                                                   \
-    void        asm_restorepc();                                                \
-    void        asm_discardpc();                                                \
     void        asm_cmpi(Register, int32_t imm);                                \
     void        asm_ldr_chk(Register d, Register b, int32_t off, bool chk);     \
     int32_t     asm_str(Register rt, Register rr, int32_t off);                 \

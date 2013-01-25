@@ -743,10 +743,6 @@ var FEATURES =
     <name> AVMFEATURE_INTERRUPT_SAFEPOINT_POLL </name>
     <defines> VMCFG_INTERRUPT_SAFEPOINT_POLL </defines>
     <requires>AVMFEATURE_SAFEPOINTS </requires>
-    <requires> <exactly-one> 
-       <name>AVMSYSTEM_IA32</name> 
-       <name>AVMSYSTEM_AMD64</name> 
-    </exactly-one> </requires>
   </feature>
 
   <feature>

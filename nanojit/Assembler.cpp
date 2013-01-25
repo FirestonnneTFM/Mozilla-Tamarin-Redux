@@ -1406,6 +1406,24 @@ typedef void* (*decode_instructions_ftype) (void* start, void* end,
         }
     }
 
+#if NJ_SAFEPOINT_POLLING_SUPPORTED
+    void Assembler::asm_brsavpc(LIns* ins)
+    {
+        NanoAssert(ins->opcode() == LIR_brsavpc);
+        LIns* cond = ins->oprnd1();
+
+        countlir_jcc();
+        LIns* to = ins->getTarget();
+        LabelState *label = _labels.get(to);
+		NanoAssert(label && label->addr);
+		{
+            // Forward jump to known label.  Need to merge with label's register state.
+            unionRegisterState(label->regs);
+            asm_brsavpc_impl(cond, label->addr);
+        }
+    }
+#endif
+
     void Assembler::asm_jov(LIns* ins, InsList& pending_lives)
     {
         // The caller is responsible for countlir_* profiling, unlike
@@ -1591,23 +1609,24 @@ typedef void* (*decode_instructions_ftype) (void* start, void* end,
                 case LIR_regfence:
                     evictAllActiveRegs();
                     break;
-
-               case LIR_pushstate:
+#if NJ_SAFEPOINT_POLLING_SUPPORTED
+                case LIR_pushstate:
                    asm_pushstate();
                    break;
-               case LIR_popstate:
+                case LIR_popstate:
                    asm_popstate();
                    break;
-               case LIR_savepc:
-                   asm_savepc();
-                   break;
-               case LIR_restorepc:
+                case LIR_brsavpc:
+                    ins->oprnd1()->setResultLive();
+                    asm_brsavpc(ins);
+                    break;
+                case LIR_restorepc:
                    asm_restorepc();
                    break;
-               case LIR_discardpc:
-                   asm_discardpc();
-                   break;
-
+                case LIR_memfence:
+				   asm_memfence();
+				   break;
+#endif
                 case LIR_livei:
                 CASE64(LIR_liveq:)
                 case LIR_lived:

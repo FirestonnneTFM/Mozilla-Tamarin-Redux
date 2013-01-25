@@ -80,6 +80,7 @@ namespace nanojit
     #define NJ_DIVI_SUPPORTED               1
     #define RA_PREFERS_LSREG                1
     #define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs
+    #define NJ_SAFEPOINT_POLLING_SUPPORTED  1
 
         // Preserve a 16-byte stack alignment, to support the use of
         // SSE instructions like MOVDQA (if not by Tamarin itself,
@@ -176,9 +177,9 @@ namespace nanojit
         bool hardenNopInsertion(const Config& c) { return c.harden_nop_insertion; } \
         void asm_pushstate();                                           \
         void asm_popstate();                                            \
-        void asm_savepc();                                              \
+        void asm_memfence();                                            \
+        void asm_brsavpc_impl(LIns* flag, NIns* targ);                  \
         void asm_restorepc();                                           \
-        void asm_discardpc();                                           \
         void asm_cmpf4(LIns *cond);  \
         void asm_immf(Register r, int32_t i, float f, bool canClobberCCs); \
         void asm_immf4(Register r, const float4_t& f4, bool canClobberCCs);\

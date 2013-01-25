@@ -883,36 +883,6 @@ Assembler::asm_stkarg(LIns* arg, int stkd)
     }
 }
 
-void 
-Assembler::asm_pushstate()
-{
-    NanoAssert(false);
-}
-
-void 
-Assembler::asm_popstate()
-{
-    NanoAssert(false);
-}
-
-void 
-Assembler::asm_savepc()
-{
-    NanoAssert(false);
-}
-
-void 
-Assembler::asm_restorepc()
-{
-    NanoAssert(false);
-}
-
-void 
-Assembler::asm_discardpc()
-{
-    NanoAssert(false);
-}
-
 void
 Assembler::asm_call(LIns* ins)
 {
