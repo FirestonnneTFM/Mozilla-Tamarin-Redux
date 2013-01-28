@@ -6,11 +6,9 @@
 //  If you feel you need to make changes below, instead edit the configuration
 //  file and rerun it to get a new version of this file.
 //
-///*
-//*  This Source Code Form is subject to the terms of the Mozilla Public
-//*  License, v. 2.0. If a copy of the MPL was not distributed with this
-//*  file, You can obtain one at http://mozilla.org/MPL/2.0/.
-//*/
+//  This Source Code Form is subject to the terms of the Mozilla Public
+//  License, v. 2.0. If a copy of the MPL was not distributed with this
+//  file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #undef VMCFG_32BIT
 #undef VMCFG_64BIT
 #undef MMGC_64BIT
@@ -126,81 +124,43 @@
 /* AVMSYSTEM_UNALIGNED_INT_ACCESS
  *
  * Selects an architecture that allows load/store of unaligned 16- and 32-bit ints.
-
- * 
  *
  * While it's OK for an unaligned int load or store to be slower than an aligned load
-
  * or store, we require that:
-
- * 
  *
  * - an unaligned load/store MUST NOT generate a run-time fault, and
-
  * - an unaligned load/store MUST be at least as efficient as separate instructions
-
  * to load and assemble the word one byte at a time / disassemble and store one
-
  * byte at a time.
-
- * 
  *
  * If you cannot guarantee that the requirements are met then DO NOT enable
-
- * this feature.  (For example, on Palm Pre unaligned loads/stores are allowed but 
-
+ * this feature.  (For example, on Palm Pre unaligned loads/stores are allowed but
  * they're reportedly so slow that they're pointless.)
-
- * 
  *
  * Code that uses this feature MUST NOT use it as a license to load/store floating-point
-
  * data using integer instructions, since in general that will not work.  In
-
  * particular this classical pattern will not work:
-
- * 
  *
  * uint8_t* p = ...;  // possibly-unaligned address we're loading from
-
  * union (
-
  * float f;
-
  * uint32_t i;
-
  * ) u;
-
  * #ifdef VMCFG_UNALIGNED_INT_ACCESS
-
  * u.i = *(uint32_t*)p;
-
  * return u.f;
-
  * #else
-
  * ...
-
- * 
  *
  * The reason it won't work is that some compilers (notably on ARM) will generate
-
  * code that uses a floating-point load into an FP register, so the code actually
-
  * needs unaligned floating-point loads to be supported, AVMSYSTEM_UNALIGNED_FP_ACCESS.
-
  * (Whether it is correct for the compiler to generate that code is beside the point.)
-
- * 
  *
  * The prohibition applies to 64-bit loads/stores as well (expressed as pairs of
-
- * uint32_t loads/stores): ARM compilers as of October 2011 will rewrite a pair of loads 
-
+ * uint32_t loads/stores): ARM compilers as of October 2011 will rewrite a pair of loads
  * into a uint32_t array in a union with a return of a double from the union as a single
-
  * double load into the return register.  See comments throughout the code as well
-
  * as Bugzilla 569691 and 685441.
  */
 #if !defined AVMSYSTEM_UNALIGNED_INT_ACCESS || AVMSYSTEM_UNALIGNED_INT_ACCESS != 0 && AVMSYSTEM_UNALIGNED_INT_ACCESS != 1
@@ -211,49 +171,27 @@
 /* AVMSYSTEM_UNALIGNED_FP_ACCESS
  *
  * Selects an architecture that allows load/store of unaligned 32- and 64-bit floats.
-
- * 
-
+ *
  * While it's OK for an unaligned floating-point load/store to be slower than an aligned
-
  * load/store, we require that:
-
- * 
  *
  * - an unaligned load/store MUST NOT generate a run-time fault, and
-
  * - an unaligned load/store MUST be at least as efficient as separate instructions
-
  * to load and assemble the datum one byte at a time / disassemble and store one
-
  * byte at a time.
-
- * 
  *
  * If you cannot guarantee that the requirements are met then DO NOT enable
-
  * this feature.
-
- * 
  *
  * Note that if AVMSYSTEM_UNALIGNED_FP_ACCESS is not set then it is assumed that 64-bit
-
  * floats require 8-byte alignment.
-
- * 
-
+ *
  * Note that AVMSYSTEM_UNALIGNED_FP_ACCESS does not apply to float4 values.  Some SIMD
-
- * units have different instructions for aligned and unaligned access; on some 
-
+ * units have different instructions for aligned and unaligned access; on some
  * systems the alignment requirement is 16 bytes, on others it's 8 bytes.  But as of
-
  * November 2011 all C++ compilers we use will assume such alignment when manipulating
-
  * float4 values and will not use the instructions for unaligned access even if
-
  * they are available.  C++ code must never assume that unaligned access is OK is
-
  * appropriate for float4 data.
  */
 #if !defined AVMSYSTEM_UNALIGNED_FP_ACCESS || AVMSYSTEM_UNALIGNED_FP_ACCESS != 0 && AVMSYSTEM_UNALIGNED_FP_ACCESS != 1
@@ -264,7 +202,6 @@
 /* AVMSYSTEM_BIG_ENDIAN
  *
  * Selects a big-endian architecture: the most significant byte of a word
-
  * is stored at the lowest byte address of the word
  */
 #if !defined AVMSYSTEM_BIG_ENDIAN || AVMSYSTEM_BIG_ENDIAN != 0 && AVMSYSTEM_BIG_ENDIAN != 1
@@ -275,7 +212,6 @@
 /* AVMSYSTEM_LITTLE_ENDIAN
  *
  * Selects a little-endian architecture: the least significant byte of a word
-
  * is stored at the lowest byte address of the word
  */
 #if !defined AVMSYSTEM_LITTLE_ENDIAN || AVMSYSTEM_LITTLE_ENDIAN != 0 && AVMSYSTEM_LITTLE_ENDIAN != 1
@@ -286,11 +222,8 @@
 /* AVMSYSTEM_DOUBLE_MSW_FIRST
  *
  * Selects a reverse floating-point layout on little-endian systems:
-
  * the most significant word (containing the sign, exponent, and most
-
  * significant bits of the significand) are at the lower word address.
-
  * Each word is stored little-endian, however.
  */
 #if !defined AVMSYSTEM_DOUBLE_MSW_FIRST || AVMSYSTEM_DOUBLE_MSW_FIRST != 0 && AVMSYSTEM_DOUBLE_MSW_FIRST != 1
@@ -328,7 +261,6 @@
 /* AVMSYSTEM_PPC
  *
  * Selects the PowerPC / Power architecture.  Whether it's the 32-bit or the
-
  * 64-bit version of the architecture is controlled independently.
  */
 #if !defined AVMSYSTEM_PPC || AVMSYSTEM_PPC != 0 && AVMSYSTEM_PPC != 1
@@ -402,25 +334,15 @@
 /* AVMFEATURE_DEBUGGER
  *
  * Selects the AVM debugger API, including retaining debug information at
-
  * run-time and human-readable error messages for run-time errors.
-
- * 
  *
  * There is a performance penalty to enabling this; clients that want
-
  * maximal execution performance and don't care about debugging should
-
  * disable it.
-
- * 
  *
  * If you enable the debugger you may want to consider enabling support for
-
  * specific language strings for error messages in order to avoid getting
-
  * them all.  See the AVMPLUS_ERROR_LANG_ macros in core/ErrorConstants.h.
-
  * It's easiest to define the ones you want in core/avmbuild.h.
  */
 #if !defined AVMFEATURE_DEBUGGER || AVMFEATURE_DEBUGGER != 0 && AVMFEATURE_DEBUGGER != 1
@@ -431,7 +353,6 @@
 /* AVMFEATURE_DEBUGGER_STUB
  *
  * This is used to compile AVM with the debugger API enabled, but
-
  * certain bits of functionality reduced to no-ops.
  */
 #if !defined AVMFEATURE_DEBUGGER_STUB || AVMFEATURE_DEBUGGER_STUB != 0 && AVMFEATURE_DEBUGGER_STUB != 1
@@ -442,23 +363,14 @@
 /* AVMFEATURE_ALLOCATION_SAMPLER
  *
  * Enable the sample-based memory profiler.  This makes allocation a
-
  * little more expensive if a sampler callback is not installed, and
-
  * more expensive still if it is installed.
-
- * 
  *
  * FIXME: more information needed.
-
- * 
  *
  * Note that this is enabled always by AVMFEATURE_DEBUGGER.
-
- * 
  *
  * It is known that the Flash Player wants to enable this if SCRIPT_DEBUGGER
-
  * is enabled in the Player code.
  */
 #if !defined AVMFEATURE_ALLOCATION_SAMPLER || AVMFEATURE_ALLOCATION_SAMPLER != 0 && AVMFEATURE_ALLOCATION_SAMPLER != 1
@@ -469,9 +381,7 @@
 /* AVMFEATURE_VTUNE
  *
  * Selects VTune profiling of jit'd code.  Requires Windows x86,
-
  * and could support windows x64 after more testing.
-
  * turns on AVMPLUS_VERBOSE solely to get method/class names for profiling
  */
 #if !defined AVMFEATURE_VTUNE || AVMFEATURE_VTUNE != 0 && AVMFEATURE_VTUNE != 1
@@ -482,9 +392,7 @@
 /* AVMFEATURE_SHARK
  *
  * Selects Shark profiling of jit'd code.  MacOS 10.6.  This technique
-
  * should work for oprofile on linux and/or android, with more tweaks.
-
  * See README in utils/sharkprof.
  */
 #if !defined AVMFEATURE_SHARK || AVMFEATURE_SHARK != 0 && AVMFEATURE_SHARK != 1
@@ -495,7 +403,6 @@
 /* AVMFEATURE_JIT
  *
  * Enables the just-in-time compiler.  This will typically increase performance
-
  * significantly but may result in significantly higher memory consumption.
  */
 #if !defined AVMFEATURE_JIT || AVMFEATURE_JIT != 0 && AVMFEATURE_JIT != 1
@@ -524,13 +431,9 @@
 /* AVMFEATURE_OSR
  *
  * Enables delayed JIT-compilation with on-stack replacement, by default,
-
  * and supports runtime-disabling of OSR to get the legacy policy (OSR=0).
-
  * Without this feature, legacy policy is the default: the VM
-
  * compiles a method eagerly or interprets it always, and the OSR
-
  * invocation threshold can be enabled at runtime (OSR=K, K>0).
  */
 #if !defined AVMFEATURE_OSR || AVMFEATURE_OSR != 0 && AVMFEATURE_OSR != 1
@@ -541,13 +444,9 @@
 /* AVMFEATURE_COMPILEPOLICY
  *
  * Allows the default JIT compilation policy to be overriden with alternate rules.
-
  * In shell builds, this enables the -policy option which allows one to specify
-
  * which methods should be compiled and which should be interpreted.  There are
-
  * currently three means of identifying a method to be controlled; unique id,
-
  * exact name match, and regular expression name match.
  */
 #if !defined AVMFEATURE_COMPILEPOLICY || AVMFEATURE_COMPILEPOLICY != 0 && AVMFEATURE_COMPILEPOLICY != 1
@@ -567,7 +466,6 @@
 /* AVMFEATURE_BUFFER_GUARD
  *
  * Enables the exception based caching code, right now this is used
-
  * exclusively by AOT.
  */
 #if !defined AVMFEATURE_BUFFER_GUARD || AVMFEATURE_BUFFER_GUARD != 0 && AVMFEATURE_BUFFER_GUARD != 1
@@ -578,9 +476,7 @@
 /* AVMFEATURE_ABC_INTERP
  *
  * Selects the ABC interpreter.  Appropriate for platforms that run
-
  * the interpreter only for initialization code and for
-
  * platforms that are exceptionally memory-constrained.
  */
 #if !defined AVMFEATURE_ABC_INTERP || AVMFEATURE_ABC_INTERP != 0 && AVMFEATURE_ABC_INTERP != 1
@@ -591,7 +487,6 @@
 /* AVMFEATURE_WORDCODE_INTERP
  *
  * Selects the wordcode interpreter.  Appropriate for platforms that run the
-
  * interpreter for some or all methods and are not exceptionally memory-constrained.
  */
 #if !defined AVMFEATURE_WORDCODE_INTERP || AVMFEATURE_WORDCODE_INTERP != 0 && AVMFEATURE_WORDCODE_INTERP != 1
@@ -602,11 +497,8 @@
 /* AVMFEATURE_THREADED_INTERP
  *
  * Selects the faster, direct threaded wordcode interpreter.
-
  * This is appropriate only for C++ compilers that support GCC-style computed
-
  * "goto".  It is believed that RCVT, Intel's C++ compiler, and the Sunpro
-
  * compiler all do.
  */
 #if !defined AVMFEATURE_THREADED_INTERP || AVMFEATURE_THREADED_INTERP != 0 && AVMFEATURE_THREADED_INTERP != 1
@@ -617,12 +509,8 @@
 /* AVMFEATURE_SELFTEST
  *
  * AVMFEATURE_SELFTEST enables the built-in selftests.  These can be run by -Dselftest
-
  * at the shell or by calling the global function avmplus::selftests(), see extensions/Selftest.h.
-
  * Mostly they are useful for AVM development, not for embedders.
-
- * 
  *
  * Apart from code size considerations this can be enabled for release builds.
  */
@@ -634,7 +522,6 @@
 /* AVMFEATURE_EVAL
  *
  * Select support for the AS3 run-time compiler.  NOT RECOMMENDED.  The run-time compiler
-
  * is still undergoing development.
  */
 #if !defined AVMFEATURE_EVAL || AVMFEATURE_EVAL != 0 && AVMFEATURE_EVAL != 1
@@ -654,7 +541,6 @@
 /* AVMFEATURE_TELEMETRY_SAMPLER
  *
  * Select support for Telemetry based sampler, requires a Telemetry implementation
-
  * (to be used in host)
  */
 #if !defined AVMFEATURE_TELEMETRY_SAMPLER || AVMFEATURE_TELEMETRY_SAMPLER != 0 && AVMFEATURE_TELEMETRY_SAMPLER != 1
@@ -665,7 +551,6 @@
 /* AVMFEATURE_PROTECT_JITMEM
  *
  * Makes all JIT code buffers read-only whenever JIT code is executing,
-
  * to reduce the probability of heap overflow attacks.
  */
 #if !defined AVMFEATURE_PROTECT_JITMEM || AVMFEATURE_PROTECT_JITMEM != 0 && AVMFEATURE_PROTECT_JITMEM != 1
@@ -676,11 +561,8 @@
 /* AVMFEATURE_SHARED_GCHEAP
  *
  * Selects locking around calls to the memory block manager (GCHeap), allowing multiple
-
  * threads to share the block manager.  Any client with more than one thread that uses
-
  * MMgc either for garbage collected or manually managed memory wants this; the Flash
-
  * Player requires it.
  */
 #if !defined AVMFEATURE_SHARED_GCHEAP || AVMFEATURE_SHARED_GCHEAP != 0 && AVMFEATURE_SHARED_GCHEAP != 1
@@ -691,15 +573,10 @@
 /* AVMFEATURE_USE_SYSTEM_MALLOC
  *
  * Make MMgc's overridden global new and delete operators delegate allocation and
-
  * deallocation to VMPI_alloc and VMPI_free instead of going to FixedMalloc.
-
- * 
  *
  * Whether you want this or not probably depends on the performance of the
-
  * underlying malloc and might depend on memory consumption patterns.  On desktop
-
  * systems you probably want this to be disabled.
  */
 #if !defined AVMFEATURE_USE_SYSTEM_MALLOC || AVMFEATURE_USE_SYSTEM_MALLOC != 0 && AVMFEATURE_USE_SYSTEM_MALLOC != 1
@@ -710,22 +587,13 @@
 /* AVMFEATURE_CPP_EXCEPTIONS
  *
  * Support C++ exceptions in the MMgc API.  At the time of writing (Apr 2009)
-
  * this means decorating the global new and delete operator with appropriate 'throw'
-
  * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
-
  * do not generally support C++ exceptions.
-
- * 
  *
  * Note that even if this is enabled, the global new and delete operators may
-
  * not throw exceptions when memory can't be allocated, because the out-of-memory
-
  * handling in MMgc may take precedence.
-
- * 
  *
  * FixedMalloc never throws an exception for a failed allocation.
  */
@@ -737,10 +605,7 @@
 /* AVMFEATURE_INTERIOR_POINTERS
  *
  * Recognize a pointer or pointer-like value into anywhere in an object as referencing
-
  * that object during marking in the garbage collector.
-
- * 
  *
  * Enabling this tends to be increase GC cost but it can be a useful debugging aid.
  */
@@ -752,17 +617,11 @@
 /* AVMFEATURE_HEAP_ALLOCA
  *
  * If enabled then always divert avmStackAlloc() to a separately managed stack,
-
  * to avoid blowing the stack on small systems or to support systems that
-
  * don't provide alloca().  If disabled then smallish allocations are handled
-
  * by the built-in alloca() (which must be provided) and larger allocations
-
  * are handled by diverting to a separately managed stack; the latter case is
-
  * mainly a security issue, as alloca() will do strange things if given sufficiently
-
  * large requests.
  */
 #if !defined AVMFEATURE_HEAP_ALLOCA || AVMFEATURE_HEAP_ALLOCA != 0 && AVMFEATURE_HEAP_ALLOCA != 1
@@ -773,13 +632,9 @@
 /* AVMFEATURE_OVERRIDE_GLOBAL_NEW
  *
  * Enabling this will cause the mmfx_* memory macros to use global new/delete.
-
  * By default we use specialized new/delete operators and avoid global new/delete.  However
-
  * this requires some tricks to get multiple inheritance and private destructors to work
-
  * so some codebases may want to use the simpler path of overriding global new/delete.
-
  * Note that this feature works independently of AVMFEATURE_USE_SYSTEM_MALLOC.
  */
 #if !defined AVMFEATURE_OVERRIDE_GLOBAL_NEW || AVMFEATURE_OVERRIDE_GLOBAL_NEW != 0 && AVMFEATURE_OVERRIDE_GLOBAL_NEW != 1
@@ -790,7 +645,6 @@
 /* AVMFEATURE_MEMORY_PROFILER
  *
  * Enabling this will compile in code to enable memory profiling. (Must still be
-
  * enabled at runtime.)
  */
 #if !defined AVMFEATURE_MEMORY_PROFILER || AVMFEATURE_MEMORY_PROFILER != 0 && AVMFEATURE_MEMORY_PROFILER != 1
@@ -801,7 +655,6 @@
 /* AVMFEATURE_CACHE_GQCN
  *
  * Enabling this will cache the result of getQualifiedClassName, making it run
-
  * much more quickly, at the expense of more memory usage.
  */
 #if !defined AVMFEATURE_CACHE_GQCN || AVMFEATURE_CACHE_GQCN != 0 && AVMFEATURE_CACHE_GQCN != 1
@@ -921,7 +774,6 @@
 /* AVMTWEAK_SIN_COS_NONFINITE
  *
  * Various iphone SDK versions - at least - botch sin() and cos() around NaN
-
  * and infinity.  See https://bugzilla.mozilla.org/show_bug.cgi?id=556149.
  */
 #if !defined AVMTWEAK_SIN_COS_NONFINITE
@@ -935,7 +787,6 @@
 /* AVMTWEAK_EPOC_EMULATOR
  *
  * The current (June 2010) EPOC/Symbian emulator has certain limitations,
-
  * described throughout the code where this tweak is used.
  */
 #if !defined AVMTWEAK_EPOC_EMULATOR

@@ -337,7 +337,6 @@ namespace avmplus
                         MethodSignaturep ms = mi->getMethodSignature();
 
                         Traitsp declaringTraits = mi->declaringTraits();
-
                         Traitsp accessorType = AvmCore::hasGetterBinding(binding) ?
                                                     ms->returnTraits() :
                                                     ms->paramTraits(1);
