@@ -1279,6 +1279,7 @@ namespace avmplus
             case OP_inclocal:
             case OP_declocal:
             {
+                checkLocal(imm30);
                 Traits* retType = NUMBER_TYPE;
                 bool already_coerced = false;
 #ifdef VMCFG_FLOAT
