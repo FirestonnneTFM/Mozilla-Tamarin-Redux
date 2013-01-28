@@ -2068,15 +2068,8 @@ LIns* LirEmitter::emitInterruptHandler() {
     LIns* args[] = { env_param };
     interrupt_label = traps_lir->ins0(LIR_label);
     
-#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
-    traps_lir->ins0(LIR_pushstate);
-#endif 
     traps_lir->ins0(LIR_regfence);
     traps_lir->insCall(&ci_handleInterruptMethodEnv, args);
-#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
-    traps_lir->ins0(LIR_popstate);
-    traps_lir->ins0(LIR_restorepc);
-#endif
     
   }
   return interrupt_label;
@@ -2102,18 +2095,12 @@ void LirEmitter::do_cktimeout(UnaryStmt* instr) {
   // Omit timeout checks if they are turned off.  We don't do this further
   // upstream, because it can cause the graph to have no endpoints, if there
   // is an infinite loop.
-#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
-  bool check_interrupt = true;
-#else
   bool check_interrupt = core->config.interrupts;
-#endif
   if (check_interrupt) {
-    lirout->ins0(LIR_savepc);
     LIns* interrupted = ldi(coreAddr, JitFriend::core_interrupted_offset,
                             ACCSET_OTHER, LOAD_VOLATILE);
     LIns* cond = eqi(interrupted, AvmCore::NotInterrupted);
     lirout->insBranch(LIR_jf, cond, emitInterruptHandler());
-    lirout->ins0(LIR_discardpc);
   }
   set_def_ins(instr->value_out(), InsConst(0)); // always return false.
 }
