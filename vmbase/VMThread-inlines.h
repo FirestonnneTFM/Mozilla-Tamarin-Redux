@@ -234,7 +234,7 @@ namespace vmbase {
                              :"memory", "cc");
         return val;
 #elif defined(_MSC_VER) 
-        // we know that we are dealing with only 32 bit word here and a 32 bit compiler option
+        // we know that we are dealing with only 32 bit word here
         return ::InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(wordptr), next, expected);
 #else
         //  THIS IS WRONG!!!!

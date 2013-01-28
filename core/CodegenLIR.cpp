@@ -2561,7 +2561,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         // If this is the target of a backwards branch, generate an interrupt check.
 
-#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
         // Always poll for safepoints, regardless of config settings.
 		if (state->targetOfBackwardsBranch) {
 			AvmAssert(AvmCore::NotInterrupted == 0);
@@ -7751,12 +7751,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         if (interrupt_label.unpatchedEdges) {
             emitLabel(interrupt_label);
-#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
             Ins(LIR_pushstate);
 #endif 
             Ins(LIR_regfence);
             callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
-#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
             Ins(LIR_popstate);
             Ins(LIR_restorepc);
 #endif
