@@ -1416,11 +1416,9 @@ typedef void* (*decode_instructions_ftype) (void* start, void* end,
         LIns* to = ins->getTarget();
         LabelState *label = _labels.get(to);
 		NanoAssert(label && label->addr);
-		{
-            // Forward jump to known label.  Need to merge with label's register state.
-            unionRegisterState(label->regs);
-            asm_brsavpc_impl(cond, label->addr);
-        }
+        // Forward jump to known label.  Need to merge with label's register state.
+        unionRegisterState(label->regs);
+        asm_brsavpc_impl(cond, label->addr);
     }
 #endif
 

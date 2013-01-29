@@ -136,7 +136,7 @@ namespace avmplus
     public:
         void clearThread();
         void setSharedProperty(const StUTF8String& key, ChannelItem* item);
-        bool getSharedProperty(const StUTF8String& key, ChannelItem** outItem);
+        Atom getSharedProperty(const StUTF8String& key, Toplevel* toplevel);
         virtual ChannelItem* makeChannelItem(Toplevel* toplevel, Atom atom);
         void signalInterruptibleState();
         virtual bool retryInterruptibleState();

@@ -250,12 +250,20 @@ struct vmpi_spin_lock_t
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
+#ifdef _M_ARM_FP
+	__iso_volatile_store32(( __int32 *)&lock->lock,0);
+#else //#ifdef _M_ARM_FP
     lock->lock = 0;
+#endif //#ifdef _M_ARM_FP
 }
 
 REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
+#ifdef _M_ARM_FP
+	__iso_volatile_store32(( __int32 *)&lock->lock,0);
+#else //#ifdef _M_ARM_FP
     lock->lock = 0;
+#endif //#ifdef _M_ARM_FP
 }
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)

@@ -10,6 +10,10 @@
 #include "LirHelper.h"
 #include "InvokerCompiler.h"
 
+#if defined(VMCFG_INTERRUPT_SAFEPOINT_POLL) && !defined(NJ_SAFEPOINT_POLLING_SUPPORTED)
+#error "configuration error: safepoint polling not supported on this platform"
+#endif
+
 namespace avmplus
 {
     using namespace nanojit;

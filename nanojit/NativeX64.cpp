@@ -1620,19 +1620,19 @@ namespace nanojit
     void Assembler::asm_brsavpc_impl(LIns* flag, NIns* target)
     {
         Register r = findRegFor(flag, GpRegs);
-        underrunProtect(20);
+        underrunProtect(19);
     
         // discard pc
-        ADDQRI(RSP, 16);  
+        ADDQR8(RSP, 16);  
         
         // handle interrupt call
         JNE(0, target);  
         
         // save pc
-        emit(X64_call);  
+        emit(X64_call); // call with displacement 0  
         
-        CMPQRI(r, 0);   
-        SUBQRI(RSP, 8); 
+        CMPQR8(r, 0);   
+        SUBQR8(RSP, 8); 
     }
 
     void Assembler::asm_restorepc()

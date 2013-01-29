@@ -112,10 +112,11 @@ namespace telemetry
     class ITelemetry
     {
     public:
-        ITelemetry() : m_active (false) {}
+        ITelemetry() : m_active (false), m_spanNestLevel (0) {}
         virtual ~ITelemetry() {}
         bool IsActive() {   return m_active;    } // Check whether Telemetry is ON.
         virtual uint64_t GetElapsedTime() = 0;    // Get a microsecond timestamp since Telemetry start up.
+        int32_t GetSpanNestLevel() { return m_spanNestLevel; } // Get the current span nesting level.
 
         virtual void WriteValue(telemetryId id, bool value) = 0;    // Writes a boolean metric.
         virtual void WriteValue(telemetryId id, uint32_t value) = 0;
@@ -132,6 +133,9 @@ namespace telemetry
         void SetActive(bool isActive)   { m_active = isActive; }
     private:
         bool m_active;
+        int32_t m_spanNestLevel;
+
+        friend class TelemetryMethod;
     };
 
 
@@ -147,9 +151,19 @@ namespace telemetry
 
         virtual ~TelemetryMethod()
         {
-            if (m_telemetry && m_telemetry->IsActive()) {
-                m_telemetry->WriteSpan(m_id, m_start, m_force);
+            if (m_telemetry) {
+                if (m_telemetry->IsActive())
+                    m_telemetry->WriteSpan(m_id, m_start, m_force);
+                DecrementSpanNestLevel();
             }
+        }
+
+    protected:
+        void DecrementSpanNestLevel()
+        {
+            AvmAssert(m_telemetry->m_spanNestLevel > 0);
+            if (m_telemetry->m_spanNestLevel > 0)
+                m_telemetry->m_spanNestLevel--;
         }
 
         void Init(ITelemetry* telem, telemetryId id, bool force)
@@ -162,9 +176,11 @@ namespace telemetry
             } else {
                 m_start = 0;
             }
+            if (m_telemetry) {
+                m_telemetry->m_spanNestLevel++;
+            }
         }
 
-    protected:
         bool m_force;
         telemetryId m_id;
         uint64_t m_start;
