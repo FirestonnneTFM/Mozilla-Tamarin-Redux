@@ -28,6 +28,11 @@
 #else
   #define AVMSYSTEM_WIN32 0
 #endif
+#ifdef WINDOWS_STORE_APP // For Windows Store Apps both AVMSYSTEM_WIN32 and AVMSYSTEM_WINDOWSSTOREAPP are defined.
+	#define AVMSYSTEM_WINDOWSSTOREAPP 1
+#else
+	#define AVMSYSTEM_WINDOWSSTOREAPP 0
+#endif
 #ifdef __SYMBIAN32__ // defined by Symbian S60 tool chain
   #define AVMSYSTEM_SYMBIAN 1
 #else

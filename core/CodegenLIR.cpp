@@ -6017,7 +6017,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = localGet(index);
                 const MopsInfo& mi = kMopsLoadInfo[opcode-OP_lix8];
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
 				Ins(LIR_memfence);
+#endif
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
@@ -6036,7 +6038,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = localGet(index);
                 const MopsInfo& mi = kMopsLoadInfo[opcode-OP_lix8];
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
 				Ins(LIR_memfence);
+#endif
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
@@ -6051,7 +6055,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
             case OP_lf32x4:
             {
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
 				Ins(LIR_memfence);
+#endif
                 // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = binaryIns(LIR_andi, localGet(index), InsConst(~15U));
@@ -6071,7 +6077,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* svalue = localGet(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
  				Ins(LIR_memfence);
+#endif
            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
@@ -6090,7 +6098,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* svalue = singlePrecision ? localGetf(sp-1) : localGetd(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
  				Ins(LIR_memfence);
+#endif
            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
@@ -6104,7 +6114,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
             case OP_sf32x4:
             {
+#if defined (VMCFG_INTERRUPT_SAFEPOINT_POLL) && defined (NJ_SAFEPOINT_POLLING_SUPPORTED)
  				Ins(LIR_memfence);
+#endif
                // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
                 LIns* svalue = localGetf4Addr(sp-1);
                 LIns* mopAddr = binaryIns(LIR_andi, localGet(sp), InsConst(~15U));
