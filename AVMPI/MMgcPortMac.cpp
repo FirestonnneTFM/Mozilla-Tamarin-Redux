@@ -13,6 +13,10 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#if defined(PEPPER_PLUGIN)
+#include <mach/mach.h>
+#endif // PEPPER_PLUGIN
+
 #ifdef MMGC_MEMORY_PROFILER
 #include <dlfcn.h>
 #include <cxxabi.h>

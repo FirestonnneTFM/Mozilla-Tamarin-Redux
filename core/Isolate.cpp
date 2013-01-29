@@ -381,17 +381,38 @@ throw_terminated_error:
         // else the key is owned by the hashmap
     }
 
-    bool Isolate::getSharedProperty(const StUTF8String& key, ChannelItem** item)
+    Atom Isolate::getSharedProperty(const StUTF8String& key, Toplevel* toplevel)
     {
-		bool result = false;
+		Atom result = undefinedAtom;
+		
+		AvmAssert(toplevel != NULL);
+		
         SCOPE_LOCK(m_sharedPropertyLock) {
+			ChannelItem* item = NULL;
+			
             Isolate::SharedPropertyNamep keyInternal = mmfx_new(FixedHeapArray<char>());
             keyInternal->values = (char*)key.c_str(); // it's OK, we won't touch it
             keyInternal->length = key.length();
-            result = m_sharedProperties.LookupItem(keyInternal, item);
+            const bool cFoundItem = m_sharedProperties.LookupItem(keyInternal, &item);
             keyInternal->values = NULL;
             mmfx_delete(keyInternal);
-        }
+			
+			if (cFoundItem)
+			{
+				AvmCore* core = toplevel->core();
+				TRY( core, kCatchAction_Ignore )
+				{
+					result = item->getAtom(toplevel);
+				}
+				CATCH (Exception* e)
+				{
+					(void) e;
+				}
+				END_CATCH
+				END_TRY
+			}
+       }
+		
         return result;
     }
 

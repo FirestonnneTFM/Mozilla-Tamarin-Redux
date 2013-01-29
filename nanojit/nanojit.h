@@ -16,7 +16,7 @@
     #define NANOJIT_IA32
 #elif defined AVMPLUS_ARM
     #if defined(TARGET_THUMB2) || defined(UNDER_RT)
-         #define NANOJIT_THUMB2 1
+         #define NANOJIT_THUMB2
     #else
          #define NANOJIT_ARM
     #endif

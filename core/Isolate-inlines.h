@@ -206,23 +206,14 @@ namespace avmplus
         // worker is busy creating workers during a shutdown cycle,
         // as the logic for creating an isolate will return NULL 
         // in that situation.
+		Atom result = undefinedAtom;
         if (m_isolate)
         {
-		    Atom result = undefinedAtom;
 		    StUTF8String buf(key);
-		    ChannelItem* item;
-		    const bool cOk = m_isolate->getSharedProperty(buf, &item);
-		    if (cOk) 
-		    {
-			    result =  item->getAtom(self()->toplevel());
-		    }
+		    result = m_isolate->getSharedProperty(buf, self()->toplevel());
+        }
 
-            return result;
-        }
-        else
-        {
-            return undefinedAtom;
-        }
+		return result;
     }
 
     template <class T>

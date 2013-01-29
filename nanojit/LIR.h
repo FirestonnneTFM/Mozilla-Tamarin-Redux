@@ -1073,7 +1073,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
 
         bool isUnConditionalBranch() const {
-            return isop(LIR_j) || isop(LIR_jtbl) || isop(LIR_brsavpc);
+            return isop(LIR_j) || isop(LIR_jtbl);
         }
 
         bool isBranch() const {
