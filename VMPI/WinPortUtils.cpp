@@ -192,7 +192,15 @@ double VMPI_getDate()
 
 uint64_t VMPI_getTime()
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	LARGE_INTEGER counter;
+	LARGE_INTEGER frequency;
+	QueryPerformanceCounter(&counter);
+	QueryPerformanceFrequency(&frequency);
+	return (counter.QuadPart * 1000) / frequency.QuadPart;
+#else
     return timeGetTime();
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
 }
 
 // On Windows, _vsnprintf isn't reliable (no NUL termination) and _vsnprintf_s
@@ -268,9 +276,12 @@ const char *VMPI_getenv(const char *env)
 {
     const char *val = NULL;
     (void)env;
+	// Environment variables are not available for Windows Store applications.
+#ifndef AVMSYSTEM_WINDOWSSTOREAPP
 #ifndef UNDER_CE
     val = getenv(env);
 #endif
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
     return val;
 }
 
@@ -315,7 +326,12 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
 static size_t computePagesize()
 {
     SYSTEM_INFO sysinfo;
+
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	GetNativeSystemInfo(&sysinfo);
+#else
     GetSystemInfo(&sysinfo);
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
 
     return sysinfo.dwPageSize;
 }
@@ -329,6 +345,42 @@ size_t VMPI_getVMPageSize()
 {
     return pagesize;
 }
+
+#if AVMSYSTEM_WINDOWSSTOREAPP
+
+using namespace Windows::System::Threading;
+using namespace Windows::Foundation;
+
+struct VMPI_WinTimerData : VMPI_TimerData
+{
+	ThreadPoolTimer^ timer;
+};
+
+uintptr_t VMPI_startTimer(uint32_t micros, VMPI_TimerClient *client)
+{
+    VMPI_WinTimerData *data = (VMPI_WinTimerData *) VMPI_alloc(sizeof(VMPI_WinTimerData));
+    data->init(micros, client);
+	data->timer = nullptr;
+
+    TimeSpan timeSpan;
+    timeSpan.Duration = micros / 1000;
+
+    data->timer = ThreadPoolTimer::CreatePeriodicTimer(ref new TimerElapsedHandler([&] (ThreadPoolTimer^ timer) {
+		data->client->tick();
+    }
+    ), timeSpan);
+    return (uintptr_t)data;
+}
+
+void VMPI_stopTimer(uintptr_t ptr)
+{
+	VMPI_WinTimerData *data = (VMPI_WinTimerData *)ptr;
+	data->timer->Cancel();
+	data->timer = nullptr;
+    VMPI_free(data);
+}
+
+#else
 
 // Timer data, Windows specific data
 struct VMPI_WinTimerData : VMPI_TimerData
@@ -371,3 +423,5 @@ void VMPI_stopTimer(uintptr_t data)
         timeKillEvent((UINT)timerId);
     VMPI_free((VMPI_WinTimerData *)data);
 }
+
+#endif // AVMSYSTEM_WINDOWSSTOREAPP

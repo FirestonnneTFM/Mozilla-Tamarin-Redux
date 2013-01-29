@@ -10,6 +10,15 @@
 
 #include <stdarg.h>
 
+#if AVMSYSTEM_WINDOWSSTOREAPP
+// Including thread will cause warning 4265
+#pragma warning(disable:4265)
+#include <thread>
+#pragma warning(4:4265)
+#include <condition_variable>
+#include <functional>
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
+
 /**
  * We have avmplus.vcproj compiled with the /W4 warning level
  * which is quite picky.  Disable warnings we don't care about.
@@ -258,7 +267,14 @@ REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
         // We used to reset to zero if we got to 100. This resets to 0 at 64 instead, with no branch.
         tries &= 63;
         // if tries == 0, we just rolled over 64, so we Sleep(1) to give other threads a chance to run... otherwise we Sleep(0)
+#if AVMSYSTEM_WINDOWSSTOREAPP
+		if(tries == 0)
+		{
+			std::this_thread::yield();
+		}
+#else
         ::Sleep(tries == 0);
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
     }
     return true;
 }
@@ -328,6 +344,13 @@ REALLY_INLINE void VMPI_memoryBarrier()
     VMPI_atomicIncAndGet32WithBarrier(&dummy);
 }
 
+#if AVMSYSTEM_WINDOWSSTOREAPP
+
+typedef size_t             vmpi_thread_t;
+typedef CONDITION_VARIABLE vmpi_condvar_t;
+
+#else
+
 /**
  * Threads waiting on a conditional variable are recorded in a list
  * of WaitingThread structs.
@@ -348,6 +371,9 @@ struct vmpi_condvar_t {
 };
 
 typedef DWORD                  vmpi_thread_t;
+
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
+
 typedef CRITICAL_SECTION       vmpi_mutex_t;
 typedef LPVOID                 vmpi_thread_arg_t; // Argument type for thread start function
 typedef DWORD                  vmpi_thread_rtn_t; // Return type for thread start function
@@ -363,7 +389,11 @@ struct vmpi_thread_attr_t {
 
 REALLY_INLINE bool VMPI_recursiveMutexInit(vmpi_mutex_t* mutex)
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+    InitializeCriticalSectionEx(mutex, 1000, 0);
+#else
     InitializeCriticalSection(mutex);
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
     return true;
 }
 
@@ -390,8 +420,12 @@ REALLY_INLINE void VMPI_recursiveMutexUnlock(vmpi_mutex_t* mutex)
 
 REALLY_INLINE bool VMPI_condVarInit(vmpi_condvar_t* condvar)
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	InitializeConditionVariable(condvar);
+#else
     condvar->head = NULL;
     condvar->tail = NULL;
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
     return true;
 }
 
@@ -403,27 +437,48 @@ REALLY_INLINE bool VMPI_condVarDestroy(vmpi_condvar_t* condvar)
 
 REALLY_INLINE vmpi_thread_t VMPI_currentThread()
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	std::hash<std::thread::id> hash;
+	return hash( std::this_thread::get_id() );
+#else
     return (vmpi_thread_t) (uintptr_t)GetCurrentThreadId();
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
 }
 
 REALLY_INLINE vmpi_thread_t VMPI_nullThread()
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	std::thread::id nullThreadId;
+	std::hash<std::thread::id> hash;
+	return hash( nullThreadId );
+#else
     return NULL;
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
 }
 
 REALLY_INLINE bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	return FlsSetValue((DWORD)tlsId, value) == TRUE;
+#else
     return TlsSetValue((DWORD)tlsId, value) == TRUE;
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
 }
 
 REALLY_INLINE void* VMPI_tlsGetValue(uintptr_t tlsId)
 {
+#if AVMSYSTEM_WINDOWSSTOREAPP
+    return FlsGetValue((DWORD)tlsId);
+#else
     return TlsGetValue((DWORD)tlsId);
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
 }
 
 REALLY_INLINE void VMPI_threadYield()
 {
-#ifdef UNDER_CE
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	std::this_thread::yield();
+#elif defined(UNDER_CE)
     Sleep(1);
 #else
     SwitchToThread();
@@ -433,7 +488,11 @@ REALLY_INLINE void VMPI_threadYield()
 REALLY_INLINE int VMPI_processorQtyAtBoot()
 {
     SYSTEM_INFO systemInfo;
+#if AVMSYSTEM_WINDOWSSTOREAPP
+	GetNativeSystemInfo(&systemInfo);
+#else
     GetSystemInfo(&systemInfo);
+#endif // AVMSYSTEM_WINDOWSSTOREAPP
     // dwNumberOfProcessors can be unreliable, but we know we have at least one processor
     return systemInfo.dwNumberOfProcessors < 1 ? 1 : systemInfo.dwNumberOfProcessors;
 }
